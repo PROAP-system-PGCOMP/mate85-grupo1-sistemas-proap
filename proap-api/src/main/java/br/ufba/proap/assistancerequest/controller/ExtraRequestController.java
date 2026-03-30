@@ -82,30 +82,36 @@ public class ExtraRequestController {
 		}
 	}
 
-	@GetMapping("/find/{id}")
-	public Optional<ExtraRequest> findById(@PathVariable Long id) {
-		User currentUser = serviceUser.getLoggedUser();
+    @GetMapping("/find/{id}")
+    public ResponseEntity<ExtraRequest> findById(@PathVariable Long id) {
+        User currentUser = serviceUser.getLoggedUser();
 
-		if (currentUser == null)
-			return Optional.empty();
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
-		try {
-			Optional<ExtraRequest> request = service.findById(id);
+        Optional<ExtraRequest> requestOpt = service.findById(id);
 
-			boolean isValid = currentUser.getPerfil() == null ||
-					(currentUser.getPerfil().getName() != "Aluno" &&
-							request.isPresent() && !request.get()
-									.getUser().getId().equals(currentUser.getId()));
+        if (requestOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
 
-			if (isValid)
-				return Optional.empty();
+        ExtraRequest request = requestOpt.get();
 
-			return request;
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			return Optional.empty();
-		}
-	}
+        // Lógica de Permissão Corrigida:
+        // 1. Se for Admin/Avaliador, ele PODE ver (hasPermission)
+        // 2. Se for o dono da solicitação, ele PODE ver
+        boolean isOwner = request.getUser().getId().equals(currentUser.getId());
+        boolean canViewAll = currentUser.getPerfil() != null &&
+                currentUser.getPerfil().hasPermission("VIEW_ALL_REQUESTS");
+
+        if (canViewAll || isOwner) {
+            return ResponseEntity.ok(request);
+        }
+
+        // Se não for dono nem admin, bloqueia
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
 
 	@PostMapping("/create")
 	public ResponseEntity<ExtraRequest> create(@RequestBody ExtraRequest extraRequest) {
@@ -169,7 +175,7 @@ public class ExtraRequestController {
 		try {
 			extraRequest.setAutomaticDecText(" ");
 
-			return ResponseEntity.ok().body(service.save(extraRequest));
+			return ResponseEntity.ok().body(service.reviewExtraSolicitation(extraRequest, currentUser));
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();

@@ -13,6 +13,11 @@ import br.ufba.proap.authentication.domain.User;
 
 import jakarta.validation.constraints.NotNull;
 
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+
+
 @Service
 public class ExtraRequestService {
 
@@ -92,4 +97,25 @@ public class ExtraRequestService {
 	public Boolean userHasAnyExtraRequests(Long userId) {
 		return extraRequestRepostirory.userHasAnyExtraRequests(userId);
 	}
+
+
+    @Transactional
+    public ExtraRequest reviewExtraSolicitation(ExtraRequest requestFromFront, User currentUser) {
+        // 1. Buscamos o registro ORIGINAL da tabela proap_extra_request
+        ExtraRequest persisted = extraRequestRepostirory.findById(requestFromFront.getId())
+                .orElseThrow(() -> new RuntimeException("Demanda extra não encontrada"));
+
+        // 2. Atualizamos APENAS os campos da EXTRA
+        persisted.setSituacao(requestFromFront.getSituacao());
+        persisted.setObservacao(requestFromFront.getObservacao());
+        persisted.setNumeroAta(requestFromFront.getNumeroAta());
+        persisted.setValorAprovado(requestFromFront.getValorAprovado());
+        persisted.setDataAvaliacaoProap(LocalDate.now());
+
+        // 3. Geramos o texto automático (o seu método da extra pede uma String)
+        persisted.setAutomaticDecText(" ");
+
+        // 4. Forçamos o salvamento
+        return extraRequestRepostirory.save(persisted);
+    }
 }

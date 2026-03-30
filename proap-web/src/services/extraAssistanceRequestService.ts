@@ -40,3 +40,6 @@ export const getExtraAssistanceRequestById = (id: number) =>
 
 export const deleteExtraAssistanceRequest = (id: number) =>
   api.delete(`extrarequest/remove/${id}`);
+
+export const reviewExtraAssistanceRequest = (request: ExtraRequest) =>
+  api.put('extrarequest/extrareviewsolicitation', request);

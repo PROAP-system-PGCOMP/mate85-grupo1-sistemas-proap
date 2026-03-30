@@ -18,6 +18,7 @@ import AdminDashboardPage from '../../pages/admin-panel/AdminDashboardPage';
 import CeapgReviewsPage from '../../pages/ceapg-reviews/CeapgReviewsPage';
 import useHasPermission from '../../hooks/auth/useHasPermission';
 import RedirectBasedOnRole from './RedirectBasedOnRole';
+import ReviewExtraSolicitationPage from '../../pages/review-extra-solicitation/ReviewExtraSolicitationPage';
 
 export default function PrivateRoutes() {
   const isAdmin = useHasPermission('ADMIN_ROLE');
@@ -50,6 +51,9 @@ export default function PrivateRoutes() {
           path="/solicitation/review/:id"
           element={<ReviewSolicitationPage />}
         />
+        <Route
+          path="/extra-solicitation/review/:id"
+          element={<ReviewExtraSolicitationPage />} />
         <Route
           path="/solicitation/view/:id"
           element={<ViewSolicitationPage />}

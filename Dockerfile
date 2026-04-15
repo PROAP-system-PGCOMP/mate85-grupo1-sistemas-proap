@@ -34,7 +34,7 @@ COPY deploy/nginx.conf /etc/nginx/templates/default.conf.template
 COPY deploy/start.sh /start.sh
 
 # 4) portas e entrypoint
-ENV PORT=5000
+ENV API_PORT=5000
 EXPOSE 5000
 RUN chmod +x /start.sh
 ENTRYPOINT ["/start.sh"]

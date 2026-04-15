@@ -6,7 +6,7 @@ const getBaseApiURL = () => {
 };
 
 const DEV_BASE_API_URL =
-  process.env.REACT_APP_DEV_API_URL || 'http://localhost:8080/api';
+  import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 export const BASE_API_URL =
   process.env.NODE_ENV === 'development' ? DEV_BASE_API_URL : getBaseApiURL();
 export const BASE_PDF_URL = BASE_API_URL + '/files/view-pdf/';

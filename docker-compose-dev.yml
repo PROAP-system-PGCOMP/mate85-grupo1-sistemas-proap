@@ -29,7 +29,7 @@ services:
       - proap_dev_db
 
   proap_dev_db:
-    image: postgres:latest
+    image: postgres:15
     container_name: proap_dev_db
     environment:
       - POSTGRES_DB=proap

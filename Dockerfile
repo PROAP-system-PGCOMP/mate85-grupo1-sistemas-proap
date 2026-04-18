@@ -1,5 +1,5 @@
 ########################################
-# Stage 1 – build do front (Vite)
+# Stage 1 – build do front (Vite)      #
 ########################################
 FROM node:22-alpine AS frontend-build
 WORKDIR /workspace/front
@@ -9,33 +9,32 @@ COPY proap-web/ .
 RUN npm run build
 
 ########################################
-# Stage 2 – build do back (Spring)
+# Stage 2 – build do back (Spring)     #
 ########################################
 FROM eclipse-temurin:21-jdk-alpine AS backend-build
 WORKDIR /workspace/back
-
-# 1. Copia o Maven
 COPY proap-api/pom.xml proap-api/mvnw ./
 COPY proap-api/.mvn .mvn
 RUN ./mvnw -B dependency:go-offline
-
-# 2. Copia o código do Java
 COPY proap-api/src src
-
-RUN mkdir -p src/main/resources/static
-COPY --from=frontend-build /workspace/front/dist/ src/main/resources/static/
-
-# 4. Gera o JAR com tudo dentro
 RUN ./mvnw -B clean package -DskipTests
 
 ########################################
-# Stage 3 – runtime (SÓ JAVA)
+# Stage 3 – runtime (Nginx + JRE)      #
 ########################################
 FROM eclipse-temurin:21-jre-alpine
+# 1) dependências mínimas via Alpine
+RUN apk add --no-cache nginx ca-certificates gettext
+
+# 2) artefatos
 WORKDIR /app
-
+COPY --from=frontend-build /workspace/front/dist /usr/share/nginx/html
 COPY --from=backend-build /workspace/back/target/*.jar app.jar
+COPY deploy/nginx.conf /etc/nginx/templates/default.conf.template
+COPY deploy/start.sh /start.sh
 
-EXPOSE 8080
-
-ENTRYPOINT ["java", "-Xmx512m", "-Dserver.port=${PORT}", "-jar", "app.jar"]
+# 4) portas e entrypoint
+ENV API_PORT=5000
+EXPOSE 5000
+RUN chmod +x /start.sh
+ENTRYPOINT ["/start.sh"]

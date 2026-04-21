@@ -11,7 +11,7 @@ public class SpaController {
     public String redirect(HttpServletRequest request) {
         String path = request.getRequestURI();
 
-        if (ppath.startsWith("/api") ||
+        if (path.startsWith("/api") ||
                 path.startsWith("/v3/api-docs") ||
                 path.startsWith("/error") ||
                 path.contains(".")) {

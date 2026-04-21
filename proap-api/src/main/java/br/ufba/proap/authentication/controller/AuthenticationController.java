@@ -28,7 +28,7 @@ import br.ufba.proap.security.JwtAuthenticationResponse;
 import br.ufba.proap.security.JwtTokenProvider;
 
 @RestController
-@RequestMapping("/authentication")
+@RequestMapping("/api/authentication")
 public class AuthenticationController {
 
 	@Autowired

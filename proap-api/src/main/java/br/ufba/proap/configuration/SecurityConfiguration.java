@@ -52,22 +52,16 @@ public class SecurityConfiguration {
 				.exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(authorize -> authorize
-					// 1. Libera o Frontend e arquivos estáticos na raiz
-					.requestMatchers("/", "/index.html", "/static/**", "/assets/**", "/*.js", "/*.css", "/*.ico").permitAll()
-
-					// 2. Libera os endpoints da API com o prefixo /api (que o seu React está chamando)
-					.requestMatchers(HttpMethod.POST, "/api/authentication/**", "/api/user/create").permitAll()
-					.requestMatchers(HttpMethod.GET, "/api/files/**", "/api/authentication/**").permitAll()
-					.requestMatchers(HttpMethod.GET, "/api/profile/**").authenticated()
-
-					// 3. Libera Actuator e Swagger (também sob /api)
-					.requestMatchers("/api/actuator/health/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
-					.requestMatchers("/api/actuator/**").hasAuthority("ADMIN_ROLE")             
-
-					.requestMatchers(HttpMethod.GET, "/api/user/list").hasAuthority("VIEW_USER")                    
-
-					// O resto exige login
-					.anyRequest().authenticated())
+						.requestMatchers(HttpMethod.POST, "/api/authentication/**", "/api/user/create")
+						.permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/files/**", "/api/authentication/**").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/profile/**").authenticated()
+						.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/actuator/health/**")
+						.permitAll()
+						.requestMatchers("/api/actuator/**")
+						.hasAuthority("ADMIN_ROLE")
+						.requestMatchers(HttpMethod.GET, "/api/user/list").hasAuthority("VIEW_USER")
+						.anyRequest().authenticated())
 				.logout(logout -> logout.logoutUrl("/api/authentication/logout"))
 				.headers(headers -> headers
 						.referrerPolicy(referrer -> referrer.policy(ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))

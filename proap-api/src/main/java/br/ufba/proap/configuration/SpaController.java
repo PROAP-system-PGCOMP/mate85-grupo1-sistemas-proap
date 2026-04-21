@@ -12,12 +12,12 @@ public class SpaController {
         String path = request.getRequestURI();
 
         if (path.startsWith("/api") ||
-                path.startsWith("/assets") ||
                 path.startsWith("/v3/api-docs") ||
+                path.startsWith("/error") ||
                 path.contains(".")) {
             return null;
         }
 
-        return "forward:/index.html";
+        return "forward:/";
     }
 }

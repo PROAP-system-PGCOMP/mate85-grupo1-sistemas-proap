@@ -12,7 +12,7 @@ term_handler() {
 trap 'term_handler' SIGTERM SIGINT
 
 # 1) inicia Spring em background
-java -jar /app/app.jar --server.port="$API_PORT" &
+java -jar /app/app.jar --server.port=5000 &
 SPRING_PID=$!
 
 # 2) gera nginx.conf substituindo variáveis do template e o coloca como o arquivo principal

@@ -119,7 +119,7 @@ class UserControllerTest {
 				"{\"email\":\"%s\",\"password\":\"%s\",\"name\":\"%s\",\"cpf\":\"%s\",\"registration\":\"%s\",\"phone\":\"%s\",\"alternativePhone\":\"%s\"}",
 				TEST_EMAIL, TEST_PASSWORD, TEST_NAME, TEST_CPF, TEST_REGISTRATION, TEST_PHONE, TEST_ALT_PHONE);
 
-		mockMvc.perform(post("/user/create")
+		mockMvc.perform(post("/api/user/create")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(jsonPayload))
 				.andExpect(status().isCreated()) // Alterado para isCreated()
@@ -138,7 +138,7 @@ class UserControllerTest {
 				"{\"email\":\"%s\",\"password\":\"%s\",\"name\":\"%s\",\"cpf\":\"%s\",\"registration\":\"%s\",\"phone\":\"%s\",\"alternativePhone\":\"%s\"}",
 				TEST_EMAIL, TEST_PASSWORD, TEST_NAME, TEST_CPF, TEST_REGISTRATION, TEST_PHONE, TEST_ALT_PHONE);
 
-		mockMvc.perform(post("/user/create")
+		mockMvc.perform(post("/api/user/create")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(jsonPayload))
 				.andExpect(status().isInternalServerError())
@@ -158,7 +158,7 @@ class UserControllerTest {
 				"{\"email\":\"%s\",\"password\":\"%s\",\"name\":\"%s\",\"cpf\":\"%s\",\"registration\":\"%s\",\"phone\":\"%s\",\"alternativePhone\":\"%s\"}",
 				TEST_EMAIL, shortPassword, TEST_NAME, TEST_CPF, TEST_REGISTRATION, TEST_PHONE, TEST_ALT_PHONE);
 
-		mockMvc.perform(post("/user/create")
+		mockMvc.perform(post("/api/user/create")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(jsonPayload))
 				.andExpect(status().isBadRequest())
@@ -173,7 +173,7 @@ class UserControllerTest {
 		when(userService.getLoggedUser()).thenReturn(adminUser);
 		when(userService.getAllUsersWithPerfilAndPermissions()).thenReturn(Arrays.asList(testUser, adminUser));
 
-		mockMvc.perform(get("/user/list"))
+		mockMvc.perform(get("/api/user/list"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$[0].email").value(TEST_EMAIL))
 				.andExpect(jsonPath("$[1].email").value("admin@example.com"));
@@ -186,7 +186,7 @@ class UserControllerTest {
 	void list_whenUserDoesNotHavePermission_shouldReturnForbidden() throws Exception {
 		when(userService.getLoggedUser()).thenReturn(testUser);
 
-		mockMvc.perform(get("/user/list"))
+		mockMvc.perform(get("/api/user/list"))
 				.andExpect(status().isForbidden());
 
 		verify(userService).getLoggedUser();
@@ -197,7 +197,7 @@ class UserControllerTest {
 	void currentUserInfo_shouldReturnLoggedUserInfo() throws Exception {
 		when(userService.getLoggedUser()).thenReturn(testUser);
 
-		mockMvc.perform(get("/user/info"))
+		mockMvc.perform(get("/api/user/info"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.name").value(TEST_NAME))
 				.andExpect(jsonPath("$.email").value(TEST_EMAIL))
@@ -211,7 +211,7 @@ class UserControllerTest {
 	void currentUserInfo_whenNotAuthenticated_shouldReturnUnauthorized() throws Exception {
 		when(userService.getLoggedUser()).thenReturn(null);
 
-		mockMvc.perform(get("/user/info"))
+		mockMvc.perform(get("/api/user/info"))
 				.andExpect(status().isUnauthorized());
 
 		verify(userService).getLoggedUser();
@@ -232,7 +232,7 @@ class UserControllerTest {
 
 		when(userService.update(any(UserUpdateDTO.class))).thenReturn(updatedUser);
 
-		mockMvc.perform(put("/user/update")
+		mockMvc.perform(put("/api/user/update")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("{\"name\":\"Updated Name\",\"phone\":\"71988776655\"}"))
 				.andExpect(status().isOk())
@@ -246,7 +246,7 @@ class UserControllerTest {
 	void update_whenServiceThrowsException_shouldReturnBadRequest() throws Exception {
 		when(userService.update(any(UserUpdateDTO.class))).thenThrow(new RuntimeException("Erro ao atualizar usuário"));
 
-		mockMvc.perform(put("/user/update")
+		mockMvc.perform(put("/api/user/update")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("{\"name\":\"Updated Name\",\"phone\":\"71988776655\"}"))
 				.andExpect(status().isBadRequest());
@@ -256,7 +256,7 @@ class UserControllerTest {
 
 	@Test
 	void delete_whenUserHasAdminPermission_shouldDeleteUser() throws Exception {
-		mockMvc.perform(delete("/user/delete/{email}", "user.to.delete@example.com"))
+		mockMvc.perform(delete("/api/user/delete/{email}", "user.to.delete@example.com"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.status").value("Sucesso"))
 				.andExpect(jsonPath("$.message").value("Usuário deletado com sucesso!"));
@@ -269,7 +269,7 @@ class UserControllerTest {
 		doThrow(new ValidationException("Você não tem permissão para deletar um usuário"))
 				.when(userService).delete(anyString());
 
-		mockMvc.perform(delete("/user/delete/{email}", "user.to.delete@example.com"))
+		mockMvc.perform(delete("/api/user/delete/{email}", "user.to.delete@example.com"))
 				.andExpect(status().isForbidden())
 				.andExpect(jsonPath("$.status").value("Erro"))
 				.andExpect(jsonPath("$.message").value("Você não tem permissão para deletar um usuário"));
@@ -279,7 +279,7 @@ class UserControllerTest {
 
 	@Test
 	void changePassword_withValidData_shouldReturnSuccess() throws Exception {
-		mockMvc.perform(put("/user/change-password")
+		mockMvc.perform(put("/api/user/change-password")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("{\"currentPassword\":\"" + TEST_PASSWORD + "\",\"newPassword\":\"newPassword123\"}"))
 				.andExpect(status().isOk())
@@ -294,7 +294,7 @@ class UserControllerTest {
 		doThrow(new ValidationException("Senha atual incorreta"))
 				.when(userService).changePassword(anyString(), anyString());
 
-		mockMvc.perform(put("/user/change-password")
+		mockMvc.perform(put("/api/user/change-password")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("{\"currentPassword\":\"wrongPassword\",\"newPassword\":\"newPassword123\"}"))
 				.andExpect(status().isBadRequest())
@@ -306,7 +306,7 @@ class UserControllerTest {
 
 	@Test
 	void updateProfile_withValidData_shouldReturnSuccess() throws Exception {
-		mockMvc.perform(put("/user/update-profile/{email}", TEST_EMAIL)
+		mockMvc.perform(put("/api/user/update-profile/{email}", TEST_EMAIL)
 				.param("profileId", "2"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.status").value("Sucesso"))
@@ -320,7 +320,7 @@ class UserControllerTest {
 		doThrow(new ValidationException("Usuário não encontrado"))
 				.when(userService).updateProfile(anyString(), anyLong());
 
-		mockMvc.perform(put("/user/update-profile/{email}", "nonexistent@example.com")
+		mockMvc.perform(put("/api/user/update-profile/{email}", "nonexistent@example.com")
 				.param("profileId", "2"))
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.status").value("Inválido"))
@@ -334,7 +334,7 @@ class UserControllerTest {
 		doThrow(new ValidationException("Perfil não encontrado"))
 				.when(userService).updateProfile(anyString(), anyLong());
 
-		mockMvc.perform(put("/user/update-profile/{email}", TEST_EMAIL)
+		mockMvc.perform(put("/api/user/update-profile/{email}", TEST_EMAIL)
 				.param("profileId", "999"))
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.status").value("Inválido"))

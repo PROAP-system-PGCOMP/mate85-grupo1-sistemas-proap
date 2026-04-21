@@ -17,24 +17,21 @@ COPY proap-api/pom.xml proap-api/mvnw ./
 COPY proap-api/.mvn .mvn
 RUN ./mvnw -B dependency:go-offline
 COPY proap-api/src src
+
+COPY --from=frontend-build /workspace/front/dist /workspace/back/src/main/resources/static
+
 RUN ./mvnw -B clean package -DskipTests
 
 ########################################
-# Stage 3 – runtime (Nginx + JRE)      #
+# Stage 3 – runtime (Apenas JRE)       #
 ########################################
 FROM eclipse-temurin:21-jre-alpine
-# 1) dependências mínimas via Alpine
-RUN apk add --no-cache nginx ca-certificates gettext
-
-# 2) artefatos
 WORKDIR /app
-COPY --from=frontend-build /workspace/front/dist /usr/share/nginx/html
-COPY --from=backend-build /workspace/back/target/*.jar app.jar
-COPY deploy/nginx.conf /etc/nginx/templates/default.conf.template
-COPY deploy/start.sh /start.sh
 
-# 4) portas e entrypoint
-ENV API_PORT=5000
+COPY --from=backend-build /workspace/back/target/*.jar app.jar
+
+# Configurações de porta
+ENV SERVER_PORT=5000
 EXPOSE 5000
-RUN chmod +x /start.sh
-ENTRYPOINT ["/start.sh"]
+
+ENTRYPOINT ["java", "-jar", "app.jar"]

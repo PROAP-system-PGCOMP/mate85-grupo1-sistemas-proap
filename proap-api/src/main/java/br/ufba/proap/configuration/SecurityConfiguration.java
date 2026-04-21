@@ -57,11 +57,11 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/api/files/**", "/api/authentication/**").permitAll()
                         .requestMatchers("/api/v3/api-docs/**", "/api/swagger-ui/**", "/api/actuator/health/**").permitAll()
                         .requestMatchers("/assets/**", "/static/**", "/*.js", "/*.css").permitAll()
-                        .requestMatchers("/{path:[^\\.]*}", "/**/{path:[^\\.]*}").permitAll()
-						.requestMatchers(HttpMethod.GET, "/api/profile/**").authenticated()
 						.requestMatchers("/api/actuator/**")
 						.hasAuthority("ADMIN_ROLE")
 						.requestMatchers(HttpMethod.GET, "/api/user/list").hasAuthority("VIEW_USER")
+                        .requestMatchers(HttpMethod.GET, "/api/profile/**").authenticated()
+                        .requestMatchers("/**").permitAll()
 						.anyRequest().authenticated())
 				.logout(logout -> logout.logoutUrl("/api/authentication/logout"))
 				.headers(headers -> headers

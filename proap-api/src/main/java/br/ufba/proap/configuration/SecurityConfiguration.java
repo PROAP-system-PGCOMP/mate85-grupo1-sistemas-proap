@@ -52,13 +52,21 @@ public class SecurityConfiguration {
 				.exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(authorize -> authorize
+					// 1. Libera o Frontend e arquivos estáticos na raiz
 					.requestMatchers("/", "/index.html", "/static/**", "/assets/**", "/*.js", "/*.css", "/*.ico").permitAll()
-					.requestMatchers(HttpMethod.POST, "/authentication/**", "/user/create").permitAll()
-					.requestMatchers(HttpMethod.GET, "/files/**", "/authentication/**").permitAll()
-					.requestMatchers(HttpMethod.GET, "/profile/**").authenticated()
-					.requestMatchers("/actuator/health/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
-					.requestMatchers("/actuator/**").hasAuthority("ADMIN_ROLE")				
-					.requestMatchers(HttpMethod.GET, "/user/list").hasAuthority("VIEW_USER")					
+
+					// 2. Libera os endpoints da API com o prefixo /api (que o seu React está chamando)
+					.requestMatchers(HttpMethod.POST, "/api/authentication/**", "/api/user/create").permitAll()
+					.requestMatchers(HttpMethod.GET, "/api/files/**", "/api/authentication/**").permitAll()
+					.requestMatchers(HttpMethod.GET, "/api/profile/**").authenticated()
+
+					// 3. Libera Actuator e Swagger (também sob /api)
+					.requestMatchers("/api/actuator/health/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+					.requestMatchers("/api/actuator/**").hasAuthority("ADMIN_ROLE")             
+
+					.requestMatchers(HttpMethod.GET, "/api/user/list").hasAuthority("VIEW_USER")                    
+
+					// O resto exige login
 					.anyRequest().authenticated())
 				.logout(logout -> logout.logoutUrl("/api/authentication/logout"))
 				.headers(headers -> headers

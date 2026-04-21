@@ -62,7 +62,7 @@ public class AuthenticationControllerTest {
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(authentication);
         when(tokenProvider.generateToken(any(Authentication.class))).thenReturn(TEST_JWT);
         
-        mockMvc.perform(post("/authentication/signin")
+        mockMvc.perform(post("/api/authentication/signin")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"username\":\"" + TEST_EMAIL + "\",\"password\":\"" + TEST_PASSWORD + "\"}"))
                 .andExpect(status().isOk())
@@ -78,7 +78,7 @@ public class AuthenticationControllerTest {
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenThrow(new BadCredentialsException("Credenciais inválidas"));
 
-        mockMvc.perform(post("/authentication/signin")
+        mockMvc.perform(post("/api/authentication/signin")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"username\":\"" + TEST_EMAIL + "\",\"password\":\"senhaerrada\"}"))
                 .andExpect(status().isUnauthorized())
@@ -89,7 +89,7 @@ public class AuthenticationControllerTest {
 
     @Test
     public void resetPassword_withValidEmail_shouldReturnSuccess() throws Exception {
-        mockMvc.perform(post("/authentication/reset-password")
+        mockMvc.perform(post("/api/authentication/reset-password")
                 .param("email", TEST_EMAIL))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("Sucesso"))
@@ -100,7 +100,7 @@ public class AuthenticationControllerTest {
 
     @Test
     public void resetPassword_withInvalidEmail_shouldReturnBadRequest() throws Exception {
-        mockMvc.perform(post("/authentication/reset-password")
+        mockMvc.perform(post("/api/authentication/reset-password")
                 .param("email", "email-invalido"))
                 .andExpect(status().isBadRequest());
     }
@@ -110,7 +110,7 @@ public class AuthenticationControllerTest {
         doThrow(new NotFoundException("Usuário não encontrado")).when(passwordResetTokenService)
                 .sendResetToken(anyString());
 
-        mockMvc.perform(post("/authentication/reset-password")
+        mockMvc.perform(post("/api/authentication/reset-password")
                 .param("email", TEST_EMAIL))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value("erro"))
@@ -123,7 +123,7 @@ public class AuthenticationControllerTest {
     public void validateToken_withValidToken_shouldReturnSuccess() throws Exception {
         when(passwordResetTokenService.isPasswordResetTokenValid(TEST_TOKEN)).thenReturn(true);
 
-        mockMvc.perform(get("/authentication/reset-password/validate")
+        mockMvc.perform(get("/api/authentication/reset-password/validate")
                 .param("token", TEST_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("Sucesso"))
@@ -136,7 +136,7 @@ public class AuthenticationControllerTest {
     public void validateToken_withInvalidToken_shouldReturnBadRequest() throws Exception {
         when(passwordResetTokenService.isPasswordResetTokenValid(TEST_TOKEN)).thenReturn(false);
 
-        mockMvc.perform(get("/authentication/reset-password/validate")
+        mockMvc.perform(get("/api/authentication/reset-password/validate")
                 .param("token", TEST_TOKEN))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value("Erro"))
@@ -150,7 +150,7 @@ public class AuthenticationControllerTest {
         when(passwordResetTokenService.isPasswordResetTokenValid(TEST_TOKEN))
                 .thenThrow(new NotFoundException("Token não encontrado"));
 
-        mockMvc.perform(get("/authentication/reset-password/validate")
+        mockMvc.perform(get("/api/authentication/reset-password/validate")
                 .param("token", TEST_TOKEN))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value("Erro"))
@@ -163,7 +163,7 @@ public class AuthenticationControllerTest {
     public void recoverPassword_withValidData_shouldReturnSuccess() throws Exception {
         when(passwordResetTokenService.isPasswordResetTokenValid(TEST_TOKEN)).thenReturn(true);
 
-        mockMvc.perform(post("/authentication/reset-password/confirm")
+        mockMvc.perform(post("/api/authentication/reset-password/confirm")
                 .param("token", TEST_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"newPassword\":\"" + TEST_PASSWORD + "\",\"confirmPassword\":\"" + TEST_PASSWORD + "\"}"))
@@ -180,7 +180,7 @@ public class AuthenticationControllerTest {
     public void recoverPassword_withInvalidToken_shouldReturnBadRequest() throws Exception {
         when(passwordResetTokenService.isPasswordResetTokenValid(TEST_TOKEN)).thenReturn(false);
 
-        mockMvc.perform(post("/authentication/reset-password/confirm")
+        mockMvc.perform(post("/api/authentication/reset-password/confirm")
                 .param("token", TEST_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"newPassword\":\"" + TEST_PASSWORD + "\",\"confirmPassword\":\"" + TEST_PASSWORD + "\"}"))
@@ -199,7 +199,7 @@ public class AuthenticationControllerTest {
         doThrow(new RuntimeException("Erro ao atualizar senha")).when(passwordResetTokenService)
                 .updatePassword(anyString(), anyString());
 
-        mockMvc.perform(post("/authentication/reset-password/confirm")
+        mockMvc.perform(post("/api/authentication/reset-password/confirm")
                 .param("token", TEST_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"newPassword\":\"" + TEST_PASSWORD + "\",\"confirmPassword\":\"" + TEST_PASSWORD + "\"}"))

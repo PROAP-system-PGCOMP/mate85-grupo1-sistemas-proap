@@ -54,6 +54,7 @@ public class SecurityConfiguration {
 				.authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/index.html", "/favicon.png", "/favicon.ico", "/error").permitAll()
                         .requestMatchers("/assets/**", "/static/**", "/*.js", "/*.css").permitAll()
+                        .requestMatchers("/{path:[^\\.]*}").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/authentication/**", "/api/user/create").permitAll()
 						.requestMatchers(HttpMethod.GET, "/api/files/**", "/api/authentication/**").permitAll()
 						.requestMatchers(HttpMethod.GET, "/api/profile/**").authenticated()

@@ -1,33 +1,17 @@
- package br.ufba.proap.configuration;
-
+package br.ufba.proap.configuration;
 
 import org.springframework.stereotype.Controller;
-
 import org.springframework.web.bind.annotation.GetMapping;
 
-
 @Controller
-
 public class SpaController {
 
-
-
-@GetMapping(value = "/{path:[^\\.]*}")
-
-public String redirect() {
-
-return "forward:/index.html";
-
+    /**
+     * Redireciona rotas que não são arquivos (não possuem ponto) 
+     * e que NÃO começam com /api ou /actuator para o index.html.
+     */
+    @GetMapping(value = "{path:^(?!api|actuator|.*\\.[\\w]+$).*$}/**")
+    public String redirect() {
+        return "forward:/index.html";
+    }
 }
-
-
-
-@GetMapping(value = "/*/{path:[^\\.]*}")
-
-public String redirectDeep() {
-
-return "forward:/index.html";
-
-}
-
-} 

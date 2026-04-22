@@ -7,13 +7,13 @@ import jakarta.servlet.http.HttpServletRequest;
 @Controller
 public class SpaController {
 
-    @GetMapping(value = "/{path:[^\\.]}")
+    @GetMapping(value = "/{path:[^\.]}")
     public String redirect() {
         return "forward:/index.html";
     }
 
     // Este cara captura rotas profundas, MAS ignora explicitamente a API
-   @GetMapping(value = "/{target:^(?!api|actuator).$}/*/{path:[^\\.]}")
+   @GetMapping(value = "/{target:^(?!api|actuator).$}/*/{path:[^\.]}")
     public String redirectDeep() {
         return "forward:/index.html";
     }

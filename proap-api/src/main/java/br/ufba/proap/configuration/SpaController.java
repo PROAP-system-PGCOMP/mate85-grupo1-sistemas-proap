@@ -10,24 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 public class SpaController {
 
-
-
-@GetMapping(value = "/{path:[^\\.]*}")
-
-public String redirect() {
-
-return "forward:/index.html";
-
+    @GetMapping(value = "{path:^(?!api|actuator)[^\\.]*}/**")
+    public String redirect() {
+        return "forward:/index.html";
+    }
 }
-
-
-
-@GetMapping(value = "/*/{path:[^\\.]*}")
-
-public String redirectDeep() {
-
-return "forward:/index.html";
-
-}
-
-} 

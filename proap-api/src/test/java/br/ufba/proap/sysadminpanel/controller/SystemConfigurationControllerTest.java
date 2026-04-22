@@ -179,7 +179,7 @@ class SystemConfigurationControllerTest {
         SystemConfigurationDTO configDTO = new SystemConfigurationDTO();
         configDTO.setEnableSolicitation(false);
 
-        mockMvc.perform(patch("/admin/system-config")
+        mockMvc.perform(patch("/api/admin/system-config")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(configDTO)))
                 .andExpect(status().isForbidden());

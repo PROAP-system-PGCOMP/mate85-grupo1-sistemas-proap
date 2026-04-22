@@ -300,7 +300,7 @@ class AssistanceRequestControllerTest {
                 MockMultipartFile pdf = new MockMultipartFile("file", "file.pdf", "application/pdf",
                                 "dummy".getBytes());
 
-                mvc.perform(MockMvcRequestBuilders.multipart("/assistancerequest/create-with-file")
+                mvc.perform(MockMvcRequestBuilders.multipart("/api/assistancerequest/create-with-file")
                                 .file(form)
                                 .file(pdf)
                                 .contentType(MediaType.MULTIPART_FORM_DATA))
@@ -328,7 +328,7 @@ class AssistanceRequestControllerTest {
                                 objectMapper.writeValueAsBytes(dto));
                 MockMultipartFile txt = new MockMultipartFile("file", "file.txt", "text/plain", "oops".getBytes());
 
-                mvc.perform(MockMvcRequestBuilders.multipart("/assistancerequest/create-with-file")
+                mvc.perform(MockMvcRequestBuilders.multipart("/api/assistancerequest/create-with-file")
                                 .file(form)
                                 .file(txt)
                                 .contentType(MediaType.MULTIPART_FORM_DATA))
@@ -389,7 +389,7 @@ class AssistanceRequestControllerTest {
                 MockMultipartFile formPart = new MockMultipartFile("form", "", "application/json",
                                 objectMapper.writeValueAsBytes(requestBodyDto));
 
-                mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, "/assistancerequest/update")
+                mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, "/api/assistancerequest/update")
                                 .file(formPart)
                                 .contentType(MediaType.MULTIPART_FORM_DATA))
                                 .andExpect(status().isOk())
@@ -429,7 +429,7 @@ class AssistanceRequestControllerTest {
                 MockMultipartFile formPart = new MockMultipartFile("form", "", "application/json",
                                 objectMapper.writeValueAsBytes(requestBodyDto));
 
-                mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, "/assistancerequest/update")
+                mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, "/api/assistancerequest/update")
                                 .file(formPart)
                                 .contentType(MediaType.MULTIPART_FORM_DATA))
                                 .andExpect(status().isForbidden());
@@ -467,7 +467,7 @@ class AssistanceRequestControllerTest {
                 MockMultipartFile formPart = new MockMultipartFile("form", "", "application/json",
                                 objectMapper.writeValueAsBytes(requestBodyDto));
 
-                mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, "/assistancerequest/update")
+                mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, "/api/assistancerequest/update")
                                 .file(formPart)
                                 .contentType(MediaType.MULTIPART_FORM_DATA))
                                 .andExpect(status().isForbidden());
@@ -529,7 +529,7 @@ class AssistanceRequestControllerTest {
                 MockMultipartFile formPart = new MockMultipartFile("form", "", "application/json",
                                 objectMapper.writeValueAsBytes(requestBodyDto));
 
-                mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, "/assistancerequest/update")
+                mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, "/api/assistancerequest/update")
                                 .file(formPart)
                                 .contentType(MediaType.MULTIPART_FORM_DATA))
                                 .andExpect(status().isOk())
@@ -574,7 +574,7 @@ class AssistanceRequestControllerTest {
                 MockMultipartFile pdfFile = new MockMultipartFile("file", "original.pdf",
                                 MediaType.APPLICATION_PDF_VALUE, "pdf content".getBytes());
 
-                mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, "/assistancerequest/update")
+                mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, "/api/assistancerequest/update")
                                 .file(formPart)
                                 .file(pdfFile)
                                 .contentType(MediaType.MULTIPART_FORM_DATA))
@@ -602,7 +602,7 @@ class AssistanceRequestControllerTest {
                 MockMultipartFile formPart = new MockMultipartFile("form", "", "application/json",
                                 objectMapper.writeValueAsBytes(requestBodyDto));
 
-                mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, "/assistancerequest/update")
+                mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, "/api/assistancerequest/update")
                                 .file(formPart)
                                 .contentType(MediaType.MULTIPART_FORM_DATA))
                                 .andExpect(status().isNotFound());
@@ -634,7 +634,7 @@ class AssistanceRequestControllerTest {
                 MockMultipartFile txtFile = new MockMultipartFile("file", "document.txt", MediaType.TEXT_PLAIN_VALUE,
                                 "text content".getBytes());
 
-                mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, "/assistancerequest/update")
+                mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, "/api/assistancerequest/update")
                                 .file(formPart)
                                 .file(txtFile)
                                 .contentType(MediaType.MULTIPART_FORM_DATA))
@@ -691,7 +691,7 @@ class AssistanceRequestControllerTest {
                 when(userService.getLoggedUser()).thenReturn(mockUser);
                 doNothing().when(service).delete(1L);
 
-                mvc.perform(MockMvcRequestBuilders.delete("/assistancerequest/remove/1"))
+                mvc.perform(MockMvcRequestBuilders.delete("/api/assistancerequest/remove/1"))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.status", is("success")))
                                 .andExpect(jsonPath("$.message", is("Successfully removed")));

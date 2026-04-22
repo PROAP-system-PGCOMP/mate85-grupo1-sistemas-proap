@@ -23,7 +23,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin/budget")
+@RequestMapping("/api/admin/budget")
 public class BudgetController {
 
     @Autowired

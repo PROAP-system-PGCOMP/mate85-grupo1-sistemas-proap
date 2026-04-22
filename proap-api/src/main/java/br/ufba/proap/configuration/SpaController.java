@@ -6,8 +6,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class SpaController {
 
-    @GetMapping(value = "{path:^(?!api|actuator)[^\\.]*}/**")
-    public String redirect() {
+    @GetMapping(value = "/**/{path:[^\\.]*}")
+    public String redirect(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+
+        if (uri.startsWith("/api") || uri.startsWith("/actuator")) {
+            return "forward:/error";
+        }
+
         return "forward:/index.html";
     }
 }

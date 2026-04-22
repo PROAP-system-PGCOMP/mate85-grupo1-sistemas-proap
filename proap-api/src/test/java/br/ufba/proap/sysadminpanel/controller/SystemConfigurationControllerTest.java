@@ -125,7 +125,7 @@ class SystemConfigurationControllerTest {
         configDTO.setCountryGroups(Collections.emptyList());
         when(systemConfigurationService.updateConfiguration(any(SystemConfigurationDTO.class))).thenReturn(configDTO);
 
-        mockMvc.perform(put("/admin/system-config")
+        mockMvc.perform(put("/api/admin/system-config")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(configDTO)))
                 .andExpect(status().isOk())
@@ -141,7 +141,7 @@ class SystemConfigurationControllerTest {
         configDTO.setResourceLinks(Collections.emptyList());
         configDTO.setCountryGroups(Collections.emptyList());
 
-        mockMvc.perform(put("/admin/system-config")
+        mockMvc.perform(put("/api/admin/system-config")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(configDTO)))
                 .andExpect(status().isForbidden());
@@ -165,7 +165,7 @@ class SystemConfigurationControllerTest {
         when(systemConfigurationService.updateConfiguration(any(SystemConfigurationDTO.class)))
                 .thenReturn(updatedConfigDTO);
 
-        mockMvc.perform(patch("/admin/system-config")
+        mockMvc.perform(patch("/api/admin/system-config")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(configDTO)))
                 .andExpect(status().isOk())

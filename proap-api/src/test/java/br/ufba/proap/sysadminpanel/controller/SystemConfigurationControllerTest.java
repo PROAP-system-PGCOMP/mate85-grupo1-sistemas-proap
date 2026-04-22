@@ -109,7 +109,7 @@ class SystemConfigurationControllerTest {
         configDTO.setCountryGroups(Collections.emptyList());
         when(systemConfigurationService.getCurrentConfiguration()).thenReturn(configDTO);
 
-        mockMvc.perform(get("/admin/system-config"))
+        mockMvc.perform(get("/api/admin/system-config"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.enableSolicitation").value(true))
                 .andExpect(jsonPath("$.qualis[0]").value("A1"));
@@ -195,7 +195,7 @@ class SystemConfigurationControllerTest {
         configDTO.setCountryGroups(Collections.emptyList());
         when(systemConfigurationService.getCurrentConfiguration()).thenReturn(configDTO);
 
-        mockMvc.perform(get("/admin/system-config/qualis"))
+        mockMvc.perform(get("/api/admin/system-config/qualis"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0]").value("A1"))
                 .andExpect(jsonPath("$[1]").value("B1"));
@@ -207,7 +207,7 @@ class SystemConfigurationControllerTest {
         List<String> qualisList = Arrays.asList("C1", "C2");
         when(systemConfigurationService.updateQualisList(anyList())).thenReturn(qualisList);
 
-        mockMvc.perform(post("/admin/system-config/qualis")
+        mockMvc.perform(post("/api/admin/system-config/qualis")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(qualisList)))
                 .andExpect(status().isOk())
@@ -219,7 +219,7 @@ class SystemConfigurationControllerTest {
         mockRegularUser();
         List<String> qualisList = Arrays.asList("C1", "C2");
 
-        mockMvc.perform(post("/admin/system-config/qualis")
+        mockMvc.perform(post("/api/admin/system-config/qualis")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(qualisList)))
                 .andExpect(status().isForbidden());
@@ -240,7 +240,7 @@ class SystemConfigurationControllerTest {
         configDTO.setCountryGroups(Collections.emptyList());
         when(systemConfigurationService.getCurrentConfiguration()).thenReturn(configDTO);
 
-        mockMvc.perform(get("/admin/system-config/resource-links"))
+        mockMvc.perform(get("/api/admin/system-config/resource-links"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].fieldName").value("Google"))
                 .andExpect(jsonPath("$[0].url").value("http://google.com"));
@@ -256,7 +256,7 @@ class SystemConfigurationControllerTest {
         List<UrlMapperDTO> resourceLinks = Collections.singletonList(urlMapperDTO);
         when(systemConfigurationService.updateResourceLinks(anyList())).thenReturn(resourceLinks);
 
-        mockMvc.perform(post("/admin/system-config/resource-links")
+        mockMvc.perform(post("/api/admin/system-config/resource-links")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(resourceLinks)))
                 .andExpect(status().isOk())
@@ -272,7 +272,7 @@ class SystemConfigurationControllerTest {
         urlMapperDTO.setUrlTitle("Bing URL");
         List<UrlMapperDTO> resourceLinks = Collections.singletonList(urlMapperDTO);
 
-        mockMvc.perform(post("/admin/system-config/resource-links")
+        mockMvc.perform(post("/api/admin/system-config/resource-links")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(resourceLinks)))
                 .andExpect(status().isForbidden());

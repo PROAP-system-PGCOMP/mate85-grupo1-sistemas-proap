@@ -129,7 +129,7 @@ class AssistanceRequestControllerTest {
         void list_shouldReturn401_whenNoUser() throws Exception {
                 when(userService.getLoggedUser()).thenReturn(null);
 
-                mvc.perform(MockMvcRequestBuilders.get("/assistancerequest/list")
+                mvc.perform(MockMvcRequestBuilders.get("/api/assistancerequest/list")
                                 .param("sortBy", "createdAt")
                                 .param("ascending", "true")
                                 .param("page", "0")
@@ -150,7 +150,7 @@ class AssistanceRequestControllerTest {
                 when(service.find(eq("createdAt"), eq(true), eq(0), eq(10), eq(mockUser)))
                                 .thenReturn(result);
 
-                mvc.perform(MockMvcRequestBuilders.get("/assistancerequest/list")
+                mvc.perform(MockMvcRequestBuilders.get("/api/assistancerequest/list")
                                 .param("sortBy", "createdAt")
                                 .param("ascending", "true")
                                 .param("page", "0")
@@ -170,7 +170,7 @@ class AssistanceRequestControllerTest {
 
                 when(service.findByUser(mockUser)).thenReturn(requests);
 
-                mvc.perform(MockMvcRequestBuilders.get("/assistancerequest/list/1"))
+                mvc.perform(MockMvcRequestBuilders.get("/api/assistancerequest/list/1"))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$", hasSize(1)));
         }
@@ -180,7 +180,7 @@ class AssistanceRequestControllerTest {
         void listById_shouldReturnEmptyList_whenNoUser() throws Exception {
                 when(userService.getLoggedUser()).thenReturn(null);
 
-                mvc.perform(MockMvcRequestBuilders.get("/assistancerequest/list/1"))
+                mvc.perform(MockMvcRequestBuilders.get("/api/assistancerequest/list/1"))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$", hasSize(0)));
 
@@ -219,7 +219,7 @@ class AssistanceRequestControllerTest {
                                 mockResponse.createdAt(), mockResponse.updatedAt());
                 when(service.findById(1L)).thenReturn(Optional.of(responseOwnedByMockUser));
 
-                mvc.perform(MockMvcRequestBuilders.get("/assistancerequest/find/1"))
+                mvc.perform(MockMvcRequestBuilders.get("/api/assistancerequest/find/1"))
                                 .andExpect(status().isOk());
         }
 
@@ -229,7 +229,7 @@ class AssistanceRequestControllerTest {
                 when(userService.getLoggedUser()).thenReturn(adminUser);
                 when(service.findById(1L)).thenReturn(Optional.of(mockResponse));
 
-                mvc.perform(MockMvcRequestBuilders.get("/assistancerequest/find/1"))
+                mvc.perform(MockMvcRequestBuilders.get("/api/assistancerequest/find/1"))
                                 .andExpect(status().isOk());
         }
 
@@ -239,7 +239,7 @@ class AssistanceRequestControllerTest {
                 when(userService.getLoggedUser()).thenReturn(mockUser);
                 when(service.findById(1L)).thenReturn(Optional.empty());
 
-                mvc.perform(MockMvcRequestBuilders.get("/assistancerequest/find/1"))
+                mvc.perform(MockMvcRequestBuilders.get("/api/assistancerequest/find/1"))
                                 .andExpect(status().isNotFound());
         }
 
@@ -251,7 +251,7 @@ class AssistanceRequestControllerTest {
 
                 AssistanceRequest newRequest = new AssistanceRequest();
 
-                mvc.perform(MockMvcRequestBuilders.post("/assistancerequest/create")
+                mvc.perform(MockMvcRequestBuilders.post("/api/assistancerequest/create")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(newRequest)))
                                 .andExpect(status().isOk());
@@ -266,7 +266,7 @@ class AssistanceRequestControllerTest {
 
                 AssistanceRequest newRequest = new AssistanceRequest();
 
-                mvc.perform(MockMvcRequestBuilders.post("/assistancerequest/create")
+                mvc.perform(MockMvcRequestBuilders.post("/api/assistancerequest/create")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(newRequest)))
                                 .andExpect(status().isBadRequest());
@@ -651,7 +651,7 @@ class AssistanceRequestControllerTest {
                 when(service.reviewSolicitation(any(AssistanceRequest.class), eq(mockUser)))
                                 .thenReturn(mockRequest);
 
-                mvc.perform(MockMvcRequestBuilders.put("/assistancerequest/reviewsolicitation")
+                mvc.perform(MockMvcRequestBuilders.put("/api/assistancerequest/reviewsolicitation")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(mockRequest)))
                                 .andExpect(status().isOk());
@@ -664,7 +664,7 @@ class AssistanceRequestControllerTest {
         void reviewSolicitation_shouldReturn400_whenNoUser() throws Exception {
                 when(userService.getLoggedUser()).thenReturn(null);
 
-                mvc.perform(MockMvcRequestBuilders.put("/assistancerequest/reviewsolicitation")
+                mvc.perform(MockMvcRequestBuilders.put("/api/assistancerequest/reviewsolicitation")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(mockRequest)))
                                 .andExpect(status().isBadRequest());
@@ -679,7 +679,7 @@ class AssistanceRequestControllerTest {
                 when(service.reviewSolicitation(any(AssistanceRequest.class), eq(mockUser)))
                                 .thenReturn(null);
 
-                mvc.perform(MockMvcRequestBuilders.put("/assistancerequest/reviewsolicitation")
+                mvc.perform(MockMvcRequestBuilders.put("/api/assistancerequest/reviewsolicitation")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(mockRequest)))
                                 .andExpect(status().isNotFound());
@@ -714,7 +714,7 @@ class AssistanceRequestControllerTest {
 
                 when(reviewService.approve(any(ReviewDTO.class))).thenReturn(approvedReview);
 
-                mvc.perform(MockMvcRequestBuilders.put("/assistancerequest/approve/1")
+                mvc.perform(MockMvcRequestBuilders.put("/api/assistancerequest/approve/1")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(reviewDTO)))
                                 .andExpect(status().isOk());
@@ -729,7 +729,7 @@ class AssistanceRequestControllerTest {
 
                 ReviewDTO reviewDTO = new ReviewDTO();
 
-                mvc.perform(MockMvcRequestBuilders.put("/assistancerequest/approve/1")
+                mvc.perform(MockMvcRequestBuilders.put("/api/assistancerequest/approve/1")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(reviewDTO)))
                                 .andExpect(status().isBadRequest());
@@ -751,7 +751,7 @@ class AssistanceRequestControllerTest {
 
                 when(reviewService.reprove(any(ReviewDTO.class))).thenReturn(reprovedReview);
 
-                mvc.perform(MockMvcRequestBuilders.put("/assistancerequest/reprove/1")
+                mvc.perform(MockMvcRequestBuilders.put("/api/assistancerequest/reprove/1")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(reviewDTO)))
                                 .andExpect(status().isOk());
@@ -778,7 +778,7 @@ class AssistanceRequestControllerTest {
                 when(service.updateCeapgFields(eq(1L), any(AssistanceRequestCeapgDTO.class)))
                                 .thenReturn(updatedRequest);
 
-                mvc.perform(MockMvcRequestBuilders.put("/assistancerequest/1/ceapg")
+                mvc.perform(MockMvcRequestBuilders.put("/api/assistancerequest/1/ceapg")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(ceapgDTO)))
                                 .andExpect(status().isOk())
@@ -801,7 +801,7 @@ class AssistanceRequestControllerTest {
                 when(service.updateCeapgFields(eq(1L), any(AssistanceRequestCeapgDTO.class)))
                                 .thenThrow(new UnauthorizedException("User not authorized for CEAPG update."));
 
-                mvc.perform(MockMvcRequestBuilders.put("/assistancerequest/1/ceapg")
+                mvc.perform(MockMvcRequestBuilders.put("/api/assistancerequest/1/ceapg")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(ceapgDTO)))
                                 .andExpect(status().isForbidden())

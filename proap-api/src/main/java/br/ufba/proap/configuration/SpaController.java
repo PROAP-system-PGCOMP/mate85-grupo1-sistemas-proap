@@ -7,12 +7,14 @@ import jakarta.servlet.http.HttpServletRequest;
 @Controller
 public class SpaController {
 
-    /**
-     * Redireciona rotas que não são arquivos (não possuem ponto) 
-     * e que NÃO começam com /api ou /actuator para o index.html.
-     */
-    @GetMapping(value = "{path:^(?!api|actuator|.*\\.[\\w]+$).*$}/**")
+    @GetMapping(value = "/{path:[^\\.]}")
     public String redirect() {
+        return "forward:/index.html";
+    }
+
+    // Este cara captura rotas profundas, MAS ignora explicitamente a API
+    @GetMapping(value = "/{target:^(?!api|actuator).*$}/**/{path:[^\\.]*}")
+    public String redirectDeep() {
         return "forward:/index.html";
     }
 }

@@ -13,7 +13,7 @@ public class SpaController {
     }
 
     // Este cara captura rotas profundas, MAS ignora explicitamente a API
-    @GetMapping(value = "/{target:^(?!api|actuator).*$}/**/{path:[^\\.]*}")
+   @GetMapping(value = "/{target:^(?!api|actuator).$}/*/{path:[^\\.]}")
     public String redirectDeep() {
         return "forward:/index.html";
     }

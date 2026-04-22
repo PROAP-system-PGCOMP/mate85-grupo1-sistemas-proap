@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import br.ufba.proap.mailsender.dto.EmailDTO;
 
 @RestController
-@RequestMapping("/email")
+@RequestMapping("/api/email")
 public class EmailController {
     @Autowired
     private EmailService emailService;

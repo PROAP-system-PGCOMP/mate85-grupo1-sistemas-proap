@@ -21,7 +21,7 @@ import br.ufba.proap.authentication.domain.User;
 import br.ufba.proap.authentication.service.UserService;
 
 @RestController
-@RequestMapping("extrarequest")
+@RequestMapping("/api/extrarequest")
 public class ExtraRequestController {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExtraRequestController.class);

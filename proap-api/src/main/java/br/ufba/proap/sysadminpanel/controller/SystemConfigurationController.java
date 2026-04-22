@@ -23,7 +23,7 @@ import br.ufba.proap.sysadminpanel.domain.dto.UrlMapperDTO;
 import br.ufba.proap.sysadminpanel.service.SystemConfigurationService;
 
 @RestController
-@RequestMapping("admin/system-config")
+@RequestMapping("/api/admin/system-config")
 public class SystemConfigurationController {
 
     private static final Logger logger = LoggerFactory.getLogger(SystemConfigurationController.class);

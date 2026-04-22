@@ -42,7 +42,7 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.NotFoundException;
 
 @RestController
-@RequestMapping("assistancerequest")
+@RequestMapping("/api/assistancerequest")
 public class AssistanceRequestController {
 
 	private static final Logger logger = LoggerFactory.getLogger(AssistanceRequestController.class);

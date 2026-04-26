@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+// Certifique-se de que estes imports do Logger estão aqui!
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,30 +32,32 @@ public class FileController {
 
     @GetMapping("view-pdf/{fileName}")
     public ResponseEntity<InputStreamResource> viewPdf(@PathVariable String fileName) {
+
+        // 1. DECLARAR AQUI FORA (Escopo do método)
+        File pdfFile = null;
+
         try {
-            File pdfFile = fileService.getPdfByFileName(fileName);
+            pdfFile = fileService.getPdfByFileName(fileName);
 
             FileInputStream fis = new FileInputStream(pdfFile);
             InputStreamResource resource = new InputStreamResource(fis);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
-
             headers.setContentDisposition(ContentDisposition.inline().filename(fileName).build());
 
             return ResponseEntity.ok().headers(headers).body(resource);
 
         } catch (FileNotFoundException e) {
             if (pdfFile != null) {
-                logger.error("Erro 404 - Arquivo não encontrado no caminho: " + pdfFile.getAbsolutePath());
+                logger.error("Erro 404 - O Spring tentou buscar em: " + pdfFile.getAbsolutePath());
             } else {
-                logger.error("Erro 404 - Falha ao tentar localizar o arquivo: " + fileName);
+                logger.error("Erro 404 - Arquivo não encontrado: " + fileName);
             }
             return ResponseEntity.notFound().build();
         } catch (IOException e) {
-            logger.error("Erro interno ao ler arquivo PDF", e);
+            logger.error("Erro de IO ao processar PDF", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
 }

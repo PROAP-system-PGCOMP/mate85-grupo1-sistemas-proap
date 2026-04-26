@@ -40,6 +40,7 @@ public class FileController {
             return ResponseEntity.ok().headers(headers).body(resource);
 
         } catch (FileNotFoundException e) {
+            logger.error("Erro 404 - O Spring tentou buscar em: " + pdfFile.getAbsolutePath());
             return ResponseEntity.notFound().build();
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

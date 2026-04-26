@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-// Certifique-se de que estes imports do Logger estão aqui!
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

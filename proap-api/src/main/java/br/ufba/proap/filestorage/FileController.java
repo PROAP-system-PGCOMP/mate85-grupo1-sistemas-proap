@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RequestMapping("/api/files")
 public class FileController {
 
+    private static final Logger logger = LoggerFactory.getLogger(FileController.class);
+
     @Autowired
     private FileService fileService;
 
@@ -40,9 +42,14 @@ public class FileController {
             return ResponseEntity.ok().headers(headers).body(resource);
 
         } catch (FileNotFoundException e) {
-            logger.error("Erro 404 - O Spring tentou buscar em: " + pdfFile.getAbsolutePath());
+            if (pdfFile != null) {
+                logger.error("Erro 404 - Arquivo não encontrado no caminho: " + pdfFile.getAbsolutePath());
+            } else {
+                logger.error("Erro 404 - Falha ao tentar localizar o arquivo: " + fileName);
+            }
             return ResponseEntity.notFound().build();
         } catch (IOException e) {
+            logger.error("Erro interno ao ler arquivo PDF", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

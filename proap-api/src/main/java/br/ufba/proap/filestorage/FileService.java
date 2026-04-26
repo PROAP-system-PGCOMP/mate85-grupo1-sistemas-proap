@@ -55,4 +55,11 @@ public class FileService {
         }
         return file;
     }
+
+    @jakarta.annotation.PostConstruct
+    public void logDir() {
+        System.out.println("=========================================");
+        System.out.println("DPROJ DEBUG - DIRETÓRIO DE UPLOAD: " + uploadDir);
+        System.out.println("=========================================");
+    }
 }

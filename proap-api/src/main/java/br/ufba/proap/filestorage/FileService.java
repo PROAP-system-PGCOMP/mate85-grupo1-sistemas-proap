@@ -50,10 +50,16 @@ public class FileService {
     }
 
     public File getPdfByFileName(String fileName) throws IOException {
-        File file = new File(uploadDir + PDF_DIRECTORY + "/" + fileName);
+        Path filePath = Paths.get(uploadDir, PDF_DIRECTORY, fileName);
+        File file = filePath.toFile();
+
+        logger.info("DPROJ DEBUG - Tentando acessar arquivo em: {}", file.getAbsolutePath());
+
         if (!file.exists() || !file.isFile()) {
-            throw new FileNotFoundException("Arquivo \"" + fileName + "\" não encontrado ou não é um arquivo válido.");
+            logger.error("DPROJ DEBUG - Arquivo não existe no caminho: {}", file.getAbsolutePath());
+            throw new FileNotFoundException("Arquivo \"" + fileName + "\" não encontrado no servidor.");
         }
+
         return file;
     }
 

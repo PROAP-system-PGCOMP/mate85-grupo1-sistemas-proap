@@ -5,6 +5,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Random;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -12,6 +18,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class FileService {
+
+    private static final Logger logger = LoggerFactory.getLogger(FileService.class);
     @Value("${file.upload-dir}")
     private String uploadDir;
 

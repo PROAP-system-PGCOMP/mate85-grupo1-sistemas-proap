@@ -118,7 +118,7 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
     <>
       <FormControl fullWidth sx={{ mb: 3 }}>
         <StyledFormLabel htmlFor="year-select" required>
-          Selecione o Ano
+          Selecione o ano
         </StyledFormLabel>
         {yearsLoading ? (
           <Box sx={{ display: 'flex', py: 1 }}>

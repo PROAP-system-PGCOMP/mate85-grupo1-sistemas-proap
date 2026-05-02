@@ -30,6 +30,7 @@ interface SolicitationRowData {
   dataAvaliacaoProap?: string | null;
   solicitanteDocente?: boolean;
   tituloPublicacao?: string;
+  numeroAta?: number;
   valorDiaria?: number;
   cotacaoMoeda?: number;
   nomeEvento?: string;
@@ -66,6 +67,7 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
   valorAprovado = null,
   dataAvaliacaoProap = null,
   solicitanteDocente = false,
+  numeroAta = null,
   tituloPublicacao = '',
   valorDiaria = 0,
   cotacaoMoeda = 0,
@@ -90,6 +92,7 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
   // Menu state
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+  
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation(); // Prevent row click when menu button is clicked
@@ -162,12 +165,15 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
       <TableCell align="center">
         <StatusChip status={situacao} />
       </TableCell>
-      <TableCell align="right">{formatNumberToBRL(valorTotal)}</TableCell>
-      <TableCell align="right">
+      <TableCell align="left">{formatNumberToBRL(valorTotal)}</TableCell>
+      <TableCell align="center">
         {valorAprovado === null ? '-' : formatNumberToBRL(valorAprovado)}
       </TableCell>
       <TableCell align="center">
         {dataAvaliacaoProap === null ? '-' : dataAvaliacaoProap}
+      </TableCell>
+      <TableCell align="center">
+        {numeroAta}
       </TableCell>
       <TableCell align="center" onClick={(e) => e.stopPropagation()}>
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}>

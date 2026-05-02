@@ -80,66 +80,6 @@ export default function ReviewDataFormContainer() {
         Avaliação da solicitação
       </Typography>
 
-      {/* Situação */}
-      <Box sx={{ mb: 3 }}>
-        <StyledFormLabel required sx={{ mb: 1.5 }}>
-          Decisão
-        </StyledFormLabel>
-        <Box
-          sx={{
-            display: 'flex',
-            gap: 2,
-            flexDirection: isMobile ? 'column' : 'row',
-          }}
-        >
-          <Button
-            variant={values.situacao === 1 ? 'contained' : 'outlined'}
-            color="success"
-            onClick={() => handleDecisionSelect(1)}
-            startIcon={
-              <CheckCircle
-                sx={{ color: values.situacao === 1 ? 'white' : undefined }}
-              />
-            }
-            sx={{
-              flex: 1,
-              py: 1,
-              borderRadius: '12px',
-              fontWeight: values.situacao === 1 ? 'bold' : 'normal',
-              color: values.situacao === 1 ? 'white' : undefined,
-            }}
-          >
-            Aprovar
-          </Button>
-
-          <Button
-            variant={values.situacao === 2 ? 'contained' : 'outlined'}
-            color="error"
-            onClick={() => handleDecisionSelect(2)}
-            startIcon={
-              <Cancel
-                sx={{ color: values.situacao === 2 ? 'white' : undefined }}
-              />
-            }
-            sx={{
-              flex: 1,
-              py: 1,
-              borderRadius: '12px',
-              fontWeight: values.situacao === 2 ? 'bold' : 'normal',
-              color: values.situacao === 2 ? 'white' : undefined,
-            }}
-          >
-            Reprovar
-          </Button>
-        </Box>
-
-        {/* Hidden field to maintain formik validation */}
-        <Field type="hidden" name="situacao" />
-        {touched.situacao && errors.situacao && (
-          <FormHelperText error>{errors.situacao}</FormHelperText>
-        )}
-      </Box>
-
       {/* Data e Número ATA */}
       <Box
         sx={{
@@ -352,7 +292,7 @@ export default function ReviewDataFormContainer() {
       </Box>
 
       {/* Observação */}
-      <Box>
+      <Box sx={{ mb: 3 }}>
         <Field
           as={StyledTextField}
           fullWidth
@@ -363,6 +303,66 @@ export default function ReviewDataFormContainer() {
           multiline
           rows={4}
         />
+      </Box>
+
+      {/* Situação (Movido para o final) */}
+      <Box sx={{ mb: 3 }}>
+        <StyledFormLabel required sx={{ mb: 1.5 }}>
+          Decisão
+        </StyledFormLabel>
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 2,
+            flexDirection: isMobile ? 'column' : 'row',
+          }}
+        >
+          <Button
+            variant={values.situacao === 1 ? 'contained' : 'outlined'}
+            color="success"
+            onClick={() => handleDecisionSelect(1)}
+            startIcon={
+              <CheckCircle
+                sx={{ color: values.situacao === 1 ? 'white' : undefined }}
+              />
+            }
+            sx={{
+              flex: 1,
+              py: 1,
+              borderRadius: '12px',
+              fontWeight: values.situacao === 1 ? 'bold' : 'normal',
+              color: values.situacao === 1 ? 'white' : undefined,
+            }}
+          >
+            Aprovar
+          </Button>
+
+          <Button
+            variant={values.situacao === 2 ? 'contained' : 'outlined'}
+            color="error"
+            onClick={() => handleDecisionSelect(2)}
+            startIcon={
+              <Cancel
+                sx={{ color: values.situacao === 2 ? 'white' : undefined }}
+              />
+            }
+            sx={{
+              flex: 1,
+              py: 1,
+              borderRadius: '12px',
+              fontWeight: values.situacao === 2 ? 'bold' : 'normal',
+              color: values.situacao === 2 ? 'white' : undefined,
+            }}
+          >
+            Reprovar
+          </Button>
+        </Box>
+
+        {/* Hidden field to maintain formik validation */}
+        <Field type="hidden" name="situacao" />
+        {touched.situacao && errors.situacao && (
+          <FormHelperText error>{errors.situacao}</FormHelperText>
+        )}
       </Box>
     </Box>
   );

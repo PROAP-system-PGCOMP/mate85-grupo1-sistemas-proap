@@ -95,7 +95,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
           color="primary"
           onClick={onFilter}
           startIcon={<CalendarToday />}
-          sx={{ minWidth: 150, maxHeight: 50, position: 'relative', top: 12 }}
+          sx={{ minWidth: 150, maxHeight: 50, position: 'relative'}}
         >
           {labels.filter}
         </Button>

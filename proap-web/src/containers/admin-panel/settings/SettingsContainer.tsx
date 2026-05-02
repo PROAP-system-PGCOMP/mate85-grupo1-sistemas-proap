@@ -46,7 +46,7 @@ export default function SettingContainer({
         >
           <SectionHeader
             icon={<AttachMoney color="primary" />}
-            title="Definir Orçamento Anual"
+            title="Definir orçamento anual"
           />
         </AccordionSummary>
         <AccordionDetails>
@@ -64,7 +64,7 @@ export default function SettingContainer({
         >
           <SectionHeader
             icon={<Computer color="primary" />}
-            title="Configurações do Sistema"
+            title="Configurações do sistema"
           />
         </AccordionSummary>
         <AccordionDetails>

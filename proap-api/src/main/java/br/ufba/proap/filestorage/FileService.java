@@ -20,11 +20,11 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileService {
 
     private static final Logger logger = LoggerFactory.getLogger(FileService.class);
+    
     @Value("${file.upload-dir}")
     private String uploadDir;
 
     private static final String PDF_EXTENSION = ".pdf";
-
     private static final String PDF_DIRECTORY = "/pdf";
 
     public String uploadPdf(MultipartFile file) throws IOException {
@@ -61,20 +61,13 @@ public class FileService {
         Path filePath = Paths.get(uploadDir, PDF_DIRECTORY, fileName);
         File file = filePath.toFile();
 
-        logger.info("DPROJ DEBUG - Tentando acessar arquivo em: {}", file.getAbsolutePath());
 
         if (!file.exists() || !file.isFile()) {
-            logger.error("DPROJ DEBUG - Arquivo não existe no caminho: {}", file.getAbsolutePath());
+            logger.error("Arquivo solicitado não encontrado no storage: {}", fileName);
             throw new FileNotFoundException("Arquivo \"" + fileName + "\" não encontrado no servidor.");
         }
 
         return file;
     }
 
-    @jakarta.annotation.PostConstruct
-    public void logDir() {
-        System.out.println("=========================================");
-        System.out.println("DPROJ DEBUG - DIRETÓRIO DE UPLOAD: " + uploadDir);
-        System.out.println("=========================================");
-    }
 }

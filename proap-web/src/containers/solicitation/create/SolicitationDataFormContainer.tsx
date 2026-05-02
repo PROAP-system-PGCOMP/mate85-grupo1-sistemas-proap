@@ -105,7 +105,6 @@ export default function SolicitationDataFormContainer() {
                     position="start"
                     sx={{ alignSelf: 'flex-start', mt: 1.5 }}
                   >
-                    <Title color="action" />
                   </InputAdornment>
                 ),
               }}

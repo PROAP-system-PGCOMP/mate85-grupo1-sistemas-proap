@@ -1,6 +1,6 @@
 import React from 'react';
 import { Field, useFormikContext } from 'formik';
-import { Box, Stack, Tooltip } from '@mui/material';
+import { Box, Stack, Tooltip, Typography } from '@mui/material';
 
 import {
   StyledIconButton,
@@ -15,8 +15,9 @@ export default function ExtraSolicitantDataContainer() {
 
   const { name, email } = useAuth();
 
-  return (
+  return (     
     <Box display="flex" flexDirection="column" gap={2} pt={2} pb={2}>
+
       <StyledTextField
         label="Solicitante"
         value={values.user.name != '' ? values.user.name : name}
@@ -59,17 +60,22 @@ export default function ExtraSolicitantDataContainer() {
           </StyledIconButton>
         </Tooltip>
       </Stack>
-      <Field
-        as={StyledTextField}
-        label="Justificativa"
-        name="justificativa"
-        error={Boolean(touched.justificativa && errors.justificativa)}
-        helperText={touched.justificativa && errors.justificativa}
-        required
-        style={{ padding: 'none' }}
-        rows={5}
-        multiline
-      />
+      <Box sx={{ display: 'flex', flexDirection: 'column'}}>
+        <Typography variant="h6" component="h2" sx={{ fontSize: '1rem', fontWeight: 'bold', color: 'text.secondary'}}>
+          *Apenas solicitações que não sejam relacionadas à publicação científica.
+        </Typography> 
+        <Field
+          as={StyledTextField}
+          label="Justificativa"
+          name="justificativa"
+          error={Boolean(touched.justificativa && errors.justificativa)}
+          helperText={touched.justificativa && errors.justificativa}
+          required
+          style={{ padding: 'none' }}
+          rows={5}
+          multiline
+        />
+      </Box>
     </Box>
   );
 }

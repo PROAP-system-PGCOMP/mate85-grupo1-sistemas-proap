@@ -3,7 +3,9 @@ package br.ufba.proap.authentication.repository;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import br.ufba.proap.authentication.domain.User;
@@ -16,6 +18,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	Optional<User> findByEmail(String email);
 
 	Optional<User> findByCpf(String cpf);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE User u SET u.password = :newPassword WHERE u.id = :id")
+    void updatePasswordById(Long id, String newPassword);
 
 	@Query("SELECT m FROM User m WHERE m.email = :email and m.cpf = :cpf")
 	User findByEmailAndCPF(String email, String cpf);

@@ -54,6 +54,7 @@ public class SecurityConfiguration {
 				.authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/index.html", "/favicon.png", "/favicon.ico", "/error").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/authentication/**", "/api/user/create").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/admin/users/create").hasAuthority("ADMIN_ROLE")
                         .requestMatchers(HttpMethod.GET, "/api/files/**", "/api/authentication/**").permitAll()
                         .requestMatchers("/api/v3/api-docs/**", "/api/swagger-ui/**", "/api/actuator/health/**").permitAll()
                         .requestMatchers("/assets/**", "/static/**", "/*.js", "/*.css").permitAll()

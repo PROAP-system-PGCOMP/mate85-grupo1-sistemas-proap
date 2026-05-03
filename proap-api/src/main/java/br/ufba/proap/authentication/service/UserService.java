@@ -2,8 +2,14 @@ package br.ufba.proap.authentication.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
+import br.ufba.proap.authentication.domain.dto.AdminUserRegistrationDTO;
+import br.ufba.proap.mailsender.event.PasswordResetTokenEvent;
+import br.ufba.proap.mailsender.event.UserRegisteredByAdminEvent;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -18,6 +24,7 @@ import br.ufba.proap.authentication.domain.dto.CreateUserDTO;
 import br.ufba.proap.authentication.domain.dto.UserUpdateDTO;
 import br.ufba.proap.authentication.repository.UserRepository;
 import br.ufba.proap.exception.DefaultProfileNotFoundException;
+import br.ufba.proap.authentication.service.CreatedByAdmin;
 import jakarta.validation.ValidationException;
 
 @Service
@@ -34,6 +41,20 @@ public class UserService implements UserDetailsService {
 
 	@Autowired
 	private UserRequestValidationService userRequestValidationService;
+
+    @Autowired
+    private PasswordResetTokenService passwordResetTokenService;
+
+    @Autowired
+    private CreatedByAdmin createdByAdmin;
+
+    @Autowired
+    public void setPasswordResetTokenService(@Lazy PasswordResetTokenService passwordResetTokenService) {
+        this.passwordResetTokenService = passwordResetTokenService;
+    }
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
 	@Override
 	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -177,4 +198,27 @@ public class UserService implements UserDetailsService {
 		targetUser.setPerfil(targetProfile);
 		userRepository.saveAndFlush(targetUser);
 	}
+
+    @Transactional
+    public void createByAdmin(AdminUserRegistrationDTO user) {
+        if (userRepository.findByEmail(user.email()).isPresent()) {
+            throw new ValidationException("Email já cadastrado");
+        }
+        if (userRepository.findByCpf(user.cpf()).isPresent()) {
+            throw new ValidationException("CPF já cadastrado");
+        }
+
+        User newUser = new User();
+        newUser.setEmail(user.email());
+        newUser.setName(user.name());
+        newUser.setCpf(user.cpf());
+        newUser.setRegistration(user.registration());
+        newUser.setPhone(user.phone());
+        newUser.setAlternativePhone(user.alternativePhone());
+        String defaultPassword = UUID.randomUUID().toString().substring(0, 8);
+        newUser.setPassword(passwordEncoder.encode(defaultPassword));
+        userRepository.save(newUser);
+        String token = createdByAdmin.createCreatedByAdminToken(newUser.getEmail());
+        eventPublisher.publishEvent(new UserRegisteredByAdminEvent(newUser.getEmail(), token));
+    }
 }

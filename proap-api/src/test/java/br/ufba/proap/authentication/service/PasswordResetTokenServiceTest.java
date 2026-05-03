@@ -162,7 +162,7 @@ public class PasswordResetTokenServiceTest {
     public void updatePassword_ShouldUpdateUserPassword() {
         when(tokenRepository.findByToken(TEST_TOKEN)).thenReturn(Optional.of(testToken));
 
-        when(passwordEncoder.encode((anyString()))).thenReturn("TEST_PASSWORD");
+        when(passwordEncoder.encode((anyString()))).thenReturn(TEST_PASSWORD);
 
         passwordResetTokenService.updatePassword(TEST_TOKEN, TEST_PASSWORD);
 

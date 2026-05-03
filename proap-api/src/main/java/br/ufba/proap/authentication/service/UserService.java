@@ -208,6 +208,9 @@ public class UserService implements UserDetailsService {
             throw new ValidationException("CPF já cadastrado");
         }
 
+        Perfil perfilAtribuido = perfilService.findByName(Perfil.getDefaultPerfilName())
+                .orElseThrow(() -> new DefaultProfileNotFoundException("Perfil padrão não encontrado."));
+
         User newUser = new User();
         newUser.setEmail(user.email());
         newUser.setName(user.name());
@@ -217,6 +220,7 @@ public class UserService implements UserDetailsService {
         newUser.setAlternativePhone(user.alternativePhone());
         String defaultPassword = UUID.randomUUID().toString().substring(0, 8);
         newUser.setPassword(passwordEncoder.encode(defaultPassword));
+        newUser.setPerfil(perfilAtribuido);
         userRepository.save(newUser);
         String token = createdByAdmin.createCreatedByAdminToken(newUser.getEmail());
         eventPublisher.publishEvent(new UserRegisteredByAdminEvent(newUser.getEmail(), token));

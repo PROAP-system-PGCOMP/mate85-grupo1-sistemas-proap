@@ -95,14 +95,21 @@ public class PasswordResetTokenService {
 
     @Transactional
     public void updatePassword(String token, String newPassword) {
-        User user = tokenRepository.findByToken(token).get().getUser();
+        // 1. Busca o token com segurança
+        PasswordResetToken resetToken = tokenRepository.findByToken(token)
+                .orElseThrow(() -> new NotFoundException("Token não encontrado ou inválido"));
+
+        User user = resetToken.getUser();
+
         try {
             String passwordEncoded = passwordEncoder.encode(newPassword);
-            user.setPassword(passwordEncoded);
+
             userRepository.updatePasswordById(user.getId(), passwordEncoded);
+
+            tokenRepository.delete(resetToken);
+
         } catch (DataAccessException e) {
-            throw new DataAccessException("Erro ao atualizar senha") {
-            };
+            throw new DataAccessException("Erro ao atualizar senha no banco: " + e.getMessage()) {};
         }
     }
 

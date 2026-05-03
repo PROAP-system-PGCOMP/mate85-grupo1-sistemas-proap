@@ -653,7 +653,7 @@ class AssistanceRequestControllerTest {
             when(service.reviewSolicitation(any(AssistanceRequest.class), eq(adminUser)))
                     .thenReturn(mockRequest);
 
-            mvc.perform(MockMvcRequestBuilders.put("/assistancerequest/reviewsolicitation")
+            mvc.perform(MockMvcRequestBuilders.put("/api/assistancerequest/reviewsolicitation")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(mockRequest)))
                     .andExpect(status().isOk()); // Agora o "Guarda" da permissão deixa passar
@@ -667,7 +667,7 @@ class AssistanceRequestControllerTest {
         void reviewSolicitation_shouldReturn400_whenNoUser() throws Exception {
             when(userService.getLoggedUser()).thenReturn(null);
 
-            mvc.perform(MockMvcRequestBuilders.put("/assistancerequest/reviewsolicitation")
+            mvc.perform(MockMvcRequestBuilders.put("/api/assistancerequest/reviewsolicitation")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(mockRequest)))
                     .andExpect(status().isUnauthorized()); // Alterado de 400 para 401
@@ -683,7 +683,7 @@ class AssistanceRequestControllerTest {
             when(service.reviewSolicitation(any(AssistanceRequest.class), eq(adminUser)))
                     .thenReturn(null);
 
-            mvc.perform(MockMvcRequestBuilders.put("/assistancerequest/reviewsolicitation")
+            mvc.perform(MockMvcRequestBuilders.put("/api/assistancerequest/reviewsolicitation")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(mockRequest)))
                     .andExpect(status().isNotFound());

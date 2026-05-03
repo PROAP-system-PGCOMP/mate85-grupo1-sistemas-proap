@@ -8,6 +8,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -60,6 +61,7 @@ public class PasswordResetTokenServiceTest {
 
         testUser = new User();
         testUser.setEmail(TEST_EMAIL);
+        ReflectionTestUtils.setField(testUser, "id", 1L);
         testUser.setPassword("old-password-hash");
 
         testToken = new PasswordResetToken();
@@ -162,14 +164,15 @@ public class PasswordResetTokenServiceTest {
 
         passwordResetTokenService.updatePassword(TEST_TOKEN, TEST_PASSWORD);
 
-        verify(userRepository).updatePasswordById(anyLong(), TEST_PASSWORD);
+        verify(userRepository).updatePasswordById(anyLong(), eq(TEST_PASSWORD));
     }
 
     @Test
     public void updatePassword_WhenServiceFails_ShouldThrowException() {
         when(tokenRepository.findByToken(TEST_TOKEN)).thenReturn(Optional.of(testToken));
-        doThrow(new DataAccessException("Database error") {
-        }).when(userRepository).updatePasswordById(anyLong(), anyString());
+
+        doThrow(new DataAccessException("Database error") {})
+                .when(userRepository).updatePasswordById(anyLong(), anyString());
 
         assertThrows(DataAccessException.class, () -> {
             passwordResetTokenService.updatePassword(TEST_TOKEN, TEST_PASSWORD);

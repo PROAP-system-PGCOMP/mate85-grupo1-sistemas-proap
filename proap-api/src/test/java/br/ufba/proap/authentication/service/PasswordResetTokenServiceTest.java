@@ -162,7 +162,7 @@ public class PasswordResetTokenServiceTest {
 
         passwordResetTokenService.updatePassword(TEST_TOKEN, TEST_PASSWORD);
 
-        verify(userService).updatePassword(testUser, TEST_PASSWORD);
+        verify(userRepository).updatePasswordById(anyLong(), TEST_PASSWORD);
     }
 
     @Test

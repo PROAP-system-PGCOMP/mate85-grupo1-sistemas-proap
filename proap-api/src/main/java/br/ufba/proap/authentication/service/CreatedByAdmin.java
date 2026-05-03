@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import br.ufba.proap.authentication.repository.UserRepository;
+import br.ufba.proap.mailsender.event.UserRegisteredByAdminEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataAccessException;
@@ -22,9 +23,8 @@ import br.ufba.proap.mailsender.event.PasswordResetTokenEvent;
 import jakarta.ws.rs.NotFoundException;
 
 @Service
-public class PasswordResetTokenService {
-
-    private static final int EXPIRATION = 60;
+public class CreatedByAdmin {
+    private static final int EXPIRATION = 1440;
 
     @Autowired
     private PasswordResetTokenRepository tokenRepository;
@@ -43,7 +43,7 @@ public class PasswordResetTokenService {
     }
 
     @Transactional
-    public String createResetToken(String email) {
+    public String createCreatedByAdminToken(String email) {
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isEmpty()) {
             throw new NotFoundException("Usuário não encontrado");
@@ -76,9 +76,9 @@ public class PasswordResetTokenService {
         return token;
     }
 
-    public void sendResetToken(String email) {
-        String token = createResetToken(email);
-        eventPublisher.publishEvent(new PasswordResetTokenEvent(email, token));
+    public void sendAdminRegistrationToken(String email) {
+        String token = createCreatedByAdminToken(email);
+        eventPublisher.publishEvent(new UserRegisteredByAdminEvent(email, token));
     }
 
     public Boolean isPasswordResetTokenValid(String token) {
@@ -120,3 +120,4 @@ public class PasswordResetTokenService {
     }
 
 }
+

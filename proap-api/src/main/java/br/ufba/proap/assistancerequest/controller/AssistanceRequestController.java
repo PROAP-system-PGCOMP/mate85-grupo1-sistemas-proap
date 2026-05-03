@@ -225,25 +225,33 @@ public class AssistanceRequestController {
 	}
 
 	// TODO: Débito técnico - Refatorar para service
-	@Transactional
-	@PutMapping("/reviewsolicitation")
-	public ResponseEntity<AssistanceRequest> reviewsolicitation(
-			@RequestBody AssistanceRequest assistanceRequest) {
-		User currentUser = serviceUser.getLoggedUser();
+    @Transactional
+    @PutMapping("/reviewsolicitation")
+    public ResponseEntity<AssistanceRequest> reviewsolicitation(
+            @RequestBody AssistanceRequest assistanceRequest) {
 
-		if (currentUser == null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-		}
+        User currentUser = serviceUser.getLoggedUser();
 
-		AssistanceRequest reviewedRequest = service.reviewSolicitation(assistanceRequest, currentUser);
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 401: Quem é você?
+        }
 
-		if (reviewedRequest == null) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-		}
+        if (currentUser == null || currentUser.getPerfil() == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
-		return ResponseEntity.ok().body(reviewedRequest);
+        if (!currentUser.getPerfil().hasPermission("APPROVE_REQUEST")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
-	}
+        AssistanceRequest reviewedRequest = service.reviewSolicitation(assistanceRequest, currentUser);
+
+        if (reviewedRequest == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.ok().body(reviewedRequest);
+    }
 
 	@DeleteMapping("/remove/{id}")
 	public ResponseEntity<StatusResponseDTO> remove(@PathVariable Long id) {

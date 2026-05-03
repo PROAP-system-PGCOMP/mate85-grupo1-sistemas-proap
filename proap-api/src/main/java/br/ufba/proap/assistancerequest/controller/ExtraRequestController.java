@@ -169,7 +169,15 @@ public class ExtraRequestController {
         User currentUser = serviceUser.getLoggedUser();
 
         if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 401: Quem é você?
+        }
+
+        if (currentUser == null || currentUser.getPerfil() == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        if (!currentUser.getPerfil().hasPermission("APPROVE_REQUEST")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         try {

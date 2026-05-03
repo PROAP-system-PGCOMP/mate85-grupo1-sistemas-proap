@@ -162,6 +162,8 @@ public class PasswordResetTokenServiceTest {
     public void updatePassword_ShouldUpdateUserPassword() {
         when(tokenRepository.findByToken(TEST_TOKEN)).thenReturn(Optional.of(testToken));
 
+        when(passwordEncoder.encode((anyString()))).thenReturn(TEST_PASSWORD);
+
         passwordResetTokenService.updatePassword(TEST_TOKEN, TEST_PASSWORD);
 
         verify(userRepository).updatePasswordById(anyLong(), eq(TEST_PASSWORD));
@@ -169,7 +171,11 @@ public class PasswordResetTokenServiceTest {
 
     @Test
     public void updatePassword_WhenServiceFails_ShouldThrowException() {
+        org.springframework.test.util.ReflectionTestUtils.setField(testUser, "id", 1L);
+
         when(tokenRepository.findByToken(TEST_TOKEN)).thenReturn(Optional.of(testToken));
+
+        when(passwordEncoder.encode(anyString())).thenReturn("anyEncodedPassword");
 
         doThrow(new DataAccessException("Database error") {})
                 .when(userRepository).updatePasswordById(anyLong(), anyString());
@@ -178,7 +184,6 @@ public class PasswordResetTokenServiceTest {
             passwordResetTokenService.updatePassword(TEST_TOKEN, TEST_PASSWORD);
         });
     }
-
     @Test
     public void deleteToken_ShouldDeleteToken() {
         when(tokenRepository.findByToken(TEST_TOKEN)).thenReturn(Optional.of(testToken));

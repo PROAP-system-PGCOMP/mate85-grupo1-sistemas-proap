@@ -89,7 +89,7 @@ const SolicitationTableView: React.FC<SolicitationTableViewProps> = ({
                 handleClickSortTable={handleClickSortTable}
               />
             </TableCell>
-            <TableCell align="right">
+            <TableCell align="left">
               <TableCellHeader
                 text="Valor total"
                 sortBy="valorTotal"
@@ -97,7 +97,8 @@ const SolicitationTableView: React.FC<SolicitationTableViewProps> = ({
                 handleClickSortTable={handleClickSortTable}
               />
             </TableCell>
-            <TableCell align="right">
+
+            <TableCell align="center">
               <TableCellHeader
                 text="Valor aprovado"
                 sortBy="valorAprovado"
@@ -105,6 +106,8 @@ const SolicitationTableView: React.FC<SolicitationTableViewProps> = ({
                 handleClickSortTable={handleClickSortTable}
               />
             </TableCell>
+
+            
             <TableCell align="center">
               <TableCellHeader
                 text="Data da avaliação"
@@ -113,6 +116,16 @@ const SolicitationTableView: React.FC<SolicitationTableViewProps> = ({
                 handleClickSortTable={handleClickSortTable}
               />
             </TableCell>
+
+            <TableCell align="center">
+              <TableCellHeader
+                text="ATA"
+                sortBy="numeroAta"
+                selectedPropToSortTable={selectedPropToSortTable}
+                handleClickSortTable={handleClickSortTable}
+            />
+            </TableCell>
+
             <TableCell align="center">Ações</TableCell>
           </TableRow>
         </TableHead>

@@ -18,6 +18,8 @@ import { Visibility, CheckCircle } from '@mui/icons-material';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { ExtraRequestPropToSort } from '../../../../services/extraAssistanceRequestService';
+import FactCheckIcon from '@mui/icons-material/FactCheck';
+
 
 interface TableCellHeaderProps {
   text: string;
@@ -76,6 +78,15 @@ const ExtraRequestTableView: React.FC<ExtraRequestTableViewProps> = ({
   onDelete,
   onShowText,
 }) => {
+  const formatTableDate = (dateString: string | null) => {
+    if (!dateString) return '-';
+    if (dateString.includes('-')) {
+      const [year, month, day] = dateString.split('-');
+      return `${day}/${month}/${year}`;
+    }
+    return dateString;
+  };
+  
   return (
     <TableContainer
       sx={{
@@ -145,6 +156,16 @@ const ExtraRequestTableView: React.FC<ExtraRequestTableViewProps> = ({
                 handleClickSortTable={handleClickSortTable}
               />
             </TableCell>
+
+              <TableCell align="center">
+              <TableCellHeader
+                text="ATA"
+                sortBy="numeroAta"
+                selectedPropToSortTable={selectedPropToSortTable}
+                handleClickSortTable={handleClickSortTable}
+            />
+            </TableCell>
+
             <TableCell align="center">Ações</TableCell>
           </TableRow>
         </TableHead>
@@ -195,12 +216,15 @@ const ExtraRequestTableView: React.FC<ExtraRequestTableViewProps> = ({
                     ? '-'
                     : request.dataAvaliacaoProap}
                 </TableCell>
+                <TableCell align="center">
+                  {request.numeroAta || '-'}
+                </TableCell>
                 <TableCell align="center" onClick={(e) => e.stopPropagation()}>
                   <Box
                     sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}
                   >
                     {userCanViewAllRequests && (
-                      <Tooltip title="Ver texto da solicitação">
+                      <Tooltip title="Ver resumo da solicitação">
                         <IconButton
                           size="small"
                           onClick={() => onShowText(request.automaticDecText)}
@@ -215,7 +239,7 @@ const ExtraRequestTableView: React.FC<ExtraRequestTableViewProps> = ({
                           size="small"
                           onClick={() => onReview(request.id)}
                         >
-                          <CheckCircle fontSize="small" />
+                          <FactCheckIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
                     )}
@@ -245,7 +269,7 @@ const ExtraRequestTableView: React.FC<ExtraRequestTableViewProps> = ({
                         )
                       }
                     >
-                      <DeleteIcon fontSize="small" />
+                      <DeleteIcon fontSize="small"/>
                     </IconButton>
                   </Box>
                 </TableCell>

@@ -40,6 +40,7 @@ import {
 import { useEffect, useState } from 'react';
 import { useSysConfig } from '../../../hooks/admin/useSysConfig';
 import TextPreviewAlert from '../../../components/FormFields/TextPreviewAlert';
+import LocationCityIcon from '@mui/icons-material/LocationCity';
 
 export default function EventDetailFormContainer() {
   const { config } = useSysConfig();
@@ -98,7 +99,7 @@ export default function EventDetailFormContainer() {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Event color="action" />
+                    <LocationCityIcon color="action" />
                   </InputAdornment>
                 ),
               }}

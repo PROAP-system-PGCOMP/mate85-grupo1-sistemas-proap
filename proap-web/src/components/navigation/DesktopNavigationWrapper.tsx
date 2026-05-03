@@ -13,6 +13,7 @@ import {
   Typography,
 } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
+import MenuIcon from '@mui/icons-material/Menu';
 import PersonIcon from '@mui/icons-material/Person';
 
 import { PropsWithChildren, useCallback, useEffect, useState } from 'react';
@@ -52,6 +53,9 @@ export default function DesktopNavigationWrapper({
   const { name } = useAuth();
   const userProfileState = useCurrentUser();
   const [viewName, setViewName] = useState(name);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const currentWidth = isCollapsed ? 80 : DRAWER_WIDTH;
 
   const handleClickExit = useCallback(() => {
     dispatch(logout());
@@ -62,6 +66,10 @@ export default function DesktopNavigationWrapper({
     navigate('/user-profile');
   }, [navigate]);
 
+  const handleToggleCollapse = useCallback(() => {
+    setIsCollapsed((prev) => !prev);
+  }, []);
+
   useEffect(() => {
     if (userProfileState.name !== '') {
       setViewName(userProfileState.name);
@@ -70,12 +78,19 @@ export default function DesktopNavigationWrapper({
 
   return (
     <DesktopNavigationContainer>
-      <DesktopNavigationListWrapper width={DRAWER_WIDTH}>
+      <DesktopNavigationListWrapper width={currentWidth}>
         <DesktopNavigationHeader>
-          <ImgLogo src={logoIc} alt="Logo Instituto de Computação UFBA" />
-          <Typography color="primary" variant="h5" fontWeight="bold">
-            PROAP
-          </Typography>
+          {!isCollapsed && <ImgLogo src={logoIc} alt="Logo Instituto de Computação UFBA" />}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+            {!isCollapsed && (
+              <Typography color="primary" variant="h5" fontWeight="bold">
+                PROAP
+              </Typography>
+            )}
+            <IconButton onClick={handleToggleCollapse} sx={{ color: '#184a7f', alignSelf: 'end' }}>
+              <MenuIcon />
+            </IconButton>
+          </Box>
         </DesktopNavigationHeader>
         <List>
           {items.map(
@@ -89,6 +104,7 @@ export default function DesktopNavigationWrapper({
                       padding: '10px 16px',
                       borderRadius: '0 20px 20px 0',
                       margin: '4px 8px 4px 0',
+                      justifyContent: isCollapsed ? 'center' : 'flex-start',
                       '&.active': {
                         backgroundColor: 'rgba(24, 74, 127, 0.1)',
                         color: '#184a7f',
@@ -103,7 +119,7 @@ export default function DesktopNavigationWrapper({
                       <Box
                         component="span"
                         sx={{
-                          mr: 2,
+                          mr: isCollapsed ? 0 : 2,
                           color: 'inherit',
                           display: 'flex',
                         }}
@@ -111,7 +127,7 @@ export default function DesktopNavigationWrapper({
                         {icon}
                       </Box>
                     )}
-                    <ListItemText primary={label} />
+                    {!isCollapsed && <ListItemText primary={label} />}
                   </ListItemButton>
                 </ListItem>
               ),
@@ -119,7 +135,7 @@ export default function DesktopNavigationWrapper({
         </List>
       </DesktopNavigationListWrapper>
 
-      <DesktopNavigationChildrenWrapper navigationWidth={DRAWER_WIDTH}>
+      <DesktopNavigationChildrenWrapper navigationWidth={currentWidth}>
         <HeaderContainer>
           <Typography variant="h6" color="primary">
             Bem-vindo ao Sistema PROAP

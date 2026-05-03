@@ -86,7 +86,7 @@ export default function PersonalDataFormContainer() {
               <TextField
                 {...field}
                 fullWidth
-                label="Matrícula"
+                label="Matrícula / SIAPE"
                 placeholder="Digite sua matrícula ou SIAPE"
                 variant="outlined"
                 required

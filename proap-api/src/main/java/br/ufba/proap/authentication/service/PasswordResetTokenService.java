@@ -97,8 +97,9 @@ public class PasswordResetTokenService {
     public void updatePassword(String token, String newPassword) {
         User user = tokenRepository.findByToken(token).get().getUser();
         try {
-            user.setPassword(passwordEncoder.encode(newPassword));
-            userRepository.updatePasswordById(user.getId(), newPassword);
+            String passwordEncoded = passwordEncoder.encode(newPassword);
+            user.setPassword(passwordEncoded);
+            userRepository.updatePasswordById(user.getId(), passwordEncoded);
         } catch (DataAccessException e) {
             throw new DataAccessException("Erro ao atualizar senha") {
             };

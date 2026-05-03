@@ -16,6 +16,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { formatNumberToBRL } from '../../../../helpers/formatter';
 import { SolicitationDetailsDialogProps } from '../../request-dialog/SolicitationDetailsDialog';
 import { StatusChip } from './index';
+import FactCheckIcon from '@mui/icons-material/FactCheck';
 
 interface SolicitationRowData {
   id?: number;
@@ -182,7 +183,7 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
             <Tooltip title="Ver resumo da Solicitação">
               <IconButton
                 size="small"
-                color="primary"
+                color="default"
                 onClick={handleShowDetailsClick}
               >
                 <Visibility fontSize="small" />
@@ -192,64 +193,33 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
 
           {(userCanReviewRequests || isCeapg) && (
             <Tooltip title="Revisar Solicitação">
-              <IconButton size="small" color="success" onClick={handleReview}>
-                <CheckCircle fontSize="small" />
+              <IconButton size="small" onClick={handleReview}>
+                <FactCheckIcon fontSize="small" />
               </IconButton>
             </Tooltip>
           )}
 
-          {/* More Actions Menu Button */}
-          <Tooltip title="Mais ações">
-            <IconButton
-              size="small"
-              onClick={handleOpenMenu}
-              aria-label="mais ações"
-              aria-controls={open ? 'row-actions-menu' : undefined}
-              aria-haspopup="true"
-              aria-expanded={open ? 'true' : undefined}
-            >
-              <MoreVert fontSize="small" />
-            </IconButton>
+          <Tooltip title="Editar solicitação">
+            <span>
+              <IconButton
+                size="small"
+                onClick={handleEdit}
+                disabled={
+                  !(
+                    (situacao == 0 && currentUserEmail === user.email) ||
+                    userCanReviewRequests
+                  )
+                }
+              >
+                <ModeEditIcon fontSize="small" />
+              </IconButton>
+            </span>
           </Tooltip>
 
-          {/* Dropdown Menu */}
-          <Menu
-            id="row-actions-menu"
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleCloseMenu}
-            MenuListProps={{
-              'aria-labelledby': 'more-button',
-            }}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'right',
-            }}
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Secondary Actions - In Dropdown */}
-
-            <MenuItem
-              onClick={handleEdit}
-              disabled={
-                !(
-                  (situacao == 0 && currentUserEmail === user.email) ||
-                  userCanReviewRequests
-                )
-              }
-            >
-              <ListItemIcon>
-                <ModeEditIcon fontSize="small" color="warning" />
-              </ListItemIcon>
-              <ListItemText>Editar</ListItemText>
-            </MenuItem>
-
-            {
-              <MenuItem
+          <Tooltip title="Excluir solicitação">
+            <span>
+              <IconButton
+                size="small"
                 onClick={handleDelete}
                 disabled={
                   !(
@@ -258,13 +228,10 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
                   )
                 }
               >
-                <ListItemIcon>
-                  <DeleteIcon fontSize="small" color="error" />
-                </ListItemIcon>
-                <ListItemText>Excluir</ListItemText>
-              </MenuItem>
-            }
-          </Menu>
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            </span>
+          </Tooltip>
         </Box>
       </TableCell>
     </TableRow>

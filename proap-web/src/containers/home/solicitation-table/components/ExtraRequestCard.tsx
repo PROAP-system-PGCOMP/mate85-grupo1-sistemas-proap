@@ -20,6 +20,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { formatNumberToBRL } from '../../../../helpers/formatter';
 import { StatusChip } from './index';
+import FactCheckIcon from '@mui/icons-material/FactCheck';
 
 interface ExtraRequestCardProps {
   extraRequest: any;
@@ -186,7 +187,7 @@ const ExtraRequestCard: React.FC<ExtraRequestCardProps> = ({
           {/* Primary Actions - Always visible */}
           {userCanViewAllRequests && (
             <Tooltip title="Ver texto da solicitação">
-              <IconButton size="small" color="primary" onClick={handleShowText}>
+              <IconButton size="small" color="default" onClick={handleShowText}>
                 <VisibilityIcon fontSize="small" />
               </IconButton>
             </Tooltip>
@@ -194,77 +195,46 @@ const ExtraRequestCard: React.FC<ExtraRequestCardProps> = ({
 
           {(userCanReviewRequests || isCeapg) && (
             <Tooltip title="Revisar Solicitação">
-              <IconButton size="small" color="success" onClick={handleReview}>
-                <CheckCircleIcon fontSize="small" />
+              <IconButton size="small" color="default" onClick={handleReview}>
+                <FactCheckIcon fontSize="small" />
               </IconButton>
             </Tooltip>
           )}
+
+          <Tooltip title="Editar solicitação">
+            <span>
+              <IconButton
+                size="small"
+                onClick={handleEdit}
+                disabled={
+                  !(
+                    (situacao == 0 && currentUserEmail === user.email) ||
+                    userCanReviewRequests
+                  )
+                }
+              >
+                <ModeEditIcon fontSize="small" />
+              </IconButton>
+            </span>
+          </Tooltip>
+
+          <Tooltip title="Excluir solicitação">
+            <span>
+              <IconButton
+                size="small"
+                onClick={handleDelete}
+                disabled={
+                  !(
+                    (situacao == 0 && currentUserEmail === user.email) ||
+                    userCanReviewRequests
+                  )
+                }
+              >
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            </span>
+          </Tooltip>
         </Box>
-
-        {/* More Actions Menu Button */}
-        <IconButton
-          size="small"
-          color="default"
-          onClick={handleOpenMenu}
-          aria-label="mais ações"
-          aria-controls={open ? 'actions-menu' : undefined}
-          aria-haspopup="true"
-          aria-expanded={open ? 'true' : undefined}
-          title="Mais ações"
-        >
-          <MoreVertIcon fontSize="small" />
-        </IconButton>
-
-        {/* Dropdown Menu */}
-        <Menu
-          id="actions-menu"
-          anchorEl={anchorEl}
-          open={open}
-          onClose={handleCloseMenu}
-          MenuListProps={{
-            'aria-labelledby': 'more-button',
-          }}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'right',
-          }}
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
-          }}
-          onClick={(e) => e.stopPropagation()} // Prevent card click on menu click
-        >
-          {/* Secondary Actions - In Dropdown */}
-          <MenuItem
-            onClick={handleEdit}
-            disabled={
-              !(
-                (situacao == 0 && currentUserEmail === user.email) ||
-                userCanReviewRequests
-              )
-            }
-          >
-            <ListItemIcon>
-              <ModeEditIcon fontSize="small" color="warning" />
-            </ListItemIcon>
-            <ListItemText>Editar</ListItemText>
-          </MenuItem>
-
-          <MenuItem
-            onClick={handleDelete}
-            disabled={
-              !(
-                (situacao == 0 && currentUserEmail === user.email) ||
-                userCanReviewRequests
-              )
-            }
-          >
-            <ListItemIcon>
-              <DeleteIcon fontSize="small" color="error" />
-            </ListItemIcon>
-            <ListItemText>Excluir</ListItemText>
-          </MenuItem>
-        </Menu>
       </Box>
     </Card>
   );

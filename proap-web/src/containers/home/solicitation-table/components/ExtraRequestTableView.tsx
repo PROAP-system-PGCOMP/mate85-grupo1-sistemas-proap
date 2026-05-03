@@ -18,6 +18,8 @@ import { Visibility, CheckCircle } from '@mui/icons-material';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { ExtraRequestPropToSort } from '../../../../services/extraAssistanceRequestService';
+import FactCheckIcon from '@mui/icons-material/FactCheck';
+
 
 interface TableCellHeaderProps {
   text: string;
@@ -222,7 +224,7 @@ const ExtraRequestTableView: React.FC<ExtraRequestTableViewProps> = ({
                     sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}
                   >
                     {userCanViewAllRequests && (
-                      <Tooltip title="Ver texto da solicitação">
+                      <Tooltip title="Ver resumo da solicitação">
                         <IconButton
                           size="small"
                           onClick={() => onShowText(request.automaticDecText)}
@@ -237,7 +239,7 @@ const ExtraRequestTableView: React.FC<ExtraRequestTableViewProps> = ({
                           size="small"
                           onClick={() => onReview(request.id)}
                         >
-                          <CheckCircle fontSize="small" />
+                          <FactCheckIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
                     )}
@@ -267,7 +269,7 @@ const ExtraRequestTableView: React.FC<ExtraRequestTableViewProps> = ({
                         )
                       }
                     >
-                      <DeleteIcon fontSize="small" />
+                      <DeleteIcon fontSize="small"/>
                     </IconButton>
                   </Box>
                 </TableCell>

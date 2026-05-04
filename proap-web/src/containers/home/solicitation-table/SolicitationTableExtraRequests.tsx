@@ -30,9 +30,7 @@ import ViewListIcon from '@mui/icons-material/ViewList';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import SortIcon from '@mui/icons-material/Sort';
 
-import { removeAssistanceRequestById } from '../../../services/assistanceRequestService';
 import {
   ExtraRequestPropToSort,
   deleteExtraAssistanceRequest,
@@ -44,12 +42,15 @@ import usePrevious from '../../../helpers/usePrevious';
 import useHasPermission from '../../../hooks/auth/useHasPermission';
 import { useViewModePreference } from '../../../hooks';
 import { ExtraRequestTableView, ExtraRequestGridView } from './components';
+import { SolicitationDetailsDialogProps } from '../request-dialog/SolicitationDetailsDialog';
 
-/**
- * Component that displays a table of extra assistance requests
- * Allows sorting, pagination, and actions like edit, review, delete
- */
-export default function SolicitationTableExtraRequests() {
+interface SolicitationTableExtraRequestsProps {
+  onShowDetails: (props: SolicitationDetailsDialogProps) => void;
+}
+
+export default function SolicitationTableExtraRequests({ 
+  onShowDetails 
+}: SolicitationTableExtraRequestsProps) {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const theme = useTheme();
@@ -61,10 +62,7 @@ export default function SolicitationTableExtraRequests() {
   const isCeapg = useHasPermission('CEAPG_ROLE');
   const userCanReviewRequests = useHasPermission('APPROVE_REQUEST');
 
-  // View mode (table or grid) com preferência salva
   const [viewMode, setViewMode] = useViewModePreference(currentUser.email);
-
-  // Search filter
   const [searchQuery, setSearchQuery] = useState('');
 
   // Table sorting
@@ -74,22 +72,16 @@ export default function SolicitationTableExtraRequests() {
     createdAt: false,
   });
 
-  const getSelectedProp = () => {
+  const getSelectedProp = useCallback(() => {
     return Object.getOwnPropertyNames(
       selectedPropToSortTable,
     )[0] as ExtraRequestPropToSort;
-  };
+  }, [selectedPropToSortTable]);
 
   const handleClickSortTable = (sortBy: ExtraRequestPropToSort) => {
-    if (selectedPropToSortTable[sortBy]) {
-      setSelectedPropToSortTable({
-        [sortBy]: false,
-      });
-    } else {
-      setSelectedPropToSortTable({
-        [sortBy]: true,
-      });
-    }
+    setSelectedPropToSortTable({
+      [sortBy]: !selectedPropToSortTable[sortBy],
+    });
   };
 
   // Pagination
@@ -98,11 +90,8 @@ export default function SolicitationTableExtraRequests() {
   const [size, setSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(0);
 
-  // Deletion confirmation
   const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState(false);
-  const [solicitationToDelete, setSolicitationToDelete] = useState<
-    number | null
-  >(null);
+  const [solicitationToDelete, setSolicitationToDelete] = useState<number | null>(null);
 
   // Data fetching
   const { extraRequests } = useSelector(
@@ -117,35 +106,29 @@ export default function SolicitationTableExtraRequests() {
       page: number,
     ) => {
       dispatch(getExtraAssistanceRequests(sortBy, ascending, page, size)).then(
-        (extraRequests) =>
-          setNumberPages(Math.trunc(extraRequests.payload.total / size) + 1),
+        (response: any) => {
+          if (response.payload?.total) {
+            setNumberPages(Math.ceil(response.payload.total / size));
+          }
+        }
       );
     },
     [dispatch],
   );
 
-  const updateRequestListWithCurrentParameters = () => {
+  const updateRequestListWithCurrentParameters = useCallback(() => {
     updateRequestList(
       getSelectedProp(),
       selectedPropToSortTable[getSelectedProp()] as boolean,
       size,
       currentPage,
     );
-  };
+  }, [updateRequestList, getSelectedProp, selectedPropToSortTable, size, currentPage]);
 
   // Action handlers
-  const handleClickEdit = (id: number) => {
-    navigate(`/extra-solicitation/edit/${id}`);
-  };
-
-  const handleClickReview = (id: number) => {
-    navigate(`/extra-solicitation/review/${id}`);
-  };
-
-  const handleClickView = (id: number) => {
-    // Navigate to view page
-    navigate(`/extra-solicitation/view/${id}`);
-  };
+  const handleClickEdit = (id: number) => navigate(`/extra-solicitation/edit/${id}`);
+  const handleClickReview = (id: number) => navigate(`/extra-solicitation/review/${id}`);
+  const handleClickView = (id: number) => navigate(`/extra-solicitation/view/${id}`);
 
   const openDeleteDialog = (id: number) => {
     setSolicitationToDelete(id);
@@ -166,40 +149,22 @@ export default function SolicitationTableExtraRequests() {
           closeDeleteDialog();
         })
         .catch((error) => {
-          console.error('Erro ao remover solicitação extra:', error);
+          console.error(error);
           toast.error('Erro ao remover solicitação extra');
           closeDeleteDialog();
         });
     }
   };
 
-  const handleShowText = (text: string) => {
-    if (text == null) {
-      let message =
-        'Texto de solicitação\n\nTexto não disponível, solicitação ainda não foi avaliada. Avalie a solicitação e volte para conferir.';
-      alert(message);
-    } else {
-      alert('Texto de solicitação\n\n' + text);
-    }
-  };
-
-  const handleViewModeChange = (
-    _: React.MouseEvent<HTMLElement>,
-    newMode: 'table' | 'grid',
-  ) => {
-    if (newMode !== null) {
-      setViewMode(newMode);
-    }
+  const handleViewModeChange = (_: React.MouseEvent<HTMLElement>, newMode: 'table' | 'grid') => {
+    if (newMode !== null) setViewMode(newMode);
   };
 
   // Effects
   useEffect(() => {
-    if (
-      prevNumberPages &&
-      prevNumberPages > numberPages &&
-      currentPage >= numberPages
-    )
-      setCurrentPage(numberPages - 1);
+    if (prevNumberPages && prevNumberPages > numberPages && currentPage >= numberPages) {
+      setCurrentPage(Math.max(0, numberPages - 1));
+    }
   }, [numberPages, prevNumberPages, currentPage]);
 
   useEffect(() => {
@@ -209,56 +174,36 @@ export default function SolicitationTableExtraRequests() {
       size,
       currentPage,
     );
-  }, [currentPage, size, selectedPropToSortTable, updateRequestList]);
+  }, [currentPage, size, selectedPropToSortTable, updateRequestList, getSelectedProp]);
 
   // Initial load
   useEffect(() => {
     updateRequestListWithCurrentParameters();
-  }, []);
+  }, [updateRequestListWithCurrentParameters]);
 
-  // Filter requests based on search query
-  const filteredRequests = extraRequests.list.filter(
+  // Filter
+  const filteredRequests = (extraRequests?.list || []).filter(
     (request) =>
       !searchQuery ||
-      request.user.name.toLowerCase().includes(searchQuery.toLowerCase()),
+      request.user?.name?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
     <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 2 }}>
       <Box sx={{ mb: 3 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            mb: 2,
-          }}
-        >
-          <Typography variant="h6" component="h2">
-            Solicitações de Demanda Extra
-          </Typography>
-
-          <ToggleButtonGroup
-            value={viewMode}
-            exclusive
-            onChange={handleViewModeChange}
-            aria-label="view mode"
-            size="small"
-          >
-            <ToggleButton value="table" aria-label="table view">
-              <Tooltip title="Visualização em tabela">
-                <ViewListIcon />
-              </Tooltip>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h6" component="h2">Solicitações de Demanda Extra</Typography>
+          <ToggleButtonGroup value={viewMode} exclusive onChange={handleViewModeChange} size="small">
+            <ToggleButton value="table">
+              <Tooltip title="Visualização em tabela"><ViewListIcon /></Tooltip>
             </ToggleButton>
-            <ToggleButton value="grid" aria-label="grid view">
-              <Tooltip title="Visualização em cards">
-                <ViewModuleIcon />
-              </Tooltip>
+            <ToggleButton value="grid">
+              <Tooltip title="Visualização em cards"><ViewModuleIcon /></Tooltip>
             </ToggleButton>
           </ToggleButtonGroup>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', gap: 2 }}>
           <TextField
             variant="outlined"
             size="small"
@@ -274,20 +219,16 @@ export default function SolicitationTableExtraRequests() {
               ),
             }}
           />
-
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Tooltip title="Filtros">
-              <IconButton size="small">
-                <FilterListIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
+          <Tooltip title="Filtros">
+            <IconButton size="small"><FilterListIcon /></IconButton>
+          </Tooltip>
         </Box>
       </Box>
 
       {viewMode === 'table' ? (
         <ExtraRequestTableView
           extraRequests={filteredRequests}
+          searchQuery={searchQuery}
           currentUserEmail={currentUser.email}
           userCanViewAllRequests={userCanViewAllRequests}
           userCanReviewRequests={userCanReviewRequests}
@@ -298,11 +239,12 @@ export default function SolicitationTableExtraRequests() {
           onReview={handleClickReview}
           onView={handleClickView}
           onDelete={openDeleteDialog}
-          onShowText={handleShowText}
+          onShowDetails={onShowDetails}
         />
       ) : (
         <ExtraRequestGridView
           extraRequests={filteredRequests}
+          searchQuery={searchQuery} // Adicionado para consistência com a Interface
           currentUserEmail={currentUser.email}
           userCanViewAllRequests={userCanViewAllRequests}
           userCanReviewRequests={userCanReviewRequests}
@@ -311,70 +253,39 @@ export default function SolicitationTableExtraRequests() {
           onReview={handleClickReview}
           onView={handleClickView}
           onDelete={openDeleteDialog}
-          onShowText={handleShowText}
+          onShowDetails={onShowDetails}
         />
       )}
 
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 2,
-        }}
-      >
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="body2" color="text.secondary">
-            Itens por página:
-          </Typography>
-          <Select
-            value={size}
-            onChange={(e) => setSize(e.target.value as number)}
-            size="small"
-            sx={{ minWidth: 70 }}
-          >
-            <MenuItem value={5}>5</MenuItem>
-            <MenuItem value={10}>10</MenuItem>
-            <MenuItem value={20}>20</MenuItem>
-            <MenuItem value={30}>30</MenuItem>
+          <Typography variant="body2" color="text.secondary">Itens por página:</Typography>
+          <Select value={size} onChange={(e) => setSize(e.target.value as number)} size="small">
+            {[5, 10, 20, 30].map(val => <MenuItem key={val} value={val}>{val}</MenuItem>)}
           </Select>
         </Box>
 
         <Pagination
           count={numberPages}
           page={currentPage + 1}
-          onChange={(e, v) => setCurrentPage(v - 1)}
+          onChange={(_, v) => setCurrentPage(v - 1)}
           color="primary"
-          showFirstButton
-          showLastButton
           size={isMobile ? 'small' : 'medium'}
         />
 
         <Typography variant="body2" color="text.secondary">
-          Total: {extraRequests.total} solicitações
+          Total: {extraRequests?.total || 0} solicitações
         </Typography>
       </Box>
 
-      <Dialog
-        open={openDeleteConfirmation}
-        onClose={closeDeleteDialog}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">
-          Remoção de solicitação
-        </DialogTitle>
+      <Dialog open={openDeleteConfirmation} onClose={closeDeleteDialog}>
+        <DialogTitle>Remoção de solicitação</DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            <b>Deseja realmente remover esta solicitação?</b>
-          </DialogContentText>
+          <DialogContentText><b>Deseja realmente remover esta solicitação?</b></DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={closeDeleteDialog}>Não</Button>
-          <Button onClick={handleClickRemoveRequest} autoFocus>
-            Sim
-          </Button>
+          <Button onClick={handleClickRemoveRequest} autoFocus>Sim</Button>
         </DialogActions>
       </Dialog>
     </Paper>

@@ -6,24 +6,21 @@ import {
   Box,
   Divider,
   IconButton,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-  alpha,
   Tooltip,
+  alpha,
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { formatNumberToBRL } from '../../../../helpers/formatter';
 import { StatusChip } from './index';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
+// Importação do tipo necessária para o contrato do modal
+import { SolicitationDetailsDialogProps } from '../../request-dialog/SolicitationDetailsDialog';
 
 interface ExtraRequestCardProps {
   extraRequest: any;
+  searchQuery: string;
   currentUserEmail: string;
   userCanViewAllRequests: boolean;
   userCanReviewRequests: boolean;
@@ -32,7 +29,8 @@ interface ExtraRequestCardProps {
   onReview: (id: number) => void;
   onView: (id: number) => void;
   onDelete: (id: number) => void;
-  onShowText: (text: string) => void;
+  // Substituindo a prop antiga onShowText pelo novo handler do modal
+  onShowDetails: (props: SolicitationDetailsDialogProps) => void;
 }
 
 const ExtraRequestCard: React.FC<ExtraRequestCardProps> = ({
@@ -45,7 +43,7 @@ const ExtraRequestCard: React.FC<ExtraRequestCardProps> = ({
   onReview,
   onView,
   onDelete,
-  onShowText,
+  onShowDetails,
 }) => {
   const {
     id,
@@ -58,46 +56,48 @@ const ExtraRequestCard: React.FC<ExtraRequestCardProps> = ({
     dataAvaliacaoProap,
   } = extraRequest;
 
-  // Menu state
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-
-  const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation(); // Prevent card click when menu button is clicked
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleCloseMenu = () => {
-    setAnchorEl(null);
-  };
-
-  // Handle card click to navigate to view page
   const handleCardClick = () => {
     if (id !== undefined) onView(id);
   };
 
-  const handleEdit = () => {
-    if (id !== undefined) {
-      onEdit(id);
-      handleCloseMenu();
-    }
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (id !== undefined) onEdit(id);
   };
 
   const handleReview = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click
+    e.stopPropagation();
     if (id !== undefined) onReview(id);
   };
 
-  const handleDelete = () => {
-    if (id !== undefined) {
-      onDelete(id);
-      handleCloseMenu();
-    }
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (id !== undefined) onDelete(id);
   };
 
-  const handleShowText = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click
-    onShowText(automaticDecText);
+  // Handler atualizado para enviar o objeto completo para o modal de detalhes
+  const handleShowDetailsClick = (e: React.MouseEvent) => {
+  e.stopPropagation();
+  onShowDetails({
+    // Campos que existem na interface:
+    nomeSolicitante: user.name,
+    solicitanteDocente: false, 
+    valorTotal: valorSolicitado || 0,
+    situacao: situacao,
+    observacoes: automaticDecText || '',
+    
+    // Campos OBRIGATÓRIOS que faltavam (preenchendo com valores padrão para Demanda Extra):
+    variacaoCambial: 0,
+    valorDiarias: 0,
+    isDolar: false,
+    nomeEvento: 'Solicitação de Demanda Extra', // Placeholder para identificar no modal
+    tituloPublicacao: 'N/A',
+    qualisEvento: 'N/A',
+    cidade: 'Lauro de Freitas', // Ou pegue de uma constante de localização
+    pais: 'Brasil',
+    dataInicio: createdAt, // Usando a data de criação como placeholder de período
+    dataFim: createdAt,
+  });
   };
 
   return (
@@ -181,13 +181,12 @@ const ExtraRequestCard: React.FC<ExtraRequestCardProps> = ({
           p: 1,
           backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.05),
         }}
-        onClick={(e) => e.stopPropagation()} // Prevent card click when clicking action buttons
+        onClick={(e) => e.stopPropagation()}
       >
         <Box sx={{ display: 'flex', gap: 1 }}>
-          {/* Primary Actions - Always visible */}
           {userCanViewAllRequests && (
-            <Tooltip title="Ver texto da solicitação">
-              <IconButton size="small" color="default" onClick={handleShowText}>
+            <Tooltip title="Ver resumo da solicitação">
+              <IconButton size="small" color="default" onClick={handleShowDetailsClick}>
                 <VisibilityIcon fontSize="small" />
               </IconButton>
             </Tooltip>

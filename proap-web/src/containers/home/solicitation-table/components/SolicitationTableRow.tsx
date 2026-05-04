@@ -96,7 +96,7 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
   
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation(); // Prevent row click when menu button is clicked
+    event.stopPropagation();
     setAnchorEl(event.currentTarget);
   };
 
@@ -110,7 +110,7 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
   };
 
   const handleEdit = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent row click
+    e.stopPropagation();
     if (id !== undefined) {
       onEdit(id);
       handleCloseMenu();
@@ -118,12 +118,12 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
   };
 
   const handleReview = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent row click
+    e.stopPropagation();
     if (id !== undefined) onReview(id);
   };
 
   const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent row click
+    e.stopPropagation();
     if (id !== undefined) {
       onDelete(id);
       handleCloseMenu();
@@ -131,7 +131,7 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
   };
 
   const handleShowDetailsClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent row click
+    e.stopPropagation();
     onShowDetails({
       nomeSolicitante: user.name,
       solicitanteDocente,
@@ -166,15 +166,15 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
       <TableCell align="center">
         <StatusChip status={situacao} />
       </TableCell>
-      <TableCell align="left">{formatNumberToBRL(valorTotal)}</TableCell>
-      <TableCell align="center">
+      <TableCell align="center" sx={{ whiteSpace: 'nowrap' }}>{formatNumberToBRL(valorTotal)}</TableCell>
+      <TableCell align="center" sx={{ whiteSpace: 'nowrap' }}>
         {valorAprovado === null ? '-' : formatNumberToBRL(valorAprovado)}
       </TableCell>
       <TableCell align="center">
         {dataAvaliacaoProap === null ? '-' : dataAvaliacaoProap}
       </TableCell>
       <TableCell align="center">
-        {numeroAta}
+        {numeroAta || '-'}
       </TableCell>
       <TableCell align="center" onClick={(e) => e.stopPropagation()}>
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}>

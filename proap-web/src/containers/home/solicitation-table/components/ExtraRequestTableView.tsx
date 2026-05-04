@@ -7,25 +7,18 @@ import {
   TableHead,
   TableRow,
   Typography,
-  Box,
-  IconButton,
-  alpha,
-  Tooltip,
 } from '@mui/material';
-import { StatusChip } from './index';
-import { formatNumberToBRL } from '../../../../helpers/formatter';
-import { Visibility, CheckCircle } from '@mui/icons-material';
-import ModeEditIcon from '@mui/icons-material/ModeEdit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { ExtraRequestPropToSort } from '../../../../services/extraAssistanceRequestService';
-import FactCheckIcon from '@mui/icons-material/FactCheck';
-
+import { SolicitationTableRow } from './index';
+import { SolicitationDetailsDialogProps } from '../../request-dialog/SolicitationDetailsDialog';
+// Se houver um tipo específico para ordenação de demandas extras, use-o aqui
+import { AssistanceRequestPropToSort } from '../../../../services/assistanceRequestService';
 
 interface TableCellHeaderProps {
   text: string;
-  sortBy: ExtraRequestPropToSort;
+  sortBy: any; // Usamos any para permitir campos específicos de demanda extra
   selectedPropToSortTable: Record<string, boolean>;
-  handleClickSortTable: (prop: ExtraRequestPropToSort) => void;
+  handleClickSortTable: (prop: any) => void;
+  align?: 'left' | 'center';
 }
 
 const TableCellHeader: React.FC<TableCellHeaderProps> = ({
@@ -33,60 +26,72 @@ const TableCellHeader: React.FC<TableCellHeaderProps> = ({
   sortBy,
   selectedPropToSortTable,
   handleClickSortTable,
+  align = 'left',
 }) => {
+  const isSorted = selectedPropToSortTable[sortBy] !== undefined;
+
   return (
     <div
       onClick={() => handleClickSortTable(sortBy)}
-      style={{ userSelect: 'none', cursor: 'pointer' }}
+      style={{
+        userSelect: 'none',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: align === 'center' ? 'center' : 'flex-start',
+        width: '100%',
+      }}
     >
-      {text}
-      {selectedPropToSortTable[sortBy] !== undefined && (
-        <span style={{ marginLeft: '4px' }}>
-          {selectedPropToSortTable[sortBy] ? '▲' : '▼'}
-        </span>
-      )}
+      <span>{text}</span>
+      <span
+        style={{
+          marginLeft: '4px',
+          fontSize: '0.8rem',
+          visibility: isSorted ? 'visible' : 'hidden',
+          display: 'inline-block',
+          width: '12px',
+          textAlign: 'center',
+        }}
+      >
+        {selectedPropToSortTable[sortBy] ? '▲' : '▼'}
+      </span>
     </div>
   );
 };
 
 interface ExtraRequestTableViewProps {
   extraRequests: any[];
+  searchQuery: string;
+  selectedPropToSortTable: Record<string, boolean>;
+  handleClickSortTable: (prop: any) => void;
   currentUserEmail: string;
   userCanViewAllRequests: boolean;
   userCanReviewRequests: boolean;
   isCeapg: boolean;
-  selectedPropToSortTable: Record<string, boolean>;
-  handleClickSortTable: (prop: ExtraRequestPropToSort) => void;
+  isExtraRequest?: boolean;
   onEdit: (id: number) => void;
   onReview: (id: number) => void;
   onView: (id: number) => void;
   onDelete: (id: number) => void;
-  onShowText: (text: string) => void;
+  onShowDetails: (props: SolicitationDetailsDialogProps) => void;
 }
 
 const ExtraRequestTableView: React.FC<ExtraRequestTableViewProps> = ({
-  extraRequests,
+  extraRequests = [], 
+  searchQuery = '',
+  selectedPropToSortTable = {},
+  handleClickSortTable,
   currentUserEmail,
   userCanViewAllRequests,
   userCanReviewRequests,
   isCeapg,
-  selectedPropToSortTable,
-  handleClickSortTable,
+  isExtraRequest = true,
   onEdit,
   onReview,
   onView,
   onDelete,
-  onShowText,
+  onShowDetails,
 }) => {
-  const formatTableDate = (dateString: string | null) => {
-    if (!dateString) return '-';
-    if (dateString.includes('-')) {
-      const [year, month, day] = dateString.split('-');
-      return `${day}/${month}/${year}`;
-    }
-    return dateString;
-  };
-  
   return (
     <TableContainer
       sx={{
@@ -105,6 +110,7 @@ const ExtraRequestTableView: React.FC<ExtraRequestTableViewProps> = ({
               '& th': {
                 fontWeight: 'bold',
                 backgroundColor: 'grey.50',
+                whiteSpace: 'nowrap',
               },
             }}
           >
@@ -128,6 +134,7 @@ const ExtraRequestTableView: React.FC<ExtraRequestTableViewProps> = ({
               <TableCellHeader
                 text="Status"
                 sortBy="situacao"
+                align="center"
                 selectedPropToSortTable={selectedPropToSortTable}
                 handleClickSortTable={handleClickSortTable}
               />
@@ -135,7 +142,8 @@ const ExtraRequestTableView: React.FC<ExtraRequestTableViewProps> = ({
             <TableCell align="center">
               <TableCellHeader
                 text="Valor solicitado"
-                sortBy="valorSolicitado"
+                sortBy="valorSolicitado" 
+                align="center"
                 selectedPropToSortTable={selectedPropToSortTable}
                 handleClickSortTable={handleClickSortTable}
               />
@@ -144,6 +152,7 @@ const ExtraRequestTableView: React.FC<ExtraRequestTableViewProps> = ({
               <TableCellHeader
                 text="Valor aprovado"
                 sortBy="valorAprovado"
+                align="center"
                 selectedPropToSortTable={selectedPropToSortTable}
                 handleClickSortTable={handleClickSortTable}
               />
@@ -152,129 +161,54 @@ const ExtraRequestTableView: React.FC<ExtraRequestTableViewProps> = ({
               <TableCellHeader
                 text="Data da avaliação"
                 sortBy="dataAvaliacaoProap"
+                align="center"
                 selectedPropToSortTable={selectedPropToSortTable}
                 handleClickSortTable={handleClickSortTable}
               />
             </TableCell>
-
-              <TableCell align="center">
+            <TableCell align="center">
               <TableCellHeader
                 text="ATA"
                 sortBy="numeroAta"
+                align="center"
                 selectedPropToSortTable={selectedPropToSortTable}
                 handleClickSortTable={handleClickSortTable}
             />
             </TableCell>
-
             <TableCell align="center">Ações</TableCell>
           </TableRow>
         </TableHead>
 
         <TableBody>
-          {!extraRequests.length && (
+          {extraRequests.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7}>
-                <Typography
-                  align="center"
-                  color="text.secondary"
-                  sx={{ py: 4 }}
-                >
-                  Nenhuma solicitação de demanda extra encontrada.
+              <TableCell colSpan={8}>
+                <Typography align="center" color="text.secondary" sx={{ py: 4 }}>
+                  {searchQuery
+                    ? 'Nenhuma solicitação encontrada para a busca realizada.'
+                    : 'Nenhuma solicitação de demanda extra encontrada.'}
                 </Typography>
               </TableCell>
             </TableRow>
+          ) : (
+            extraRequests.map((solicitation) => (
+              <SolicitationTableRow
+                key={solicitation.id}
+                {...solicitation}
+                valorTotal={solicitation.valorSolicitado || solicitation.valorTotal}
+                currentUserEmail={currentUserEmail}
+                userCanViewAllRequests={userCanViewAllRequests}
+                userCanReviewRequests={userCanReviewRequests}
+                isCeapg={isCeapg}
+                isExtraRequest={isExtraRequest}
+                onEdit={onEdit}
+                onReview={onReview}
+                onView={onView}
+                onDelete={onDelete}
+                onShowDetails={onShowDetails}
+              />
+            ))
           )}
-          {extraRequests.length > 0 &&
-            extraRequests.map((request) => (
-              <TableRow
-                key={request.id}
-                onClick={() => onView(request.id)}
-                sx={{
-                  cursor: 'pointer',
-                  '&:hover': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                  },
-                }}
-              >
-                <TableCell align="center">{request.createdAt}</TableCell>
-                <TableCell align="center">{request.user.name}</TableCell>
-                <TableCell align="center">
-                  <StatusChip status={request.situacao} />
-                </TableCell>
-                <TableCell align="center">
-                  {request.valorSolicitado != null
-                    ? formatNumberToBRL(request.valorSolicitado)
-                    : '-'}
-                </TableCell>
-                <TableCell align="center">
-                  {request.valorAprovado === null
-                    ? '-'
-                    : formatNumberToBRL(request.valorAprovado)}
-                </TableCell>
-                <TableCell align="center">
-                  {request.dataAvaliacaoProap === null
-                    ? '-'
-                    : request.dataAvaliacaoProap}
-                </TableCell>
-                <TableCell align="center">
-                  {request.numeroAta || '-'}
-                </TableCell>
-                <TableCell align="center" onClick={(e) => e.stopPropagation()}>
-                  <Box
-                    sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}
-                  >
-                    {userCanViewAllRequests && (
-                      <Tooltip title="Ver resumo da solicitação">
-                        <IconButton
-                          size="small"
-                          onClick={() => onShowText(request.automaticDecText)}
-                        >
-                          <Visibility fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                    {(userCanReviewRequests || isCeapg) && (
-                      <Tooltip title="Revisar solicitação">
-                        <IconButton
-                          size="small"
-                          onClick={() => onReview(request.id)}
-                        >
-                          <FactCheckIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-
-                    <IconButton
-                      size="small"
-                      onClick={() => onEdit(request.id)}
-                      disabled={
-                        !(
-                          (request.situacao == 0 &&
-                            currentUserEmail === request.user.email) ||
-                          userCanReviewRequests
-                        )
-                      }
-                    >
-                      <ModeEditIcon fontSize="small" />
-                    </IconButton>
-
-                    <IconButton
-                      size="small"
-                      onClick={() => onDelete(request.id)}
-                      disabled={
-                        !(
-                          (request.situacao == 0 &&
-                            currentUserEmail === request.user.email) ||
-                          userCanReviewRequests
-                        )
-                      }
-                    >
-                      <DeleteIcon fontSize="small"/>
-                    </IconButton>
-                  </Box>
-                </TableCell>
-              </TableRow>
-            ))}
         </TableBody>
       </Table>
     </TableContainer>

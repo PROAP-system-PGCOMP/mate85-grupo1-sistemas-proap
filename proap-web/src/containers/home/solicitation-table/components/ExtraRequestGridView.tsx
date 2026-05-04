@@ -1,9 +1,12 @@
 import React from 'react';
 import { Box, Grid, Typography } from '@mui/material';
 import ExtraRequestCard from './ExtraRequestCard';
+import { SolicitationDetailsDialogProps } from '../../request-dialog/SolicitationDetailsDialog';
+
 
 interface ExtraRequestGridViewProps {
   extraRequests: any[];
+  searchQuery: string;
   currentUserEmail: string;
   userCanViewAllRequests: boolean;
   userCanReviewRequests: boolean;
@@ -12,11 +15,12 @@ interface ExtraRequestGridViewProps {
   onReview: (id: number) => void;
   onView: (id: number) => void;
   onDelete: (id: number) => void;
-  onShowText: (text: string) => void;
+  onShowDetails: (props: SolicitationDetailsDialogProps) => void;
 }
 
 const ExtraRequestGridView: React.FC<ExtraRequestGridViewProps> = ({
   extraRequests,
+  searchQuery,
   currentUserEmail,
   userCanViewAllRequests,
   userCanReviewRequests,
@@ -25,7 +29,7 @@ const ExtraRequestGridView: React.FC<ExtraRequestGridViewProps> = ({
   onReview,
   onView,
   onDelete,
-  onShowText,
+  onShowDetails,
 }) => {
   return (
     <Box sx={{ mb: 2 }}>
@@ -41,6 +45,7 @@ const ExtraRequestGridView: React.FC<ExtraRequestGridViewProps> = ({
             <Grid item xs={12} sm={6} md={4} lg={3} key={extraRequest.id}>
               <ExtraRequestCard
                 extraRequest={extraRequest}
+                searchQuery={searchQuery}
                 currentUserEmail={currentUserEmail}
                 userCanViewAllRequests={userCanViewAllRequests}
                 userCanReviewRequests={userCanReviewRequests}
@@ -49,7 +54,7 @@ const ExtraRequestGridView: React.FC<ExtraRequestGridViewProps> = ({
                 onReview={onReview}
                 onView={onView}
                 onDelete={onDelete}
-                onShowText={onShowText}
+                onShowDetails={onShowDetails}
               />
             </Grid>
           ))}

@@ -10,6 +10,7 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  TableSortLabel,
   Typography,
   Box,
   TextField,
@@ -31,12 +32,17 @@ import {
   Search as SearchIcon,
   AdminPanelSettings,
   NoAccounts,
+  ExpandMore,
 } from '@mui/icons-material';
 import { maskCpf, maskPhone } from '../../helpers/masks';
 import useUsers from '../../hooks/auth/useUsers';
 import { UnauthorizedPage } from '../unauthorized/UnauthorizedPage';
 import useHasPermission from '../../hooks/auth/useHasPermission';
 import UserActionsDialogContainer from '../../containers/user-profile/user-actions/UserActionsDialogContainer';
+import { User } from '../../types/auth-type/user';
+
+type SortOrder = 'asc' | 'desc';
+type SortableUserKey = 'name' | 'email' | 'cpf' | 'phone' | 'profileName';
 
 export default function UsersPage() {
   const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
@@ -44,7 +50,9 @@ export default function UsersPage() {
   const [currentProfile, setCurrentProfile] = useState<string>('');
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [filteredUsers, setFilteredUsers] = useState<any[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [order, setOrder] = useState<SortOrder>('asc');
+  const [orderBy, setOrderBy] = useState<SortableUserKey>('name');
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -101,6 +109,48 @@ export default function UsersPage() {
     setSearchTerm(event.target.value);
   };
 
+  const handleRequestSort = (property: SortableUserKey) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+
+  const sortedUsers = React.useMemo(() => {
+    const getValue = (user: User, key: SortableUserKey) => {
+      switch (key) {
+        case 'name':
+          return user.name;
+        case 'email':
+          return user.email;
+        case 'cpf':
+          return user.cpf;
+        case 'phone':
+          return user.phone;
+        case 'profileName':
+          return user.profileName;
+        default:
+          return '';
+      }
+    };
+
+    const stabilized = filteredUsers.map((user, index) => ({ user, index }));
+    stabilized.sort((a, b) => {
+      const aValue = getValue(a.user, orderBy);
+      const bValue = getValue(b.user, orderBy);
+      const comparison = aValue.localeCompare(bValue, 'pt-BR', {
+        numeric: true,
+        sensitivity: 'base',
+      });
+
+      if (comparison !== 0) {
+        return order === 'asc' ? comparison : -comparison;
+      }
+
+      return a.index - b.index;
+    });
+
+    return stabilized.map(({ user }) => user);
+  }, [filteredUsers, order, orderBy]);
   const getProfileChipColor = (profileName: string) => {
     const profile = profileName.toLowerCase();
     if (profile.includes('admin')) return 'success';
@@ -113,7 +163,7 @@ export default function UsersPage() {
 
   const renderMobileView = () => (
     <Stack spacing={2}>
-      {filteredUsers.map(({ name, cpf, email, phone, profileName }) => (
+      {sortedUsers.map(({ name, cpf, email, phone, profileName }) => (
         <Card key={cpf} elevation={1} sx={{ mb: 1 }}>
           <CardContent>
             <Box
@@ -157,7 +207,7 @@ export default function UsersPage() {
           </CardContent>
         </Card>
       ))}
-      {filteredUsers.length > 0 && (
+      {sortedUsers.length > 0 && (
         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
           <TablePagination
             component="div"
@@ -183,18 +233,65 @@ export default function UsersPage() {
       >
         <TableHead>
           <TableRow>
-            <TableCell>Nome</TableCell>
-            <TableCell>E-mail</TableCell>
-            <TableCell>CPF</TableCell>
-            <TableCell>Telefone</TableCell>
-            <TableCell>Perfil de Usuário</TableCell>
+            <TableCell sortDirection={orderBy === 'name' ? order : false}>
+              <TableSortLabel
+                active={orderBy === 'name'}
+                direction={orderBy === 'name' ? order : 'asc'}
+                IconComponent={ExpandMore}
+                onClick={() => handleRequestSort('name')}
+              >
+                Nome
+              </TableSortLabel>
+            </TableCell>
+            <TableCell sortDirection={orderBy === 'email' ? order : false}>
+              <TableSortLabel
+                active={orderBy === 'email'}
+                direction={orderBy === 'email' ? order : 'asc'}
+                IconComponent={ExpandMore}
+                onClick={() => handleRequestSort('email')}
+              >
+                E-mail
+              </TableSortLabel>
+            </TableCell>
+            <TableCell sortDirection={orderBy === 'cpf' ? order : false}>
+              <TableSortLabel
+                active={orderBy === 'cpf'}
+                direction={orderBy === 'cpf' ? order : 'asc'}
+                IconComponent={ExpandMore}
+                onClick={() => handleRequestSort('cpf')}
+              >
+                CPF
+              </TableSortLabel>
+            </TableCell>
+            <TableCell sortDirection={orderBy === 'phone' ? order : false}>
+              <TableSortLabel
+                active={orderBy === 'phone'}
+                direction={orderBy === 'phone' ? order : 'asc'}
+                IconComponent={ExpandMore}
+                onClick={() => handleRequestSort('phone')}
+              >
+                Telefone
+              </TableSortLabel>
+            </TableCell>
+            <TableCell
+              sortDirection={orderBy === 'profileName' ? order : false}
+            >
+              <TableSortLabel
+                active={orderBy === 'profileName'}
+                direction={orderBy === 'profileName' ? order : 'asc'}
+                IconComponent={ExpandMore}
+                onClick={() => handleRequestSort('profileName')}
+              >
+                Perfil de Usuário
+              </TableSortLabel>
+            </TableCell>
             <TableCell align="right">Ações</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {filteredUsers.length > 0 ? (
+          {sortedUsers.length > 0 ? (
             <>
-              {filteredUsers.map(({ name, cpf, email, phone, profileName }) => (
+              {sortedUsers.map(({ name, cpf, email, phone, profileName }) => (
                 <TableRow
                   key={cpf}
                   sx={{

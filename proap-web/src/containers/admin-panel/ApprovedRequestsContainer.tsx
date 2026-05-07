@@ -17,7 +17,6 @@ import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
   CalendarToday,
-  AttachMoney,
   CheckCircle,
   Person,
 } from '@mui/icons-material';
@@ -243,7 +242,6 @@ const ApprovedRequests: React.FC<ApprovedRequestsProps> = ({
                         mt: 0.5,
                       }}
                     >
-                      <AttachMoney fontSize="small" color="primary" />
                       <Typography
                         variant="body1"
                         fontWeight="bold"

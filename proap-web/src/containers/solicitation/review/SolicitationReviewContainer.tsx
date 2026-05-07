@@ -284,15 +284,6 @@ export default function SolicitationReviewContainer() {
 
             <StyledData>
               <Typography variant="subtitle2" color="text.secondary">
-                Link da inscrição
-              </Typography>
-              <TruncatedLink href={values.linkPaginaInscricao}>
-                {values.linkPaginaInscricao}
-              </TruncatedLink>
-            </StyledData>
-
-            <StyledData>
-              <Typography variant="subtitle2" color="text.secondary">
                 Diárias solicitadas
               </Typography>
               <Typography>
@@ -415,6 +406,15 @@ export default function SolicitationReviewContainer() {
               </Typography>
               <TruncatedLink href={values.linkHomePageEvento}>
                 {values.linkHomePageEvento}
+              </TruncatedLink>
+            </StyledData>
+
+            <StyledData>
+              <Typography variant="subtitle2" color="text.secondary">
+                Link da inscrição
+              </Typography>
+              <TruncatedLink href={values.linkPaginaInscricao}>
+                {values.linkPaginaInscricao}
               </TruncatedLink>
             </StyledData>
 

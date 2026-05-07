@@ -1,7 +1,7 @@
 import { PropsWithChildren } from 'react';
 
 import { useMediaQuery, useTheme } from '@mui/material';
-import HomeIcon from '@mui/icons-material/Home';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 import {
   AddRounded,
   AdminPanelSettings,
@@ -30,8 +30,8 @@ export const NavigationWrapper = ({ children }: PropsWithChildren) => {
   const isCollaborator = useHasPermission('FUNCIONARIO_ROLE');
   const navigationItems: NavigationItem[] = [
     {
-      label: 'Página Inicial',
-      icon: <HomeIcon />,
+      label: 'Solicitações',
+      icon: <AssignmentIcon />,
       link: '/home',
       visible: true,
     },

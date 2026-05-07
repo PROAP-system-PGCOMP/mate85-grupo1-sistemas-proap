@@ -15,11 +15,7 @@ import { formatNumberToBRL } from '../../helpers/formatter';
 import DateRangeFilter from '../../components/custom/DateRangeFilter';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import {
-  CalendarToday,
-  CheckCircle,
-  Person,
-} from '@mui/icons-material';
+import { CalendarToday, CheckCircle, Person } from '@mui/icons-material';
 
 interface ApprovedRequestsProps {
   loading: boolean;

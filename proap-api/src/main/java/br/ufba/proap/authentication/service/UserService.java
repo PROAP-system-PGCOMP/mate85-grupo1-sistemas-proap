@@ -208,8 +208,8 @@ public class UserService implements UserDetailsService {
             throw new ValidationException("CPF já cadastrado");
         }
 
-        Perfil perfilAtribuido = perfilService.findByName(Perfil.getDefaultPerfilName())
-                .orElseThrow(() -> new DefaultProfileNotFoundException("Perfil padrão não encontrado."));
+        Perfil perfilAtribuido = perfilService.findById(user.perfilId())
+                .orElseThrow(() -> new DefaultProfileNotFoundException("Perfil não encontrado."));
 
         User newUser = new User();
         newUser.setEmail(user.email());

@@ -10,6 +10,7 @@ public record AdminUserRegistrationDTO(
         @NotBlank String cpf,
         @NotBlank String registration,
         @NotBlank String phone,
-        String alternativePhone
+        String alternativePhone,
+        @NotNull Long perfilId
 ) {
 }

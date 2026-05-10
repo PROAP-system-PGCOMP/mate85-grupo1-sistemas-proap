@@ -77,3 +77,13 @@ export const changeUserPassword = async (
   });
   return response.data;
 };
+
+
+export const registerUserByAdmin = async (values: any) => {
+  return await api
+    .post('user/create', values)
+    .then((response) => response.data)
+    .catch((error) => {
+      throw new Error(error.response.data.message || 'Erro ao cadastrar usuário');
+    });
+};

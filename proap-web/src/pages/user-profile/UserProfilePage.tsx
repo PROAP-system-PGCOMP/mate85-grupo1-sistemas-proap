@@ -61,33 +61,37 @@ export default function UserProfilePage() {
 
   const handleSubmit = async (values: User) => {
     dispatch(setLoading(true));
-    updateUserProfile(values)
+
+    return updateUserProfile(values)
       .then((updatedUsers) => {
-        Toast.success('Usuário atualizado com sucesso!');
         dispatch(updateUser(updatedUsers));
         dispatch(setLoading(false));
       })
       .catch((error) => {
-        Toast.error('Erro ao atualizar usuário: ' + error.message);
         dispatch(setLoading(false));
+        throw error; 
       });
   };
 
-  const handleChangePasswordSubmit = (values: unknown) => {
+  const handleChangePasswordSubmit = async (values: unknown) => {
     const { currentPassword, newPassword } = values as {
       currentPassword: string;
       newPassword: string;
     };
+    
     dispatch(setLoading(true));
-    changeUserPassword(currentPassword, newPassword)
+    
+    // Adicione o 'return' aqui também!
+    return changeUserPassword(currentPassword, newPassword)
       .then((response) => {
         Toast.success(response.message);
         dispatch(setLoading(false));
       })
       .catch((error) => {
-        Toast.error(error.response.data.message);
-        console.error(error.response.data);
+        // Se o seu ChangePasswordContainer também usa Formik, relance o erro:
+        Toast.error(error.response?.data?.message || "Erro ao trocar senha");
         dispatch(setLoading(false));
+        throw error; 
       });
   };
 

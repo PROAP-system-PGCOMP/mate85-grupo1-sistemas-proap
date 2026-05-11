@@ -57,15 +57,17 @@ export default function UserRegisterPage() {
     setIsLoading(true);
     const payload = {
       ...values,
-      profileId: Number(values.profileId),
+      perfilId: Number(values.profileId),
       password: generateSecurePassword(),
     };
+
+    delete (payload as any).profileId;
 
     registerUserByAdmin(payload)
       .then(() => {
         Toast.success('Usuário cadastrado com sucesso!');
         setIsLoading(false);
-        navigate('/users'); // Redireciona para a listagem após o sucesso
+        navigate('/users');
       })
       .catch((err) => {
         Toast.error(`Falha no cadastro: ${err.message}`);

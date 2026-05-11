@@ -80,7 +80,7 @@ export const changeUserPassword = async (
 
 export const registerUserByAdmin = async (values: any) => {
   return await api
-    .post('user/createByAdmin', values)
+    .post('admin/users/createByAdmin', values)
     .then((response) => response.data)
     .catch((error) => {
       throw new Error(error.response.data.message || 'Erro ao cadastrar usuário');

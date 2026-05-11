@@ -19,6 +19,7 @@ import CeapgReviewsPage from '../../pages/ceapg-reviews/CeapgReviewsPage';
 import useHasPermission from '../../hooks/auth/useHasPermission';
 import RedirectBasedOnRole from './RedirectBasedOnRole';
 import ReviewExtraSolicitationPage from '../../pages/review-extra-solicitation/ReviewExtraSolicitationPage';
+import UserRegisterPage from '../../pages/users/UserRegisterPage';
 
 export default function PrivateRoutes() {
   const isAdmin = useHasPermission('ADMIN_ROLE');
@@ -67,6 +68,7 @@ export default function PrivateRoutes() {
           <Route path="/ceapg-reviews" element={<CeapgReviewsPage />} />
         )}
         <Route path="*" element={<NotFoundPage />} />
+        <Route path="/register-user" element={<UserRegisterPage />} />
       </Routes>
     </NavigationWrapper>
   );

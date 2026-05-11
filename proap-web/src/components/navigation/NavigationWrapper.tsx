@@ -3,7 +3,7 @@ import { PropsWithChildren } from 'react';
 import { useMediaQuery, useTheme } from '@mui/material';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import {
-  AddRounded,
+  PersonAdd,
   AdminPanelSettings,
   Group,
   RateReview,
@@ -19,6 +19,7 @@ export interface NavigationItem {
   link: string;
   visible: boolean;
   icon?: React.ReactElement;
+  exact?: boolean;
 }
 
 export const NavigationWrapper = ({ children }: PropsWithChildren) => {
@@ -40,6 +41,13 @@ export const NavigationWrapper = ({ children }: PropsWithChildren) => {
       icon: <Group />,
       link: '/users',
       visible: userCanViewPage,
+      exact: true,
+    },
+    {
+      label: 'Cadastrar Usuário',
+      icon: <PersonAdd />,
+      link: '/register-user',
+      visible: isAdmin,
     },
     {
       label: 'Painel Administrativo',
@@ -51,7 +59,7 @@ export const NavigationWrapper = ({ children }: PropsWithChildren) => {
       label: 'Avaliações CEAPG',
       icon: <RateReview />,
       link: '/ceapg-reviews',
-      visible: isCeapg,
+      visible: isCeapg || isAdmin,
     },
   ];
 

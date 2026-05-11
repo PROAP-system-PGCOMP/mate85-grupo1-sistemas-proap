@@ -290,15 +290,10 @@ export default function UsersPage() {
                     size="small"
                   />
                 </TableCell>
-                <TableCell align="right">
+                <TableCell align="center">
                   <Tooltip title="Gerenciar permissões">
                     <IconButton onClick={() => handleClickPermissionAction(email, name, profileName)} color="default">
                       <PermIdentityIcon />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Cadastrar Usuário">
-                    <IconButton onClick={handleOpenCreateUser} color="default">
-                      <GroupAddIcon />
                     </IconButton>
                   </Tooltip>
                 </TableCell>

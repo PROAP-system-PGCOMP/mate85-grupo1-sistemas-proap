@@ -22,7 +22,7 @@ public class AdminUserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/create")
+    @PostMapping("/createByAdmin")
     public ResponseEntity<?> createByAdmin(@RequestBody @Valid AdminUserRegistrationDTO user) {
         try {
             userService.createByAdmin(user);

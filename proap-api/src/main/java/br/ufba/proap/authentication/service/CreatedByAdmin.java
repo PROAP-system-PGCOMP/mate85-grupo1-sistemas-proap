@@ -78,7 +78,7 @@ public class CreatedByAdmin {
 
     public void sendAdminRegistrationToken(String email) {
         String token = createCreatedByAdminToken(email);
-        eventPublisher.publishEvent(new UserRegisteredByAdminEvent(email, token));
+        eventPublisher.publishEvent(new UserRegisteredByAdminEvent(this, email, token));
     }
 
     public Boolean isPasswordResetTokenValid(String token) {

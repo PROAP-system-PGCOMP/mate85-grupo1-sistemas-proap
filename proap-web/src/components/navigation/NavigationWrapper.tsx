@@ -37,7 +37,7 @@ export const NavigationWrapper = ({ children }: PropsWithChildren) => {
       visible: true,
     },
     {
-      label: 'Usuários cadastrados',
+      label: 'Usuários',
       icon: <Group />,
       link: '/users',
       visible: userCanViewPage,

@@ -157,16 +157,16 @@ export default function SolicitationTableRequests() {
   const menuProps = {
     PaperProps: {
       sx: {
-        borderRadius: '4px', // Diminuindo o arredondamento do menu (mais "quadrado")
+        borderRadius: '4px',
         marginTop: '4px',
         boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
         '& .MuiList-root': {
-          padding: '4px', // Espaço entre a borda do menu e os itens
+          padding: '4px', 
         },
         '& .MuiMenuItem-root': {
-          borderRadius: '2px', // Round menor também nos itens individuais
-          minHeight: '48px',   // Aumentando o tamanho vertical do item
-          padding: '12px 16px', // Aumentando o tamanho interno (área de clique)
+          borderRadius: '2px', 
+          minHeight: '48px',   
+          padding: '12px 16px', 
           transition: 'background-color 0.2s',
           '&:hover': {
             backgroundColor: 'rgba(0, 0, 0, 0.04)',
@@ -201,16 +201,14 @@ export default function SolicitationTableRequests() {
           </ToggleButtonGroup>
         </Box>
 
-        {/* CONTAINER MÃE: Centraliza Search e Select verticalmente */}
         <Box sx={{ 
           display: 'flex', 
           flexDirection: isMobile ? 'column' : 'row', 
           gap: 2, 
-          alignItems: 'center', // Centralização vertical absoluta
+          alignItems: 'center', 
           width: '100%',
           mb: 0
         }}>
-          {/* BUSCA: Envolvida em FormControl para espelhar o Select */}
           <FormControl sx={{ flexGrow: 1 }} size="small">
             <TextField
               margin="none"
@@ -236,9 +234,7 @@ export default function SolicitationTableRequests() {
             />
           </FormControl>
 
-          {/* STATUS: FormControl idêntico ao da Busca */}
           <FormControl sx={{ minWidth: isMobile ? '100%' : '220px' }} size="small">
-            {/* displayEmpty permite mostrar o placeholder sem precisar do InputLabel */}
             <Select
               displayEmpty
               value={statusFilter ?? ''}
@@ -252,7 +248,7 @@ export default function SolicitationTableRequests() {
                 padding: '0 !important',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'start', // Centraliza horizontalmente também
+                justifyContent: 'start',
                 boxSizing: 'border-box',
               },
               }}
@@ -261,7 +257,7 @@ export default function SolicitationTableRequests() {
                   return (
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, color: 'text.secondary' }}>
                       <FilterAltIcon fontSize="small" />
-                      <Typography variant="body2">Status</Typography>
+                      <Typography variant="body2">Filtrar</Typography>
                     </Box>
                   );
                 }

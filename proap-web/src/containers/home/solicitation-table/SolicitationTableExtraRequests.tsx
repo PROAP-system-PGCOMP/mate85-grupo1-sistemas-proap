@@ -12,12 +12,15 @@ import {
   Tooltip,
   MenuItem,
   Select,
+  FormControl,
+  alpha,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
   Button,
+  SelectChangeEvent,
 } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -29,7 +32,8 @@ import Pagination from '@mui/material/Pagination';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import SearchIcon from '@mui/icons-material/Search';
-import FilterListIcon from '@mui/icons-material/FilterList';
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import ClearIcon from '@mui/icons-material/Clear';
 
 import {
   ExtraRequestPropToSort,
@@ -41,7 +45,7 @@ import { useAuth } from '../../../hooks';
 import usePrevious from '../../../helpers/usePrevious';
 import useHasPermission from '../../../hooks/auth/useHasPermission';
 import { useViewModePreference } from '../../../hooks';
-import { ExtraRequestTableView, ExtraRequestGridView } from './components';
+import { ExtraRequestTableView, ExtraRequestGridView, StatusChip } from './components';
 import { SolicitationDetailsDialogProps } from '../request-dialog/SolicitationDetailsDialog';
 
 interface SolicitationTableExtraRequestsProps {
@@ -64,6 +68,13 @@ export default function SolicitationTableExtraRequests({
 
   const [viewMode, setViewMode] = useViewModePreference(currentUser.email);
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<number | null>(null);
+
+  const statusOptions = [
+    { value: 0, text: 'Pendente' },
+    { value: 1, text: 'Aprovada' },
+    { value: 2, text: 'Não aprovada' },
+  ];
 
   // Table sorting
   const [selectedPropToSortTable, setSelectedPropToSortTable] = useState<{
@@ -99,12 +110,7 @@ export default function SolicitationTableExtraRequests({
   );
 
   const updateRequestList = useCallback(
-    (
-      sortBy: ExtraRequestPropToSort,
-      ascending: boolean,
-      size: number,
-      page: number,
-    ) => {
+    (sortBy: ExtraRequestPropToSort, ascending: boolean, size: number, page: number) => {
       dispatch(getExtraAssistanceRequests(sortBy, ascending, page, size)).then(
         (response: any) => {
           if (response.payload?.total) {
@@ -124,6 +130,18 @@ export default function SolicitationTableExtraRequests({
       currentPage,
     );
   }, [updateRequestList, getSelectedProp, selectedPropToSortTable, size, currentPage]);
+
+  const handleStatusFilterChange = (event: SelectChangeEvent<string | number>) => {
+    const value = event.target.value;
+    setStatusFilter(value === '' ? null : Number(value));
+  };
+
+  const getStatusAlphaColor = (status: number | null) => {
+    if (status === 1) return alpha('#4caf50', 0.05);
+    if (status === 2) return alpha('#f44336', 0.05);
+    if (status === 0) return alpha('#ff9800', 0.05);
+    return 'transparent';
+  };
 
   // Action handlers
   const handleClickEdit = (id: number) => navigate(`/extra-solicitation/edit/${id}`);
@@ -176,23 +194,42 @@ export default function SolicitationTableExtraRequests({
     );
   }, [currentPage, size, selectedPropToSortTable, updateRequestList, getSelectedProp]);
 
-  // Initial load
-  useEffect(() => {
-    updateRequestListWithCurrentParameters();
-  }, [updateRequestListWithCurrentParameters]);
-
-  // Filter
+  // Combined Filter
   const filteredRequests = (extraRequests?.list || []).filter(
     (request) =>
-      !searchQuery ||
-      request.user?.name?.toLowerCase().includes(searchQuery.toLowerCase()),
+      (!searchQuery || request.user?.name?.toLowerCase().includes(searchQuery.toLowerCase())) &&
+      (statusFilter === null || request.situacao === statusFilter)
   );
+
+  const menuProps = {
+    PaperProps: {
+      sx: {
+        borderRadius: '4px',
+        marginTop: '4px',
+        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+        '& .MuiList-root': { padding: '4px' },
+        '& .MuiMenuItem-root': {
+          borderRadius: '2px',
+          minHeight: '48px',
+          padding: '12px 16px',
+          transition: 'background-color 0.2s',
+          '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' },
+          '&.Mui-selected': {
+            backgroundColor: 'rgba(0, 0, 0, 0.08)',
+            '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.12)' },
+          },
+        },
+      },
+    },
+  };
 
   return (
     <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 2 }}>
       <Box sx={{ mb: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h6" component="h2">Solicitações de Demanda Extra</Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h6" component="h2" fontWeight="bold" color="primary">
+            Solicitações de Demanda Extra
+          </Typography>
           <ToggleButtonGroup value={viewMode} exclusive onChange={handleViewModeChange} size="small">
             <ToggleButton value="table">
               <Tooltip title="Visualização em tabela"><ViewListIcon /></Tooltip>
@@ -203,25 +240,102 @@ export default function SolicitationTableExtraRequests({
           </ToggleButtonGroup>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField
-            variant="outlined"
-            size="small"
-            placeholder="Buscar solicitações"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            sx={{ flexGrow: 1 }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon fontSize="small" />
-                </InputAdornment>
-              ),
-            }}
-          />
-          <Tooltip title="Filtros">
-            <IconButton size="small"><FilterListIcon /></IconButton>
-          </Tooltip>
+        {/* BARRA DE FILTROS SINCRONIZADA - PADRÃO PROAP */}
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: isMobile ? 'column' : 'row', 
+          gap: 2, 
+          alignItems: 'center', 
+          width: '100%',
+          mb: 0
+        }}>
+          <FormControl sx={{ flexGrow: 1 }} size="small">
+            <TextField
+              margin="none"
+              fullWidth
+              variant="outlined"
+              size="small"
+              placeholder="Buscar por solicitante..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" color="action" />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ '& .MuiOutlinedInput-root': { height: 47, backgroundColor: 'white' } }}
+            />
+          </FormControl>
+
+          <FormControl sx={{ minWidth: isMobile ? '100%' : '220px' }} size="small">
+            <Select
+              displayEmpty
+              value={statusFilter ?? ''}
+              onChange={handleStatusFilterChange}
+              MenuProps={menuProps}
+              sx={{
+                height: 47,
+                backgroundColor: getStatusAlphaColor(statusFilter),
+                '& .MuiSelect-select': {
+                  height: '47px !important',
+                  padding: '0 !important',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'start',
+                  boxSizing: 'border-box',
+                },
+              }}
+              renderValue={(selected) => {
+                if (String(selected) === '') {
+                  return (
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, px: 2, color: 'text.secondary' }}>
+                      <FilterAltIcon fontSize="small" />
+                      <Typography variant="body2">Filtrar</Typography>
+                    </Box>
+                  );
+                }
+                return (
+                  <StatusChip 
+                    status={Number(selected)} 
+                    sx={{ 
+                      width: '100%', 
+                      height: '47px !important', 
+                      borderRadius: 0, 
+                      border: 'none',
+                      backgroundColor: 'transparent',
+                      '& .MuiChip-label': { width: '100%', textAlign: 'center' }
+                    }} 
+                  />
+                );
+              }}
+            >
+              <MenuItem 
+                value="" 
+                sx={{ 
+                  color: 'default',
+                  py: 1.5,
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  fontWeight: 500,
+                  borderBottom: '1px solid',
+                  borderColor: 'divider',
+                  mb: 1
+                }}
+              >
+                <FilterAltIcon fontSize="small" />
+                Limpar filtro
+              </MenuItem>
+              {statusOptions.map((opt) => (
+                <MenuItem key={opt.value} value={opt.value}>
+                  <StatusChip status={opt.value} sx={{ width: '100%', pointerEvents: 'none' }} />
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Box>
       </Box>
 
@@ -244,7 +358,7 @@ export default function SolicitationTableExtraRequests({
       ) : (
         <ExtraRequestGridView
           extraRequests={filteredRequests}
-          searchQuery={searchQuery} // Adicionado para consistência com a Interface
+          searchQuery={searchQuery}
           currentUserEmail={currentUser.email}
           userCanViewAllRequests={userCanViewAllRequests}
           userCanReviewRequests={userCanReviewRequests}
@@ -260,7 +374,7 @@ export default function SolicitationTableExtraRequests({
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography variant="body2" color="text.secondary">Itens por página:</Typography>
-          <Select value={size} onChange={(e) => setSize(e.target.value as number)} size="small">
+          <Select value={size} onChange={(e) => setSize(e.target.value as number)} size="small" sx={{ minWidth: 70 }}>
             {[5, 10, 20, 30].map(val => <MenuItem key={val} value={val}>{val}</MenuItem>)}
           </Select>
         </Box>
@@ -270,18 +384,20 @@ export default function SolicitationTableExtraRequests({
           page={currentPage + 1}
           onChange={(_, v) => setCurrentPage(v - 1)}
           color="primary"
+          showFirstButton
+          showLastButton
           size={isMobile ? 'small' : 'medium'}
         />
 
         <Typography variant="body2" color="text.secondary">
-          Total: {extraRequests?.total || 0} solicitações
+          Total: <strong>{extraRequests?.total || 0}</strong> solicitações
         </Typography>
       </Box>
 
       <Dialog open={openDeleteConfirmation} onClose={closeDeleteDialog}>
         <DialogTitle>Remoção de solicitação</DialogTitle>
         <DialogContent>
-          <DialogContentText><b>Deseja realmente remover esta solicitação?</b></DialogContentText>
+          <DialogContentText>Deseja realmente remover esta solicitação extra?</DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={closeDeleteDialog}>Não</Button>

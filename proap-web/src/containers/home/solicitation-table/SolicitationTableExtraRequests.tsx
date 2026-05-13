@@ -321,7 +321,6 @@ export default function SolicitationTableExtraRequests({
                   alignItems: 'center',
                   gap: 1.5,
                   fontWeight: 500,
-                  borderBottom: '1px solid',
                   borderColor: 'divider',
                   mb: 1
                 }}

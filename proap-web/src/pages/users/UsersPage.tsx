@@ -62,29 +62,27 @@ export default function UsersPage() {
   const {
     status,
     isLoading,
-    users,
+    allUsers,
     page,
-    totalUsers,
-    PAGE_SIZE,
+    pageSize,
     handlePageChange,
+    handlePageSizeChange,
     updateUsers,
   } = useUsers();
 
   const userCanViewPage = useHasPermission('VIEW_USER');
 
   useEffect(() => {
-    if (users.length > 0) {
-      setFilteredUsers(
-        users.filter((user) =>
-          Object.values(user).some(
-            (value) =>
-              typeof value === 'string' &&
-              value.toLowerCase().includes(searchTerm.toLowerCase()),
-          ),
+    setFilteredUsers(
+      allUsers.filter((user) =>
+        Object.values(user).some(
+          (value) =>
+            typeof value === 'string' &&
+            value.toLowerCase().includes(searchTerm.toLowerCase()),
         ),
-      );
-    }
-  }, [users, searchTerm]);
+      ),
+    );
+  }, [allUsers, searchTerm]);
 
   const handleClose = () => setOpen(false);
 
@@ -147,6 +145,11 @@ export default function UsersPage() {
     return stabilized.map(({ user }) => user);
   }, [filteredUsers, order, orderBy]);
 
+  const pagedUsers = React.useMemo(
+    () => sortedUsers.slice(pageSize * page, pageSize * (page + 1)),
+    [sortedUsers, page, pageSize],
+  );
+
   const getProfileChipColor = (profileName: string) => {
     const profile = profileName.toLowerCase();
     if (profile.includes('admin')) return 'success';
@@ -165,7 +168,7 @@ export default function UsersPage() {
 
   const renderMobileView = () => (
     <Stack spacing={2}>
-      {sortedUsers.map(({ name, cpf, email, phone, profileName }) => (
+      {pagedUsers.map(({ name, cpf, email, phone, profileName }) => (
         <Card key={cpf} elevation={1} sx={{ mb: 1 }}>
           <CardContent>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
@@ -195,16 +198,18 @@ export default function UsersPage() {
           </CardContent>
         </Card>
       ))}
-      {sortedUsers.length > 0 && (
+      {pagedUsers.length > 0 && (
         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
           <TablePagination
             component="div"
-            count={totalUsers}
+            count={sortedUsers.length}
             page={page}
-            rowsPerPage={PAGE_SIZE}
-            rowsPerPageOptions={[PAGE_SIZE]}
+            rowsPerPage={pageSize}
+            rowsPerPageOptions={[20, 50, 100]}
             onPageChange={handlePageChange}
-            labelRowsPerPage=""
+            onRowsPerPageChange={handlePageSizeChange}
+            labelRowsPerPage="Por página:"
+            labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count}`}
           />
         </Box>
       )}
@@ -212,6 +217,7 @@ export default function UsersPage() {
   );
 
   const renderDesktopView = () => (
+    <>
     <TableContainer component={Paper} elevation={0}>
       <Table stickyHeader sx={{ minWidth: 650 }} size="medium" aria-label="users table">
         <TableHead>
@@ -270,8 +276,8 @@ export default function UsersPage() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {sortedUsers.length > 0 ? (
-            sortedUsers.map(({ name, cpf, email, phone, profileName }) => (
+          {pagedUsers.length > 0 ? (
+            pagedUsers.map(({ name, cpf, email, phone, profileName }) => (
               <TableRow
                 key={cpf}
                 sx={{
@@ -312,6 +318,18 @@ export default function UsersPage() {
         </TableBody>
       </Table>
     </TableContainer>
+    <TablePagination
+      component="div"
+      count={sortedUsers.length}
+      page={page}
+      rowsPerPage={pageSize}
+      rowsPerPageOptions={[20, 50, 100]}
+      onPageChange={handlePageChange}
+      onRowsPerPageChange={handlePageSizeChange}
+      labelRowsPerPage="Por página:"
+      labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count}`}
+    />
+    </>
   );
 
   return !userCanViewPage ? (

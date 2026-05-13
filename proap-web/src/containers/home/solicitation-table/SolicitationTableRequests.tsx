@@ -4,18 +4,17 @@ import {
   Paper,
   InputAdornment,
   TextField,
-  IconButton,
-  useMediaQuery,
-  useTheme,
-  ToggleButton,
-  ToggleButtonGroup,
-  Tooltip,
   MenuItem,
   Select,
   FormControl,
-  InputLabel,
-  Menu,
   Chip,
+  SelectChangeEvent,
+  alpha,
+  Tooltip,
+  ToggleButton,
+  ToggleButtonGroup,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -27,8 +26,6 @@ import Pagination from '@mui/material/Pagination';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import SearchIcon from '@mui/icons-material/Search';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import SortIcon from '@mui/icons-material/Sort';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import ClearIcon from '@mui/icons-material/Clear';
 
@@ -52,79 +49,40 @@ import {
 } from './components';
 import { ConfirmationDialog } from '../../../components/dialogs';
 
-/**
- * Component that displays a table of assistance requests
- * Allows sorting, pagination, and actions like view, edit, review, delete
- */
 export default function SolicitationTableRequests() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const userCanViewAllRequests = useHasPermission('VIEW_ALL_REQUESTS');
   const isCeapg = useHasPermission('CEAPG_ROLE');
   const userCanReviewRequests = useHasPermission('APPROVE_REQUEST');
   const currentUser = useAuth();
 
-  // View mode (table or grid) com preferência salva
   const [viewMode, setViewMode] = useViewModePreference(currentUser.email);
-
-  // Search filter
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Status filter
   const [statusFilter, setStatusFilter] = useState<number | null>(null);
-  const [anchorElFilter, setAnchorElFilter] = useState<null | HTMLElement>(
-    null,
-  );
-  const openFilter = Boolean(anchorElFilter);
 
-  // Status options
   const statusOptions = [
-    {
-      value: 0,
-      label: {
-        text: 'Pendente',
-        component: <StatusChip status={0} />,
-      },
-    },
-    {
-      value: 1,
-      label: {
-        text: 'Aprovada',
-        component: <StatusChip status={1} />,
-      },
-    },
-    {
-      value: 2,
-      label: {
-        text: 'Não aprovada',
-        component: <StatusChip status={2} />,
-      },
-    },
+    { value: 0, text: 'Pendente' },
+    { value: 1, text: 'Aprovada' },
+    { value: 2, text: 'Não aprovada' },
   ];
 
-  // Table sorting
   const { selectedPropToSortTable, getSelectedProp, handleClickSortTable } =
     useTableSort('createdAt', false);
 
-  // Pagination
   const [numberPagesAssistance, setNumberPagesAssistance] = useState(1);
   const prevNumberPagesAssistance = usePrevious(numberPagesAssistance);
   const [size, setSize] = useState(10);
   const [currentPageAssistance, setCurrentPageAssistance] = useState(0);
 
-  // Deletion confirmation
   const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState(false);
-  const [solicitationToDelete, setSolicitationToDelete] = useState<
-    number | null
-  >(null);
+  const [solicitationToDelete, setSolicitationToDelete] = useState<number | null>(null);
 
-  // Solicitation details
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
-  const [detailsDialogData, setDetailsDialogData] =
-    useState<SolicitationDetailsDialogProps>({
+  const [detailsDialogData, setDetailsDialogData] = useState<SolicitationDetailsDialogProps>({
       nomeSolicitante: '',
       solicitanteDocente: false,
       valorTotal: 0,
@@ -142,26 +100,15 @@ export default function SolicitationTableRequests() {
       observacoes: '',
     });
 
-  // Data fetching
-  const { requests } = useSelector(
-    (state: IRootState) => state.assistanceRequestSlice,
-  );
+  const { requests } = useSelector((state: IRootState) => state.assistanceRequestSlice);
 
   const updateAssistanceRequestList = useCallback(
-    (
-      sortBy: AssistanceRequestPropToSort,
-      ascending: boolean,
-      size: number,
-      page: number,
-    ) => {
+    (sortBy: AssistanceRequestPropToSort, ascending: boolean, size: number, page: number) => {
       dispatch(getAssistanceRequests(sortBy, ascending, page, size)).then(
-        (requests) =>
-          setNumberPagesAssistance(
-            Math.trunc(requests.payload.total / size) + 1,
-          ),
+        (requests) => setNumberPagesAssistance(Math.trunc(requests.payload.total / size) + 1)
       );
     },
-    [dispatch],
+    [dispatch]
   );
 
   const updateAssistanceRequestListWithCurrentParameters = () => {
@@ -169,87 +116,24 @@ export default function SolicitationTableRequests() {
       getSelectedProp(),
       selectedPropToSortTable[getSelectedProp()] as boolean,
       size,
-      currentPageAssistance,
+      currentPageAssistance
     );
   };
 
-  // Action handlers
-  const handleClickEditRequest = (id: number) => {
-    navigate(`/solicitation/edit/${id}`);
+  const handleStatusFilterChange = (event: SelectChangeEvent<string | number>) => {
+    const value = event.target.value;
+    setStatusFilter(value === '' ? null : Number(value));
   };
 
-  const handleClickReviewRequest = (id: number) => {
-    navigate(`/solicitation/review/${id}`);
+  const getStatusAlphaColor = (status: number | null) => {
+    if (status === 1) return alpha('#4caf50', 0.05);
+    if (status === 2) return alpha('#f44336', 0.05);
+    if (status === 0) return alpha('#ff9800', 0.05);
+    return 'transparent';
   };
 
-  const handleClickViewSolicitation = (id: number) => {
-    navigate(`/solicitation/view/${id}`);
-  };
-
-  const handleClickRemoveRequest = () => {
-    if (solicitationToDelete) {
-      removeAssistanceRequestById(solicitationToDelete)
-        .then(() => {
-          updateAssistanceRequestListWithCurrentParameters();
-          toast.success('Solicitação removida com sucesso');
-        })
-        .catch((error) => {
-          toast.error(
-            `Erro ao remover solicitação: ${error.response?.data?.message || 'Ocorreu um erro inesperado'}`,
-          );
-        })
-        .finally(() => {
-          setOpenDeleteConfirmation(false);
-          setSolicitationToDelete(null);
-        });
-    }
-  };
-
-  const openDeleteDialog = (id: number) => {
-    setSolicitationToDelete(id);
-    setOpenDeleteConfirmation(true);
-  };
-
-  const closeDeleteDialog = () => {
-    setOpenDeleteConfirmation(false);
-    setSolicitationToDelete(null);
-  };
-
-  const handleShowDetails = (props: SolicitationDetailsDialogProps) => {
-    setDetailsDialogData(props);
-    setOpenDetailsDialog(true);
-  };
-
-  const handleViewModeChange = (
-    _: React.MouseEvent<HTMLElement>,
-    newMode: 'table' | 'grid',
-  ) => {
-    if (newMode !== null) {
-      setViewMode(newMode);
-    }
-  };
-
-  // Handle filter menu
-  const handleOpenFilterMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElFilter(event.currentTarget);
-  };
-
-  const handleCloseFilterMenu = () => {
-    setAnchorElFilter(null);
-  };
-
-  const handleStatusFilterChange = (status: number | null) => {
-    setStatusFilter(status);
-    handleCloseFilterMenu();
-  };
-
-  // Effects
   useEffect(() => {
-    if (
-      prevNumberPagesAssistance &&
-      prevNumberPagesAssistance > numberPagesAssistance &&
-      currentPageAssistance >= numberPagesAssistance
-    )
+    if (prevNumberPagesAssistance && prevNumberPagesAssistance > numberPagesAssistance && currentPageAssistance >= numberPagesAssistance)
       setCurrentPageAssistance(numberPagesAssistance - 1);
   }, [numberPagesAssistance, prevNumberPagesAssistance, currentPageAssistance]);
 
@@ -258,132 +142,171 @@ export default function SolicitationTableRequests() {
       getSelectedProp(),
       selectedPropToSortTable[getSelectedProp()] as boolean,
       size,
-      currentPageAssistance,
+      currentPageAssistance
     );
-  }, [
-    currentPageAssistance,
-    size,
-    selectedPropToSortTable,
-    updateAssistanceRequestList,
-  ]);
+  }, [currentPageAssistance, size, selectedPropToSortTable, updateAssistanceRequestList]);
 
-  // Filter requests based on search query and status filter
-  const filteredRequests = requests.list.filter(
-    (request) =>
-      // Apply text search filter
+  const filteredRequests = requests.list.filter((request) =>
       (!searchQuery ||
         request.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        request.tituloPublicacao
-          ?.toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-        request.nomeEvento
-          ?.toLowerCase()
-          .includes(searchQuery.toLowerCase())) &&
-      // Apply status filter if selected
-      (statusFilter === null || request.situacao === statusFilter),
+        request.tituloPublicacao?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        request.nomeEvento?.toLowerCase().includes(searchQuery.toLowerCase())) &&
+      (statusFilter === null || request.situacao === statusFilter)
   );
+
+  const menuProps = {
+    PaperProps: {
+      sx: {
+        borderRadius: '4px', // Diminuindo o arredondamento do menu (mais "quadrado")
+        marginTop: '4px',
+        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+        '& .MuiList-root': {
+          padding: '4px', // Espaço entre a borda do menu e os itens
+        },
+        '& .MuiMenuItem-root': {
+          borderRadius: '2px', // Round menor também nos itens individuais
+          minHeight: '48px',   // Aumentando o tamanho vertical do item
+          padding: '12px 16px', // Aumentando o tamanho interno (área de clique)
+          transition: 'background-color 0.2s',
+          '&:hover': {
+            backgroundColor: 'rgba(0, 0, 0, 0.04)',
+          },
+          '&.Mui-selected': {
+            backgroundColor: 'rgba(0, 0, 0, 0.08)',
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.12)',
+            },
+          },
+        },
+      },
+    },
+  };
 
   return (
     <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 2 }}>
       <Box sx={{ mb: 3 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            mb: 2,
-          }}
-        >
-          <Typography variant="h6" component="h2">
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h6" component="h2" fontWeight="bold" color="primary">
             Solicitações de Apoio
           </Typography>
 
           <ToggleButtonGroup
             value={viewMode}
             exclusive
-            onChange={handleViewModeChange}
-            aria-label="view mode"
+            onChange={(_, mode) => mode && setViewMode(mode)}
             size="small"
           >
-            <ToggleButton value="table" aria-label="table view">
-              <Tooltip title="Visualização em tabela">
-                <ViewListIcon />
-              </Tooltip>
-            </ToggleButton>
-            <ToggleButton value="grid" aria-label="grid view">
-              <Tooltip title="Visualização em cards">
-                <ViewModuleIcon />
-              </Tooltip>
-            </ToggleButton>
+            <ToggleButton value="table"><Tooltip title="Tabela"><ViewListIcon /></Tooltip></ToggleButton>
+            <ToggleButton value="grid"><Tooltip title="Cards"><ViewModuleIcon /></Tooltip></ToggleButton>
           </ToggleButtonGroup>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-          <TextField
-            variant="outlined"
-            size="small"
-            placeholder="Buscar solicitações"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            sx={{ flexGrow: 1 }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon fontSize="small" />
-                </InputAdornment>
-              ),
-            }}
-          />
+        {/* CONTAINER MÃE: Centraliza Search e Select verticalmente */}
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: isMobile ? 'column' : 'row', 
+          gap: 2, 
+          alignItems: 'center', // Centralização vertical absoluta
+          width: '100%',
+          mb: 0
+        }}>
+          {/* BUSCA: Envolvida em FormControl para espelhar o Select */}
+          <FormControl sx={{ flexGrow: 1 }} size="small">
+            <TextField
+              margin="none"
+              fullWidth
+              variant="outlined"
+              size="small"
+              placeholder="Buscar por solicitante, evento ou publicação..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" color="action" />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ 
+                '& .MuiOutlinedInput-root': { 
+                  height: 47, 
+                  backgroundColor: 'white' 
+                } 
+              }}
+            />
+          </FormControl>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Tooltip title="Filtrar por status">
-              <IconButton size="small" onClick={handleOpenFilterMenu}>
-                <FilterListIcon />
-              </IconButton>
-            </Tooltip>
-            <Menu
-              anchorEl={anchorElFilter}
-              open={openFilter}
-              onClose={handleCloseFilterMenu}
+          {/* STATUS: FormControl idêntico ao da Busca */}
+          <FormControl sx={{ minWidth: isMobile ? '100%' : '220px' }} size="small">
+            {/* displayEmpty permite mostrar o placeholder sem precisar do InputLabel */}
+            <Select
+              displayEmpty
+              value={statusFilter ?? ''}
+              onChange={handleStatusFilterChange}
+              MenuProps={menuProps}
+              sx={{
+                height: 47,
+                backgroundColor: getStatusAlphaColor(statusFilter),
+                '& .MuiSelect-select': {
+                height: '47px !important',
+                padding: '0 !important',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'start', // Centraliza horizontalmente também
+                boxSizing: 'border-box',
+              },
+              }}
+              renderValue={(selected) => {
+                if (String(selected) === '') {
+                  return (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, color: 'text.secondary' }}>
+                      <FilterAltIcon fontSize="small" />
+                      <Typography variant="body2">Status</Typography>
+                    </Box>
+                  );
+                }
+                return (
+                  <StatusChip 
+                    status={Number(selected)} 
+                    sx={{ 
+                      width: '100%', 
+                      height: '47px !important', 
+                      borderRadius: 0, 
+                      border: 'none',
+                      backgroundColor: 'transparent',
+                      '& .MuiChip-label': { width: '100%', textAlign: 'center' }
+                    }} 
+                  />
+                );
+              }}
             >
-              <MenuItem onClick={() => handleStatusFilterChange(null)}>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                  }}
-                >
-                  <FilterAltIcon fontSize="small" />
-                  <Typography variant="body2">Limpar filtro</Typography>
-                </Box>
+              {/* Opção de Limpar Filtro com ícone */}
+              <MenuItem 
+                value="" 
+                sx={{ 
+                  color: 'default', // Cor de destaque para ação de limpar
+                  py: 1.5,
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  fontWeight: 500,
+                  borderColor: 'divider',
+                  mb: 1 // Separa um pouco das opções de status
+                }}
+              >
+                <FilterAltIcon fontSize="small" />
+                Limpar filtro
               </MenuItem>
-              {statusOptions.map((option) => (
-                <MenuItem
-                  key={option.value}
-                  onClick={() => handleStatusFilterChange(option.value)}
-                >
-                  {option.label.component}
+
+              {statusOptions.map((opt) => (
+                <MenuItem key={opt.value} value={opt.value}>
+                  <StatusChip status={opt.value} sx={{ width: '100%', pointerEvents: 'none' }} />
                 </MenuItem>
               ))}
-            </Menu>
-          </Box>
+            </Select>
+          </FormControl>
         </Box>
-
-        {statusFilter !== null && (
-          <Box sx={{ mt: 2 }}>
-            <Chip
-              icon={<FilterAltIcon />}
-              label={`Filtro ativo: ${
-                statusOptions.find((option) => option.value === statusFilter)
-                  ?.label.text
-              }`}
-              onDelete={() => setStatusFilter(null)}
-              deleteIcon={<ClearIcon />}
-              color="primary"
-            />
-          </Box>
-        )}
       </Box>
 
       {viewMode === 'table' ? (
@@ -396,11 +319,11 @@ export default function SolicitationTableRequests() {
           userCanViewAllRequests={userCanViewAllRequests}
           userCanReviewRequests={userCanReviewRequests}
           isCeapg={isCeapg}
-          onEdit={handleClickEditRequest}
-          onReview={handleClickReviewRequest}
-          onView={handleClickViewSolicitation}
-          onDelete={openDeleteDialog}
-          onShowDetails={handleShowDetails}
+          onEdit={(id) => navigate(`/solicitation/edit/${id}`)}
+          onReview={(id) => navigate(`/solicitation/review/${id}`)}
+          onView={(id) => navigate(`/solicitation/view/${id}`)}
+          onDelete={(id) => { setSolicitationToDelete(id); setOpenDeleteConfirmation(true); }}
+          onShowDetails={(props) => { setDetailsDialogData(props); setOpenDetailsDialog(true); }}
         />
       ) : (
         <SolicitationGridView
@@ -410,44 +333,26 @@ export default function SolicitationTableRequests() {
           userCanViewAllRequests={userCanViewAllRequests}
           userCanReviewRequests={userCanReviewRequests}
           isCeapg={isCeapg}
-          onEdit={handleClickEditRequest}
-          onReview={handleClickReviewRequest}
-          onView={handleClickViewSolicitation}
-          onDelete={openDeleteDialog}
-          onShowDetails={handleShowDetails}
+          onEdit={(id) => navigate(`/solicitation/edit/${id}`)}
+          onReview={(id) => navigate(`/solicitation/review/${id}`)}
+          onView={(id) => navigate(`/solicitation/view/${id}`)}
+          onDelete={(id) => { setSolicitationToDelete(id); setOpenDeleteConfirmation(true); }}
+          onShowDetails={(props) => { setDetailsDialogData(props); setOpenDetailsDialog(true); }}
         />
       )}
 
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 2,
-        }}
-      >
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2, mt: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="body2" color="text.secondary">
-            Itens por página:
-          </Typography>
-          <Select
-            value={size}
-            onChange={(e) => setSize(e.target.value as number)}
-            size="small"
-            sx={{ minWidth: 70 }}
-          >
-            <MenuItem value={5}>5</MenuItem>
-            <MenuItem value={10}>10</MenuItem>
-            <MenuItem value={20}>20</MenuItem>
-            <MenuItem value={30}>30</MenuItem>
+          <Typography variant="body2" color="text.secondary">Itens por página:</Typography>
+          <Select value={size} onChange={(e) => setSize(e.target.value as number)} size="small" sx={{ minWidth: 70 }}>
+            {[5, 10, 20, 30].map(v => <MenuItem key={v} value={v}>{v}</MenuItem>)}
           </Select>
         </Box>
 
         <Pagination
           count={numberPagesAssistance}
           page={currentPageAssistance + 1}
-          onChange={(e, v) => setCurrentPageAssistance(v - 1)}
+          onChange={(_, v) => setCurrentPageAssistance(v - 1)}
           color="primary"
           showFirstButton
           showLastButton
@@ -455,14 +360,21 @@ export default function SolicitationTableRequests() {
         />
 
         <Typography variant="body2" color="text.secondary">
-          Total: {requests.total} solicitações
+          Total: <strong>{requests.total}</strong> solicitações
         </Typography>
       </Box>
 
       <ConfirmationDialog
         open={openDeleteConfirmation}
-        onClose={closeDeleteDialog}
-        onConfirm={handleClickRemoveRequest}
+        onClose={() => setOpenDeleteConfirmation(false)}
+        onConfirm={() => {
+            if (solicitationToDelete) {
+                removeAssistanceRequestById(solicitationToDelete).then(() => {
+                    updateAssistanceRequestListWithCurrentParameters();
+                    toast.success('Solicitação removida');
+                }).catch(() => toast.error('Erro ao remover')).finally(() => setOpenDeleteConfirmation(false));
+            }
+        }}
         title="Remoção de solicitação"
         message="Deseja realmente remover esta solicitação?"
       />

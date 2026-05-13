@@ -112,7 +112,7 @@ export default function SolicitationTableRequests() {
   // Pagination
   const [numberPagesAssistance, setNumberPagesAssistance] = useState(1);
   const prevNumberPagesAssistance = usePrevious(numberPagesAssistance);
-  const [size, setSize] = useState(10);
+  const [size, setSize] = useState(50);
   const [currentPageAssistance, setCurrentPageAssistance] = useState(0);
 
   // Deletion confirmation
@@ -437,10 +437,9 @@ export default function SolicitationTableRequests() {
             size="small"
             sx={{ minWidth: 70 }}
           >
-            <MenuItem value={5}>5</MenuItem>
             <MenuItem value={10}>10</MenuItem>
-            <MenuItem value={20}>20</MenuItem>
-            <MenuItem value={30}>30</MenuItem>
+            <MenuItem value={50}>50</MenuItem>
+            <MenuItem value={100}>100</MenuItem>
           </Select>
         </Box>
 

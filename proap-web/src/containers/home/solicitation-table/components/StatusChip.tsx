@@ -1,11 +1,12 @@
 import React from 'react';
-import { Chip, alpha } from '@mui/material';
+import { Chip, alpha, SxProps, Theme } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 
 interface StatusChipProps {
   status: number;
+  sx?: SxProps<Theme>;
 }
 
 /**
@@ -35,10 +36,13 @@ const StatusChip: React.FC<StatusChipProps> = ({ status }) => {
       icon={getStatusIcon()}
       label={getStatusText()}
       color={getStatusColor()}
-      size="small"
+      size="medium"
       variant="outlined"
       sx={{
-        borderWidth: 1,
+        width: '100%',
+        height: '100%',
+        borderRadius: '8px',
+        borderWidth: 0,
         fontWeight: 500,
         '&.MuiChip-colorSuccess': {
           backgroundColor: alpha('#4caf50', 0.08),

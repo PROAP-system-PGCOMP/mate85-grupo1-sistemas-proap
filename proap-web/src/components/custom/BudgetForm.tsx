@@ -10,11 +10,14 @@ import {
 } from '@mui/material';
 import { CalendarToday } from '@mui/icons-material';
 import { BudgetFormValues } from '../../containers/admin-panel/BudgetFormSchema';
+// Importando o helper que você já usa no Overview
+import { formatNumberToBRL } from '../../helpers/formatter';
 import { getBudgetByYear } from '../../services/budgetService';
 
 interface BudgetFormProps {
   onSubmit: (values: BudgetFormValues) => void;
   loading: boolean;
+  totalBudget?: number; 
 }
 
 const StyledTextField = (props: any) => (
@@ -44,6 +47,8 @@ const StyledFormLabel = ({ children, ...props }: any) => (
   </Typography>
 );
 
+const BudgetForm: React.FC<BudgetFormProps> = ({ loading, totalBudget }) => {
+  const { errors, touched } = useFormikContext<BudgetFormValues>();
 const BudgetForm: React.FC<BudgetFormProps> = ({ loading }) => {
   const { errors, touched, values, setFieldValue } = useFormikContext<BudgetFormValues>();
 
@@ -64,12 +69,13 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ loading }) => {
     <Form>
       <Stack spacing={2}>
         <Box>
-          <StyledFormLabel required>Valor do Orçamento (R$)</StyledFormLabel>
+          <StyledFormLabel required>Valor do orçamento (R$)</StyledFormLabel>
           <Field
             as={StyledTextField}
             fullWidth
             name="budget"
-            placeholder="0,00"
+            // Lógica copiada exatamente do StatCard do seu BudgetOverview
+            placeholder={formatNumberToBRL(Number(totalBudget))}
             type="number"
             InputProps={{
               inputProps: { min: 0, step: 0.01 },

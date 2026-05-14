@@ -332,6 +332,7 @@ const AdminDashboardContainer = () => {
             <SettingContainer
               handleBudgetSubmit={handleBudgetSubmit}
               loading={loading}
+              totalBudget={budgetByYear.budget?.totalBudget ?? 0}
               onDirtyChange={setIsSettingsDirty}
               submitRef={settingsSubmitRef}
             />

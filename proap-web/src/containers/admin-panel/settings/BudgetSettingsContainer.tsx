@@ -13,11 +13,13 @@ import { getBudgetByYear } from '../../../services/budgetService';
 interface BudgetSettingsContainerProps {
   handleBudgetSubmit: (values: BudgetFormValues) => Promise<void>;
   loading: boolean;
+  totalBudget: number;
 }
 
 export default function BudgetSettingsContainer({
   handleBudgetSubmit,
   loading,
+  totalBudget,
 }: BudgetSettingsContainerProps) {
   const [initialValues, setInitialValues] = useState<BudgetFormValues>(INITIAL_FORM_VALUES);
 
@@ -69,6 +71,10 @@ export default function BudgetSettingsContainer({
           </Box>
 
           <Formik
+            initialValues={{ 
+              budget: totalBudget, // Se for 0 ou null, fica vazio para mostrar o placeholder
+              year: new Date().getFullYear() 
+            }}
             initialValues={initialValues}
             validationSchema={budgetFormSchema}
             onSubmit={handleBudgetSubmit}
@@ -76,7 +82,7 @@ export default function BudgetSettingsContainer({
           >
             {(formikProps) => (
               <>
-                <BudgetForm onSubmit={handleBudgetSubmit} loading={loading} />
+                <BudgetForm onSubmit={handleBudgetSubmit} loading={loading} totalBudget={totalBudget}/>
 
                 <Box
                   sx={{

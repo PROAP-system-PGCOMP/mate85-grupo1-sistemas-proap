@@ -19,6 +19,7 @@ import SectionHeader from '../../../components/custom/SectionHeader';
 interface SettingContainerProps {
   handleBudgetSubmit: (values: BudgetFormValues) => Promise<void>;
   loading: boolean;
+  totalBudget: number;
   onDirtyChange?: (dirty: boolean) => void;
   submitRef?: React.MutableRefObject<(() => Promise<void>) | null>;
 }
@@ -26,6 +27,7 @@ interface SettingContainerProps {
 export default function SettingContainer({
   handleBudgetSubmit,
   loading,
+  totalBudget,
   onDirtyChange,
   submitRef,
 }: SettingContainerProps) {
@@ -58,6 +60,7 @@ export default function SettingContainer({
           <BudgetSettingsContainer
             handleBudgetSubmit={handleBudgetSubmit}
             loading={loading}
+            totalBudget={totalBudget}
           />
         </AccordionDetails>
       </Accordion>

@@ -7,6 +7,8 @@ import {
 import { InfoOutlined } from '@mui/icons-material';
 import { Formik } from 'formik';
 import BudgetForm from '../../../components/custom/BudgetForm';
+import { useEffect, useState } from 'react';
+import { getBudgetByYear } from '../../../services/budgetService';
 
 interface BudgetSettingsContainerProps {
   handleBudgetSubmit: (values: BudgetFormValues) => Promise<void>;
@@ -17,6 +19,19 @@ export default function BudgetSettingsContainer({
   handleBudgetSubmit,
   loading,
 }: BudgetSettingsContainerProps) {
+  const [initialValues, setInitialValues] = useState<BudgetFormValues>(INITIAL_FORM_VALUES);
+
+  useEffect(() => {
+    const currentYear = new Date().getFullYear();
+    getBudgetByYear(currentYear)
+      .then((data) => {
+        setInitialValues({ budget: data.orcamentoAnual ?? 0, year: data.year });
+      })
+      .catch(() => {
+        // Nenhum orçamento definido para o ano atual — mantém os valores padrão
+      });
+  }, []);
+
   return (
     <Box
       sx={{
@@ -54,7 +69,7 @@ export default function BudgetSettingsContainer({
           </Box>
 
           <Formik
-            initialValues={INITIAL_FORM_VALUES}
+            initialValues={initialValues}
             validationSchema={budgetFormSchema}
             onSubmit={handleBudgetSubmit}
             enableReinitialize

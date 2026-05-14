@@ -69,7 +69,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ loading }) => {
     <Form>
       <Stack spacing={2}>
         <Box>
-          <StyledFormLabel required>Valor do orçamento (R$)</StyledFormLabel>
+          <StyledFormLabel required>Valor do orçamento</StyledFormLabel>
           <Field
             as={StyledTextField}
             fullWidth

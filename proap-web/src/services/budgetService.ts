@@ -3,7 +3,7 @@ import api from './index';
 export interface SolicitationAdmin {
   id: number;
   year: number;
-  budget: number;
+  orcamentoAnual: number;
 }
 
 export interface AssistanceIdValueDTO {

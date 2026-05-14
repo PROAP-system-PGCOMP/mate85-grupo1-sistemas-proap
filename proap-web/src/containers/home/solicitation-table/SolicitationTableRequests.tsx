@@ -75,7 +75,7 @@ export default function SolicitationTableRequests() {
 
   const [numberPagesAssistance, setNumberPagesAssistance] = useState(1);
   const prevNumberPagesAssistance = usePrevious(numberPagesAssistance);
-  const [size, setSize] = useState(10);
+  const [size, setSize] = useState(50);
   const [currentPageAssistance, setCurrentPageAssistance] = useState(0);
 
   const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState(false);
@@ -339,9 +339,18 @@ export default function SolicitationTableRequests() {
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2, mt: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="body2" color="text.secondary">Itens por página:</Typography>
-          <Select value={size} onChange={(e) => setSize(e.target.value as number)} size="small" sx={{ minWidth: 70 }}>
-            {[5, 10, 20, 30].map(v => <MenuItem key={v} value={v}>{v}</MenuItem>)}
+          <Typography variant="body2" color="text.secondary">
+            Itens por página:
+          </Typography>
+          <Select
+            value={size}
+            onChange={(e) => setSize(e.target.value as number)}
+            size="small"
+            sx={{ minWidth: 70 }}
+          >
+            <MenuItem value={10}>10</MenuItem>
+            <MenuItem value={50}>50</MenuItem>
+            <MenuItem value={100}>100</MenuItem>
           </Select>
         </Box>
 

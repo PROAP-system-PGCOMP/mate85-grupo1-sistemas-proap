@@ -31,8 +31,12 @@ import { PhoneInputMask } from '../../input-masks/PhoneInputMask';
 const CreateUserSchema = Yup.object().shape({
   name: Yup.string()
     .trim()
-    .min(3, 'Nome muito curto')
     .matches(/^[A-Za-záàâãéèêíïóôõöúçñÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑ\s]+$/, 'Números ou caracteres especiais não são permitidos')
+    .test('nome-completo', 'Informe o nome completo (nome e sobrenome)', (value) => {
+      if (!value) return false;
+      const parts = value.trim().split(/\s+/);
+      return parts.length >= 2 && parts.every((p) => p.length >= 2);
+    })
     .required('O nome é obrigatório'),
   cpf: Yup.string().length(11, 'CPF deve ter 11 dígitos').required('CPF é obrigatório'),
   registration: Yup.string().min(5, 'Matrícula inválida').required('Matrícula/SIAPE é obrigatória'),

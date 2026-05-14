@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Redefinição de Senha</title>
+    <title>Registro de Senha</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -44,32 +44,32 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h2>Redefinição de Senha</h2>
-        </div>
-        <div class="content">
-            <p>
-                Você solicitou a redefinição de sua senha. Para prosseguir, clique no link abaixo:
-            </p>
-            <p>
-                <a th:href="@{${url} + ${token}}" class="button" style="color: #ffffff !important;">
-                    Redefinir Senha
-                </a>
-            </p>
-            <p>
-                Caso não seja possível clicar no link, copie e cole o seguinte URL no seu navegador: <br> <span th:text="${url} + ${token}"></span>
-            </p>
-            <p>
-                <i>Nota: Este token de recuperação terá validade de 60 minutos.</i>
-            </p>
-        </div>
-        <div class="footer">
-            <p>
-                Se você não solicitou a redefinição, por favor ignore este e-mail.
-            </p>
-            <p>Este é um e-mail automático. Não responda.</p>
-        </div>
+<div class="container">
+    <div class="header">
+        <h2>Redefinição de Senha</h2>
     </div>
+    <div class="content">
+        <p>
+            Sua conta foi criada por um administrador do sistema. Para acessar sua conta, é necessário criar uma senha. Para isso, clique no link abaixo para definir sua senha inicial:
+        </p>
+        <p>
+            <a th:href="@{${url} + ${token}}" class="button">
+                Definir Senha
+            </a>
+        </p>
+        <p>
+            Caso não seja possível clicar no link, copie e cole o seguinte URL no seu navegador: <br> <span th:text="${url} + ${token}"></span>
+        </p>
+        <p>
+            <i>Nota: Este token de recuperação terá validade de 24 horas.</i>
+        </p>
+    </div>
+    <div class="footer">
+        <p>
+            Se você não solicitou a criação desta conta, por favor ignore este e-mail. A conta foi criada por um administrador do sistema.
+        </p>
+        <p>Este é um e-mail automático. Não responda.</p>
+    </div>
+</div>
 </body>
 </html>

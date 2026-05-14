@@ -4,14 +4,12 @@ import { userProfileSchema } from './UserProfileSchema';
 import {
   Box,
   Button,
-  Stack,
   TextField,
   Typography,
   Grid,
   Divider,
   InputAdornment,
   Tooltip,
-  IconButton,
 } from '@mui/material';
 import {
   Phone,
@@ -22,13 +20,17 @@ import {
   Info,
 } from '@mui/icons-material';
 import { maskCpf, maskPhone } from '../../helpers/masks';
+// Certifique-se de que o react-toastify está instalado. 
+// Se o projeto usa um helper próprio, mude para: import Toast from '../../helpers/notification';
+import { toast } from 'react-toastify'; 
 
 interface UserProfileFormProps {
   initialValues: User;
-  onSubmit: (values: User) => void;
+  onSubmit: (values: User) => Promise<void>;
 }
 
 export default function UserProfileFormContainer(props: UserProfileFormProps) {
+  // Mantém a máscara apenas para exibição inicial no formulário
   const formatInitialValues = (user: User): User => ({
     ...user,
     phone: maskPhone(user.phone),
@@ -36,21 +38,54 @@ export default function UserProfileFormContainer(props: UserProfileFormProps) {
     cpf: maskCpf(user.cpf),
   });
 
+  // FUNÇÃO DE SUBMISSÃO UNIFICADA
+  const handleSubmit = async (values: User, { setSubmitting, setErrors }: any) => {
+    try {
+      // 1. Sanitização: Transformamos "(75) 98353-0062" em "75983530062"
+      const sanitizedValues: User = {
+        ...values,
+        phone: values.phone.replace(/\D/g, ''), 
+        alternativePhone: values.alternativePhone 
+          ? values.alternativePhone.replace(/\D/g, '') 
+          : undefined,
+        cpf: values.cpf.replace(/\D/g, ''),
+      };
+
+      // 2. Chama o serviço (enviado via props) e aguarda
+      await props.onSubmit(sanitizedValues);
+      
+      // 3. Notificação de Sucesso
+      toast.success("Perfil atualizado com sucesso!");
+      
+    } catch (error: any) {
+      // 4. Tratamento do Erro 400 (Adeus mensagens em inglês)
+      console.error("Erro ao atualizar:", error);
+      
+      const errorMsg = error.response?.data?.message || "Erro ao atualizar perfil.";
+      toast.error(errorMsg);
+
+      // Se o back-end devolveu erros específicos por campo
+      if (error.response?.data?.errors) {
+        setErrors(error.response.data.errors);
+      }
+    } finally {
+      // 5. DESTRAVA O BOTÃO: O isSubmitting volta a ser false aqui
+      setSubmitting(false);
+    }
+  };
+
   return (
     <Formik
       initialValues={formatInitialValues(props.initialValues)}
       validationSchema={userProfileSchema}
-      onSubmit={props.onSubmit}
+      onSubmit={handleSubmit}
     >
       {({ errors, touched, setFieldValue, isSubmitting, dirty }) => (
         <Box component={Form} sx={{ width: '100%' }}>
           <Grid container spacing={3}>
+            {/* --- SEÇÃO: INFORMAÇÕES DA CONTA --- */}
             <Grid item xs={12}>
-              <Typography
-                variant="subtitle1"
-                fontWeight="medium"
-                sx={{ mb: 1 }}
-              >
+              <Typography variant="subtitle1" fontWeight="medium" sx={{ mb: 1 }}>
                 Informações da Conta
               </Typography>
               <Divider sx={{ mb: 2 }} />
@@ -109,12 +144,9 @@ export default function UserProfileFormContainer(props: UserProfileFormProps) {
               </Grid>
             </Grid>
 
+            {/* --- SEÇÃO: INFORMAÇÕES PESSOAIS --- */}
             <Grid item xs={12}>
-              <Typography
-                variant="subtitle1"
-                fontWeight="medium"
-                sx={{ mb: 1 }}
-              >
+              <Typography variant="subtitle1" fontWeight="medium" sx={{ mb: 1 }}>
                 Informações Pessoais
               </Typography>
               <Divider sx={{ mb: 2 }} />
@@ -144,8 +176,6 @@ export default function UserProfileFormContainer(props: UserProfileFormProps) {
                     fullWidth
                     name="profileName"
                     label="Papel do Usuário"
-                    error={touched.profileName && !!errors.profileName}
-                    helperText={touched.profileName && errors.profileName}
                     disabled
                     InputProps={{
                       startAdornment: (
@@ -162,12 +192,8 @@ export default function UserProfileFormContainer(props: UserProfileFormProps) {
                     fullWidth
                     name="registrationNumber"
                     label="Número de Matrícula"
-                    error={
-                      touched.registrationNumber && !!errors.registrationNumber
-                    }
-                    helperText={
-                      touched.registrationNumber && errors.registrationNumber
-                    }
+                    error={touched.registrationNumber && !!errors.registrationNumber}
+                    helperText={touched.registrationNumber && errors.registrationNumber}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
@@ -180,12 +206,9 @@ export default function UserProfileFormContainer(props: UserProfileFormProps) {
               </Grid>
             </Grid>
 
+            {/* --- SEÇÃO: INFORMAÇÕES DE CONTATO --- */}
             <Grid item xs={12}>
-              <Typography
-                variant="subtitle1"
-                fontWeight="medium"
-                sx={{ mb: 1 }}
-              >
+              <Typography variant="subtitle1" fontWeight="medium" sx={{ mb: 1 }}>
                 Informações de Contato
               </Typography>
               <Divider sx={{ mb: 2 }} />
@@ -199,14 +222,8 @@ export default function UserProfileFormContainer(props: UserProfileFormProps) {
                         fullWidth
                         label="Telefone Principal"
                         error={touched.phone && !!errors.phone}
-                        helperText={
-                          (touched.phone && errors.phone) ||
-                          'Ex: (71) 99999-9999'
-                        }
-                        onChange={(e) => {
-                          const formattedPhone = maskPhone(e.target.value);
-                          setFieldValue('phone', formattedPhone);
-                        }}
+                        helperText={(touched.phone && errors.phone) || 'Ex: (71) 99999-9999'}
+                        onChange={(e) => setFieldValue('phone', maskPhone(e.target.value))}
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
@@ -225,18 +242,12 @@ export default function UserProfileFormContainer(props: UserProfileFormProps) {
                         {...field}
                         fullWidth
                         label="Telefone Alternativo"
-                        error={
-                          touched.alternativePhone && !!errors.alternativePhone
-                        }
+                        error={touched.alternativePhone && !!errors.alternativePhone}
                         helperText={
-                          (touched.alternativePhone &&
-                            errors.alternativePhone) ||
+                          (touched.alternativePhone && errors.alternativePhone) || 
                           'Opcional - Ex: (71) 99999-9999'
                         }
-                        onChange={(e) => {
-                          const formattedPhone = maskPhone(e.target.value);
-                          setFieldValue('alternativePhone', formattedPhone);
-                        }}
+                        onChange={(e) => setFieldValue('alternativePhone', maskPhone(e.target.value))}
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
@@ -251,18 +262,14 @@ export default function UserProfileFormContainer(props: UserProfileFormProps) {
               </Grid>
             </Grid>
 
+            {/* --- BOTÃO DE AÇÃO --- */}
             <Grid item xs={12}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  mt: 2,
-                }}
-              >
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
                 <Button
                   type="submit"
                   variant="contained"
                   color="primary"
+                  // isSubmitting gerencia o travamento do botão
                   disabled={isSubmitting || !dirty}
                   startIcon={<Save />}
                   size="large"

@@ -24,63 +24,63 @@ import br.ufba.proap.authentication.service.UserService;
 @RequestMapping("/api/extrarequest")
 public class ExtraRequestController {
 
-	private static final Logger logger = LoggerFactory.getLogger(ExtraRequestController.class);
+    private static final Logger logger = LoggerFactory.getLogger(ExtraRequestController.class);
 
-	@Autowired
-	private ExtraRequestService service;
+    @Autowired
+    private ExtraRequestService service;
 
-	@Autowired
-	private ReviewService reviewService;
+    @Autowired
+    private ReviewService reviewService;
 
-	@Autowired
-	private UserService serviceUser;
+    @Autowired
+    private UserService serviceUser;
 
-	@GetMapping("/list")
-	public ResponseEntity<ExtraRequestListFiltered> list(
-			@RequestParam String sortBy,
-			@RequestParam Boolean ascending,
-			@RequestParam int page,
-			@RequestParam int size) {
-		User currentUser = serviceUser.getLoggedUser();
+    @GetMapping("/list")
+    public ResponseEntity<ExtraRequestListFiltered> list(
+            @RequestParam String sortBy,
+            @RequestParam Boolean ascending,
+            @RequestParam int page,
+            @RequestParam int size) {
+        User currentUser = serviceUser.getLoggedUser();
 
-		if (currentUser == null) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-					new ExtraRequestListFiltered(
-							Collections.emptyList(), 0));
-		}
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    new ExtraRequestListFiltered(
+                            Collections.emptyList(), 0));
+        }
 
-		try {
-			return ResponseEntity.ok().body(
-					service.find(
-							sortBy,
-							ascending,
-							page,
-							size,
-							currentUser));
-		} catch (Exception e) {
-			return ResponseEntity.internalServerError().body(
-					new ExtraRequestListFiltered(
-							Collections.emptyList(), 0));
-		}
-	}
+        try {
+            return ResponseEntity.ok().body(
+                    service.find(
+                            sortBy,
+                            ascending,
+                            page,
+                            size,
+                            currentUser));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ExtraRequestListFiltered(
+                            Collections.emptyList(), 0));
+        }
+    }
 
-	@GetMapping("/list/{userId}")
-	public List<ExtraRequest> listById(@PathVariable Long userId) {
-		User currentUser = serviceUser.getLoggedUser();
+    @GetMapping("/list/{userId}")
+    public List<ExtraRequest> listById(@PathVariable Long userId) {
+        User currentUser = serviceUser.getLoggedUser();
 
-		if (currentUser == null)
-			return Collections.emptyList();
-		/*
-		 * if(!currentUser.getId().equals(userId))
-		 * return Collections.emptyList();
-		 */
-		try {
-			return service.findByUser(currentUser);
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			return Collections.emptyList();
-		}
-	}
+        if (currentUser == null)
+            return Collections.emptyList();
+        /*
+         * if(!currentUser.getId().equals(userId))
+         * return Collections.emptyList();
+         */
+        try {
+            return service.findByUser(currentUser);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return Collections.emptyList();
+        }
+    }
 
     @GetMapping("/find/{id}")
     public ResponseEntity<ExtraRequest> findById(@PathVariable Long id) {
@@ -113,107 +113,115 @@ public class ExtraRequestController {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
-	@PostMapping("/create")
-	public ResponseEntity<ExtraRequest> create(@RequestBody ExtraRequest extraRequest) {
-		User currentUser = serviceUser.getLoggedUser();
+    @PostMapping("/create")
+    public ResponseEntity<ExtraRequest> create(@RequestBody ExtraRequest extraRequest) {
+        User currentUser = serviceUser.getLoggedUser();
 
-		if (currentUser == null)
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        if (currentUser == null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 
-		try {
-			extraRequest.setSituacao(0);
-			extraRequest.setUser(currentUser);
+        try {
+            extraRequest.setSituacao(0);
+            extraRequest.setUser(currentUser);
 
-			return ResponseEntity.ok().body(service.save(extraRequest));
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-		}
-	}
+            return ResponseEntity.ok().body(service.save(extraRequest));
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
 
-	@PutMapping("/update")
-	public ResponseEntity<ExtraRequest> update(@RequestBody ExtraRequest extraRequest) {
-		try {
-			return ResponseEntity.ok().body(service.save(extraRequest));
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-		}
-	}
+    @PutMapping("/update")
+    public ResponseEntity<ExtraRequest> update(@RequestBody ExtraRequest extraRequest) {
+        try {
+            return ResponseEntity.ok().body(service.save(extraRequest));
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
 
-	@DeleteMapping("/remove/{id}")
-	public ResponseEntity<String> remove(@PathVariable Long id) {
-		User currentUser = serviceUser.getLoggedUser();
+    @DeleteMapping("/remove/{id}")
+    public ResponseEntity<String> remove(@PathVariable Long id) {
+        User currentUser = serviceUser.getLoggedUser();
 
-		if (currentUser == null)
-			return ResponseEntity.badRequest().build();
+        if (currentUser == null)
+            return ResponseEntity.badRequest().build();
 
-		try {
-			Optional<ExtraRequest> extraRequest = service.findById(id);
+        try {
+            Optional<ExtraRequest> extraRequest = service.findById(id);
 
-			if (extraRequest.isPresent()) {
-				service.delete(extraRequest.get());
-				return ResponseEntity.ok().body("Successfully removed");
-			}
+            if (extraRequest.isPresent()) {
+                service.delete(extraRequest.get());
+                return ResponseEntity.ok().body("Successfully removed");
+            }
 
-			return ResponseEntity.notFound().build();
+            return ResponseEntity.notFound().build();
 
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-		}
-	}
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
 
-	@PutMapping("/extrareviewsolicitation")
-	public ResponseEntity<ExtraRequest> reviewextrasolicitation(@RequestBody ExtraRequest extraRequest) {
-		User currentUser = serviceUser.getLoggedUser();
+    @PutMapping("/extrareviewsolicitation")
+    public ResponseEntity<ExtraRequest> reviewextrasolicitation(@RequestBody ExtraRequest extraRequest) {
+        User currentUser = serviceUser.getLoggedUser();
 
-		if (currentUser == null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-		}
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 401: Quem é você?
+        }
 
-		try {
-			extraRequest.setAutomaticDecText(" ");
+        if (currentUser == null || currentUser.getPerfil() == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
-			return ResponseEntity.ok().body(service.reviewExtraSolicitation(extraRequest, currentUser));
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-		}
-	}
+        if (!currentUser.getPerfil().hasPermission("APPROVE_REQUEST")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
-	// TODO : Pendencia tecnica: Resolver este método de aprovação que não está
-	// sendo utilizado
-	@PutMapping("/approve/{requestId}")
-	public ResponseEntity<Review> approveRequest(@PathVariable String requestId, @RequestBody ReviewDTO reviewDTO) {
-		User currentUser = serviceUser.getLoggedUser();
+        try {
+            extraRequest.setAutomaticDecText(" ");
 
-		if (currentUser == null)
-			return ResponseEntity.badRequest().build();
+            return ResponseEntity.ok().body(service.reviewExtraSolicitation(extraRequest, currentUser));
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
 
-		try {
-			return ResponseEntity.ok().body(reviewService.approve(reviewDTO));
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			return ResponseEntity.badRequest().build();
-		}
-	}
+    // TODO : Pendencia tecnica: Resolver este método de aprovação que não está
+    // sendo utilizado
+    @PutMapping("/approve/{requestId}")
+    public ResponseEntity<Review> approveRequest(@PathVariable String requestId, @RequestBody ReviewDTO reviewDTO) {
+        User currentUser = serviceUser.getLoggedUser();
 
-	// TODO : Pendencia tecnica: Resolver este método de aprovação que não está
-	// sendo utilizado
-	@PutMapping("/reprove/{requestId}")
-	public ResponseEntity<Review> reproveRequest(@PathVariable String requestId, @RequestBody ReviewDTO reviewDTO) {
-		User currentUser = serviceUser.getLoggedUser();
+        if (currentUser == null)
+            return ResponseEntity.badRequest().build();
 
-		if (currentUser == null)
-			return ResponseEntity.badRequest().build();
+        try {
+            return ResponseEntity.ok().body(reviewService.approve(reviewDTO));
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
 
-		try {
-			return ResponseEntity.ok().body(reviewService.reprove(reviewDTO));
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			return ResponseEntity.badRequest().build();
-		}
-	}
+    // TODO : Pendencia tecnica: Resolver este método de aprovação que não está
+    // sendo utilizado
+    @PutMapping("/reprove/{requestId}")
+    public ResponseEntity<Review> reproveRequest(@PathVariable String requestId, @RequestBody ReviewDTO reviewDTO) {
+        User currentUser = serviceUser.getLoggedUser();
+
+        if (currentUser == null)
+            return ResponseEntity.badRequest().build();
+
+        try {
+            return ResponseEntity.ok().body(reviewService.reprove(reviewDTO));
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
 
 }

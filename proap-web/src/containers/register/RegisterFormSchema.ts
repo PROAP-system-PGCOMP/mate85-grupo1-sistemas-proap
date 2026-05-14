@@ -2,7 +2,13 @@ import * as Yup from 'yup';
 import { cpf } from 'cpf-cnpj-validator';
 
 export const personalDataFormSchema = Yup.object({
-  name: Yup.string().required('Campo obrigatório'),
+  name: Yup.string()
+    .required('Campo obrigatório')
+    .test('nome-completo', 'Informe o nome completo (nome e sobrenome)', (value) => {
+      if (!value) return false;
+      const parts = value.trim().split(/\s+/);
+      return parts.length >= 2 && parts.every((p) => p.length >= 2);
+    }),
   cpf: Yup.string()
     .required('Campo obrigatório')
     .test(

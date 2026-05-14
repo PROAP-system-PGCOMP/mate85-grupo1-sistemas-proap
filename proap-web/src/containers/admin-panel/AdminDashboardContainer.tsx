@@ -1,6 +1,12 @@
-import { useEffect, useState, useCallback, SyntheticEvent } from 'react';
+import { useEffect, useState, useCallback, useRef, SyntheticEvent } from 'react';
 import {
   Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Paper,
   Typography,
   Tabs,
@@ -72,6 +78,10 @@ const AdminDashboardContainer = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [tabValue, setTabValue] = useState(DASHBOARD_INDEX);
   const [loading, setLoading] = useState(false);
+  const [isSettingsDirty, setIsSettingsDirty] = useState(false);
+  const [dirtyDialogOpen, setDirtyDialogOpen] = useState(false);
+  const [pendingTab, setPendingTab] = useState<number | null>(null);
+  const settingsSubmitRef = useRef<(() => Promise<void>) | null>(null);
   const [selectedYear, setSelectedYear] = useState<number>(
     new Date().getFullYear(),
   );
@@ -103,7 +113,7 @@ const AdminDashboardContainer = () => {
     );
   }, [solicitationRequests.approvedRequests]);
 
-  const handleTabChange = (event: SyntheticEvent, newValue: number) => {
+  const doTabChange = (newValue: number) => {
     setTabValue(newValue);
 
     if (newValue === CEAPG_REQUESTS_INDEX && ceapg.ceapgRequests.length === 0) {
@@ -132,6 +142,35 @@ const AdminDashboardContainer = () => {
     ) {
       historicalData.fetchHistoricalBudget();
     }
+  };
+
+  const handleTabChange = (_event: SyntheticEvent, newValue: number) => {
+    if (tabValue === SETTINGS_INDEX && isSettingsDirty && newValue !== SETTINGS_INDEX) {
+      setPendingTab(newValue);
+      setDirtyDialogOpen(true);
+      return;
+    }
+    doTabChange(newValue);
+  };
+
+  const handleDirtyDialogStay = () => {
+    setDirtyDialogOpen(false);
+    setPendingTab(null);
+  };
+
+  const handleDirtyDialogLeave = () => {
+    setDirtyDialogOpen(false);
+    if (pendingTab !== null) {
+      doTabChange(pendingTab);
+      setPendingTab(null);
+    }
+  };
+
+  const handleDirtyDialogSaveAndLeave = async () => {
+    if (settingsSubmitRef.current) {
+      await settingsSubmitRef.current();
+    }
+    handleDirtyDialogLeave();
   };
 
   const handleYearChange = (event: React.ChangeEvent<{ value: unknown }>) => {
@@ -184,7 +223,7 @@ const AdminDashboardContainer = () => {
       >
         <AdminPanelSettings color="primary" fontSize="large" />
         <Typography variant="h5" fontWeight="bold" color="primary">
-          Painel Administrativo
+          Gestão
         </Typography>
       </Box>
 
@@ -294,10 +333,32 @@ const AdminDashboardContainer = () => {
               handleBudgetSubmit={handleBudgetSubmit}
               loading={loading}
               totalBudget={budgetByYear.budget?.totalBudget ?? 0}
+              onDirtyChange={setIsSettingsDirty}
+              submitRef={settingsSubmitRef}
             />
           </TabPanel>
         </Box>
       </Paper>
+
+      <Dialog open={dirtyDialogOpen} onClose={handleDirtyDialogStay} maxWidth="xs" fullWidth>
+        <DialogTitle fontWeight="bold">Alterações não salvas</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Você fez alterações que ainda não foram salvas. O que deseja fazer?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+          <Button onClick={handleDirtyDialogStay} color="inherit" sx={{ whiteSpace: 'nowrap' }}>
+            Continuar editando
+          </Button>
+          <Button onClick={handleDirtyDialogLeave} color="error" variant="outlined" sx={{ whiteSpace: 'nowrap' }}>
+            Sair sem salvar
+          </Button>
+          <Button onClick={handleDirtyDialogSaveAndLeave} variant="contained" color="primary" sx={{ whiteSpace: 'nowrap' }}>
+            Salvar e sair
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

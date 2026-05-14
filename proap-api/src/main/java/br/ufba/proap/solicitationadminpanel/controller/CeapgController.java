@@ -14,9 +14,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import br.ufba.proap.solicitationadminpanel.domain.dto.CeapgResponseDTO;
 import br.ufba.proap.solicitationadminpanel.service.CeapgService;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
-@RequestMapping("/admin/ceapg")
+@RestController
+@RequestMapping("/api/admin/ceapg")
 public class CeapgController {
 
     @Autowired

@@ -49,3 +49,4 @@ export const decodeToken = (token: string): DecodedToken => {
         permissions: [],
       };
 };
+

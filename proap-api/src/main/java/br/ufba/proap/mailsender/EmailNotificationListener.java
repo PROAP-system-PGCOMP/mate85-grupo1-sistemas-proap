@@ -2,6 +2,7 @@ package br.ufba.proap.mailsender;
 
 import java.util.Map;
 
+import br.ufba.proap.mailsender.event.UserRegisteredByAdminEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
@@ -30,6 +31,23 @@ public class EmailNotificationListener {
                 "url", recoverUrl + "?token=");
 
         emailService.sendTemplateEmail(event.getEmail(), "Recuperação de Senha | PROAP", templateName, variables);
+    }
+
+    @EventListener
+    public void handleUserRegisteredByAdminEvent(UserRegisteredByAdminEvent event) {
+        log.info("Novo usuário criado pelo Admin: {}", event.getEmail());
+        String templateName = "user-registered-by-admin";
+        Map<String, Object> variables = Map.of(
+                "token", event.getToken(),
+                "email", event.getEmail(),
+                "url", recoverUrl + "?token=");
+
+        emailService.sendTemplateEmail(
+                event.getEmail(),
+                "Bem-vindo ao PROAP! Acesse sua conta",
+                templateName,
+                variables
+        );
     }
 
 }

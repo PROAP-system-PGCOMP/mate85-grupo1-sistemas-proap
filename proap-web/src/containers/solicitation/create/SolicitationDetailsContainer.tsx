@@ -219,6 +219,22 @@ export default function SolicitationDetailsContainer({
 
           <StyledData>
             <Typography>
+              Link da página da inscrição do evento (ou solicitação)
+              <span style={{ color: 'red' }}> *</span>
+            </Typography>
+            <Tooltip
+              title={solicitation.linkPaginaInscricao}
+              arrow
+              placement="top"
+            >
+              <TruncatedText variant="subtitle2">
+                {solicitation.linkPaginaInscricao}
+              </TruncatedText>
+            </Tooltip>
+          </StyledData>
+
+          <StyledData>
+            <Typography>
               País<span style={{ color: 'red' }}> *</span>
             </Typography>
             <TruncatedText variant="subtitle2">
@@ -266,21 +282,6 @@ export default function SolicitationDetailsContainer({
             <TruncatedText variant="body1" color="text.secondary">
               {formatNumberToBRL(solicitation.valorInscricao)}
             </TruncatedText>
-          </StyledData>
-          <StyledData>
-            <Typography>
-              Link da página da inscrição do evento (ou solicitação)
-              <span style={{ color: 'red' }}> *</span>
-            </Typography>
-            <Tooltip
-              title={solicitation.linkPaginaInscricao}
-              arrow
-              placement="top"
-            >
-              <TruncatedText variant="subtitle2">
-                {solicitation.linkPaginaInscricao}
-              </TruncatedText>
-            </Tooltip>
           </StyledData>
           <StyledData>
             <Typography>

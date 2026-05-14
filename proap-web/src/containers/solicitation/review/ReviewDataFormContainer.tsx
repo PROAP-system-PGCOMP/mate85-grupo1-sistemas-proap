@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
-import { SolicitationFormValues } from '../SolicitationFormSchema';
 import { Field, useFormikContext } from 'formik';
 import {
   Box,
@@ -9,15 +7,13 @@ import {
   InputAdornment,
   MenuItem,
   Select,
-  Stack,
   Typography,
   Tooltip,
   CircularProgress,
   Button,
-  IconButton,
-  Paper,
   useTheme,
   useMediaQuery,
+  alpha,
 } from '@mui/material';
 import {
   StyledData,
@@ -31,11 +27,13 @@ import {
   Restore,
   CheckCircle,
   Cancel,
+  Undo,
 } from '@mui/icons-material';
+import { SolicitationFormValues } from '../SolicitationFormSchema';
 import { useBudgetPercentage } from '../../../hooks/budget/useBudgetPercentage';
 
 export default function ReviewDataFormContainer() {
-  const { values, errors, touched, setFieldValue } =
+  const { values, errors, touched, setFieldValue, submitForm } =
     useFormikContext<SolicitationFormValues>();
   const [isEditingDate, setIsEditingDate] = useState(false);
   const theme = useTheme();
@@ -44,6 +42,7 @@ export default function ReviewDataFormContainer() {
   const maxDiarias = values.quantidadeDiariasSolicitadas || 0;
   const diariasOptions = Array.from({ length: maxDiarias + 1 }, (_, i) => i);
 
+  // Hook para cálculo de impacto no orçamento
   const { totalBudget, percentageOfBudget, isLoading } = useBudgetPercentage({
     year: values.createdAt,
     value: values.valorTotal,
@@ -55,13 +54,31 @@ export default function ReviewDataFormContainer() {
       const formattedDate = today.toISOString().split('T')[0];
       setFieldValue('dataAvaliacaoProap', formattedDate);
     }
-  }, []);
+  }, [values.dataAvaliacaoProap, setFieldValue]);
 
   const handleSetCurrentDate = () => {
     const today = new Date();
     const formattedDate = today.toISOString().split('T')[0];
     setFieldValue('dataAvaliacaoProap', formattedDate);
     setIsEditingDate(false);
+  };
+
+  /**
+   * Remove a avaliação atual, resetando a solicitação para o estado pendente.
+   * Isso permite que o usuário salve a solicitação sem uma decisão final.
+   */
+  const handleRemoveEvaluation = async () => {
+    // 1. Resetamos o estado para pendente (0)
+    setFieldValue('situacao', 0);
+    
+    // 2. Limpamos os campos obrigatórios da análise
+    setFieldValue('valorAprovado', '');
+    setFieldValue('numeroDiariasAprovadas', 0);
+    setFieldValue('numeroAta', '');
+    setFieldValue('observacao', '');
+
+    // Opcional: Se quiser que o botão já dispare o salvamento automático:
+    // await submitForm();
   };
 
   const formatDisplayDate = (dateString?: string) => {
@@ -80,15 +97,8 @@ export default function ReviewDataFormContainer() {
         Avaliação da solicitação
       </Typography>
 
-      {/* Data e Número ATA */}
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: isMobile ? 'column' : 'row',
-          gap: 2,
-          mb: 3,
-        }}
-      >
+      {/* Seção: Data e Número ATA */}
+      <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 2, mb: 3 }}>
         <Box sx={{ flex: 1, mb: isMobile ? 2 : 0 }}>
           {isEditingDate ? (
             <Box sx={{ position: 'relative' }}>
@@ -96,54 +106,28 @@ export default function ReviewDataFormContainer() {
                 as={StyledTextField}
                 fullWidth
                 required
-                label="Data da avaliação da solicitação"
+                label="Data da avaliação"
                 name="dataAvaliacaoProap"
                 type="date"
                 InputLabelProps={{ shrink: true }}
-                error={Boolean(
-                  touched.dataAvaliacaoProap && errors.dataAvaliacaoProap,
-                )}
-                helperText={
-                  touched.dataAvaliacaoProap && errors.dataAvaliacaoProap
-                }
+                error={Boolean(touched.dataAvaliacaoProap && errors.dataAvaliacaoProap)}
+                helperText={touched.dataAvaliacaoProap && errors.dataAvaliacaoProap}
               />
               <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
-                <Button
-                  size="small"
-                  variant="outlined"
-                  onClick={() => setIsEditingDate(false)}
-                  startIcon={<Restore />}
-                >
+                <Button size="small" variant="outlined" onClick={() => setIsEditingDate(false)} startIcon={<Restore />}>
                   Cancelar
                 </Button>
-                <Button
-                  size="small"
-                  variant="outlined"
-                  color="error"
-                  onClick={handleSetCurrentDate}
-                  startIcon={<Delete />}
-                >
+                <Button size="small" variant="outlined" color="error" onClick={handleSetCurrentDate} startIcon={<Delete />}>
                   Resetar
                 </Button>
               </Box>
             </Box>
           ) : (
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <StyledFormLabel required>
-                Data da avaliação da solicitação
-              </StyledFormLabel>
+              <StyledFormLabel required>Data da avaliação da solicitação</StyledFormLabel>
               <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                <Typography variant="body1">
-                  {formatDisplayDate(values.dataAvaliacaoProap)}
-                </Typography>
-                <Button
-                  variant="text"
-                  color="primary"
-                  size="small"
-                  onClick={() => setIsEditingDate(true)}
-                  startIcon={<Edit />}
-                  sx={{ ml: 2 }}
-                >
+                <Typography variant="body1">{formatDisplayDate(values.dataAvaliacaoProap)}</Typography>
+                <Button variant="text" color="primary" size="small" onClick={() => setIsEditingDate(true)} startIcon={<Edit />} sx={{ ml: 2 }}>
                   Alterar
                 </Button>
               </Box>
@@ -155,7 +139,7 @@ export default function ReviewDataFormContainer() {
             as={StyledTextField}
             fullWidth
             label="Número da ATA"
-            required
+            required={values.situacao !== 0} // Só é obrigatório se houver uma decisão
             name="numeroAta"
             type="number"
             error={Boolean(touched.numeroAta && errors.numeroAta)}
@@ -164,56 +148,22 @@ export default function ReviewDataFormContainer() {
         </Box>
       </Box>
 
-      {/* Valores */}
-      <Box sx={{ mb: 3, p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: isMobile ? 'column' : 'row',
-            gap: isMobile ? 2 : 4,
-            mb: 2,
-          }}
-        >
+      {/* Seção: Valores e Impacto Orçamentário */}
+      <Box sx={{ mb: 3, p: 2, border: '1px solid #e0e0e0', borderRadius: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 2 : 4 }}>
           <Box sx={{ flex: 1 }}>
             <StyledData>
               <StyledFormLabel>Valor total da solicitação</StyledFormLabel>
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: isMobile ? 'column' : 'row',
-                  alignItems: isMobile ? 'flex-start' : 'center',
-                  gap: 1,
-                  mt: 1,
-                }}
-              >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
                 <Typography variant="h6" color="primary">
-                  R${' '}
-                  {values.valorTotal?.toLocaleString('pt-BR', {
-                    minimumFractionDigits: 2,
-                  })}
+                  {values.valorTotal?.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                 </Typography>
                 {isLoading ? (
                   <CircularProgress size={16} />
                 ) : percentageOfBudget !== null ? (
-                  <Tooltip
-                    title={`Esta solicitação representa ${percentageOfBudget}% do orçamento anual total (R$ ${totalBudget?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })})`}
-                    arrow
-                  >
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        color: 'primary.main',
-                      }}
-                    >
-                      <Typography
-                        variant="body2"
-                        color="primary"
-                        fontWeight="medium"
-                        sx={{ mr: 0.5 }}
-                      >
-                        ({percentageOfBudget}% do orçamento)
-                      </Typography>
+                  <Tooltip title={`Representa ${percentageOfBudget}% do orçamento anual.`} arrow>
+                    <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'help' }}>
+                      <Typography variant="body2" color="primary" sx={{ ml: 1, mr: 0.5 }}>({percentageOfBudget}%)</Typography>
                       <InfoOutlined fontSize="small" color="primary" />
                     </Box>
                   </Tooltip>
@@ -224,17 +174,12 @@ export default function ReviewDataFormContainer() {
           <Box sx={{ flex: 1 }}>
             <Field
               as={StyledTextField}
-              required
+              required={values.situacao !== 0}
               fullWidth
-              label="Valor total aprovado (R$)"
+              label="Valor aprovado"
               name="valorAprovado"
               type="number"
-              InputProps={{
-                inputProps: { min: 0, step: 0.01, max: values.valorTotal },
-                startAdornment: (
-                  <InputAdornment position="start">R$</InputAdornment>
-                ),
-              }}
+              InputProps={{ startAdornment: <InputAdornment position="start">R$</InputAdornment> }}
               error={Boolean(touched.valorAprovado && errors.valorAprovado)}
               helperText={touched.valorAprovado && errors.valorAprovado}
             />
@@ -242,50 +187,21 @@ export default function ReviewDataFormContainer() {
         </Box>
       </Box>
 
-      {/* Diárias */}
-      <Box sx={{ mb: 3, p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: isMobile ? 'column' : 'row',
-            gap: isMobile ? 2 : 4,
-          }}
-        >
+      {/* Seção: Diárias */}
+      <Box sx={{ mb: 3, p: 2, border: '1px solid #e0e0e0', borderRadius: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 2 : 4 }}>
           <Box sx={{ flex: 1 }}>
-            <StyledData>
-              <StyledFormLabel>Diárias solicitadas</StyledFormLabel>
-              <Typography variant="h6" color="primary">
-                {values.quantidadeDiariasSolicitadas}
-              </Typography>
-            </StyledData>
+            <StyledFormLabel>Diárias solicitadas</StyledFormLabel>
+            <Typography variant="h6" color="primary">{values.quantidadeDiariasSolicitadas}</Typography>
           </Box>
           <Box sx={{ flex: 1 }}>
-            <FormControl
-              fullWidth
-              error={Boolean(
-                touched.numeroDiariasAprovadas && errors.numeroDiariasAprovadas,
-              )}
-            >
-              <StyledFormLabel required>Diárias aprovadas</StyledFormLabel>
-              <Field
-                as={Select}
-                displayEmpty
-                name="numeroDiariasAprovadas"
-                defaultValue={0}
-                sx={{ maxWidth: isMobile ? '100%' : '100px' }}
-              >
+            <FormControl fullWidth error={Boolean(touched.numeroDiariasAprovadas && errors.numeroDiariasAprovadas)}>
+              <StyledFormLabel required={values.situacao !== 0}>Diárias aprovadas</StyledFormLabel>
+              <Field as={Select} name="numeroDiariasAprovadas" size="small">
                 {diariasOptions.map((num) => (
-                  <MenuItem key={num} value={num}>
-                    {num}
-                  </MenuItem>
+                  <MenuItem key={num} value={num}>{num}</MenuItem>
                 ))}
               </Field>
-              {touched.numeroDiariasAprovadas &&
-                errors.numeroDiariasAprovadas && (
-                  <FormHelperText>
-                    {errors.numeroDiariasAprovadas}
-                  </FormHelperText>
-                )}
             </FormControl>
           </Box>
         </Box>
@@ -293,46 +209,20 @@ export default function ReviewDataFormContainer() {
 
       {/* Observação */}
       <Box sx={{ mb: 3 }}>
-        <Field
-          as={StyledTextField}
-          fullWidth
-          label="Observação"
-          name="observacao"
-          error={Boolean(touched.observacao && errors.observacao)}
-          helperText={touched.observacao && errors.observacao}
-          multiline
-          rows={4}
-        />
+        <Field as={StyledTextField} fullWidth label="Observação" name="observacao" multiline rows={3} />
       </Box>
 
-      {/* Situação (Movido para o final) */}
-      <Box sx={{ mb: 3 }}>
-        <StyledFormLabel required sx={{ mb: 1.5 }}>
-          Decisão
-        </StyledFormLabel>
-        <Box
-          sx={{
-            display: 'flex',
-            gap: 2,
-            flexDirection: isMobile ? 'column' : 'row',
-          }}
-        >
+      {/* Seção de Decisão / Ações */}
+      <Box sx={{ mt: 4, pt: 3, borderTop: '1px solid', borderColor: 'divider' }}>
+        <StyledFormLabel required sx={{ mb: 2 }}>Decisão da Avaliação PROAP</StyledFormLabel>
+        <Box sx={{ display: 'flex', gap: 2, flexDirection: isMobile ? 'column' : 'row' }}>
           <Button
             variant={values.situacao === 1 ? 'contained' : 'outlined'}
             color="success"
+            fullWidth
             onClick={() => handleDecisionSelect(1)}
-            startIcon={
-              <CheckCircle
-                sx={{ color: values.situacao === 1 ? 'white' : undefined }}
-              />
-            }
-            sx={{
-              flex: 1,
-              py: 1,
-              borderRadius: '12px',
-              fontWeight: values.situacao === 1 ? 'bold' : 'normal',
-              color: values.situacao === 1 ? 'white' : undefined,
-            }}
+            startIcon={<CheckCircle />}
+            sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold' }}
           >
             Aprovar
           </Button>
@@ -340,28 +230,37 @@ export default function ReviewDataFormContainer() {
           <Button
             variant={values.situacao === 2 ? 'contained' : 'outlined'}
             color="error"
+            fullWidth
             onClick={() => handleDecisionSelect(2)}
-            startIcon={
-              <Cancel
-                sx={{ color: values.situacao === 2 ? 'white' : undefined }}
-              />
-            }
-            sx={{
-              flex: 1,
-              py: 1,
-              borderRadius: '12px',
-              fontWeight: values.situacao === 2 ? 'bold' : 'normal',
-              color: values.situacao === 2 ? 'white' : undefined,
-            }}
+            startIcon={<Cancel />}
+            sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold' }}
           >
             Reprovar
           </Button>
-        </Box>
 
-        {/* Hidden field to maintain formik validation */}
-        <Field type="hidden" name="situacao" />
+          <Tooltip title="Remove a decisão atual e permite salvar como pendente">
+            <Button
+              variant="outlined"
+              color="warning"
+              fullWidth
+              disabled={values.situacao === 0}
+              onClick={handleRemoveEvaluation}
+              startIcon={<Undo />}
+              sx={{
+                borderRadius: '12px',
+                py: 1.5,
+                borderColor: 'warning.main',
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.warning.main, 0.08),
+                },
+              }}
+            >
+              Remover Avaliação
+            </Button>
+          </Tooltip>
+        </Box>
         {touched.situacao && errors.situacao && (
-          <FormHelperText error>{errors.situacao}</FormHelperText>
+          <FormHelperText error sx={{ mt: 1 }}>{errors.situacao}</FormHelperText>
         )}
       </Box>
     </Box>

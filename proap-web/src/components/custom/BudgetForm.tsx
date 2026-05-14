@@ -8,7 +8,7 @@ import {
   Typography,
   Stack,
 } from '@mui/material';
-import { CalendarToday } from '@mui/icons-material';
+import { AttachMoney, CalendarToday } from '@mui/icons-material';
 import { BudgetFormValues } from '../../containers/admin-panel/BudgetFormSchema';
 import { formatNumberToBRL } from '../../helpers/formatter';
 import { getBudgetByYear } from '../../services/budgetService';
@@ -70,7 +70,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ loading, totalBudget }) => {
     <Form>
       <Stack spacing={2}>
         <Box>
-          <StyledFormLabel required>Valor do orçamento</StyledFormLabel>
+          <StyledFormLabel required>Valor do orçamento (R$)</StyledFormLabel>
           <Field
             as={StyledTextField}
             fullWidth
@@ -79,6 +79,11 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ loading, totalBudget }) => {
             type="number"
             InputProps={{
               inputProps: { min: 0, step: 0.01 },
+              startAdornment: (
+                <Box sx={{ color: 'text.secondary', mr: 1 }}>
+                  <AttachMoney fontSize="small" />
+                </Box>
+              ),
             }}
             error={touched.budget && Boolean(errors.budget)}
             helperText={touched.budget && errors.budget}

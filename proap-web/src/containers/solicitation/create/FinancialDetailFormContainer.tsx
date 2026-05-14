@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-
+import { NumericFormat, NumericFormatProps } from 'react-number-format';
 import { InitialSolicitationFormValues } from '../SolicitationFormSchema';
 import { Field, useFormikContext } from 'formik';
 import {
@@ -60,6 +60,37 @@ import { useSysConfig } from '../../../hooks/admin/useSysConfig';
 import TextPreviewAlert from '../../../components/FormFields/TextPreviewAlert';
 import useDollarRate from '../../../hooks/useDollarRate';
 import Toast from '../../../helpers/notification';
+import React from 'react';
+
+// ----------------------------------------------------------------------
+// COMPONENTE DE MÁSCARA - FORA DO COMPONENTE PRINCIPAL PARA NÃO PERDER FOCO
+// ----------------------------------------------------------------------
+const NumericFormatCustom = React.forwardRef<NumericFormatProps, any>(
+  function NumericFormatCustom(props, ref) {
+    const { onChange, name, ...other } = props;
+
+    return (
+      <NumericFormat
+        {...other}
+        getInputRef={ref}
+        onValueChange={(values) => {
+          onChange({
+            target: {
+              name: name,
+              // MÁGICA AQUI: Usamos floatValue para enviar um NÚMERO REAL para o Formik
+              // Isso evita que o useCalculeTotal some strings e adicione casas decimais malucas
+              value: values.floatValue === undefined ? '' : values.floatValue,
+            },
+          });
+        }}
+        thousandSeparator="."
+        decimalSeparator=","
+        decimalScale={2} // Trava ESTRITAMENTE em 2 casas decimais (bloqueia o 230,000000)
+        allowNegative={false}
+      />
+    );
+  },
+);
 
 export default function FinancialDetailFormContainer() {
   const { config } = useSysConfig();
@@ -161,19 +192,16 @@ export default function FinancialDetailFormContainer() {
                 {({ field }: any) => (
                   <StyledTextField
                     {...field}
-                    label="Valor da inscrição/solicitação (R$)"
-                    type="number"
+                    label="Valor da inscrição/solicitação"
                     InputProps={{
-                      inputProps: { min: 0, step: 0.01 },
+                      inputComponent: NumericFormatCustom as any,
                       startAdornment: (
                         <InputAdornment position="start">
-                          <AttachMoney color="action" />
+                          <AttachMoney color="action" fontSize="small" />
                         </InputAdornment>
                       ),
                     }}
-                    error={Boolean(
-                      touched.valorInscricao && errors.valorInscricao,
-                    )}
+                    error={Boolean(touched.valorInscricao && errors.valorInscricao)}
                     helperText={touched.valorInscricao && errors.valorInscricao}
                     required
                     fullWidth
@@ -375,12 +403,13 @@ export default function FinancialDetailFormContainer() {
                           <StyledTextField
                             {...field}
                             disabled
-                            type="number"
                             InputProps={{
-                              inputProps: { min: 0, step: 0.01 },
+                              inputComponent: NumericFormatCustom as any,
                               startAdornment: (
                                 <InputAdornment position="start">
-                                  {values.isDolar ? '$' : 'R$'}
+                                  <Typography color="text.secondary" sx={{ fontWeight: 'medium' }}>
+                                    {values.isDolar ? '$' : 'R$'}
+                                  </Typography>
                                 </InputAdornment>
                               ),
                             }}
@@ -702,13 +731,12 @@ export default function FinancialDetailFormContainer() {
                   {({ field }: any) => (
                     <StyledTextField
                       {...field}
-                      label="Valor aproximado da passagem aérea (R$)"
-                      type="number"
+                      label="Valor aproximado da passagem aérea"
                       InputProps={{
-                        inputProps: { min: 0, step: 0.01 },
+                        inputComponent: NumericFormatCustom as any,
                         startAdornment: (
                           <InputAdornment position="start">
-                            <AttachMoney color="action" />
+                            <AttachMoney color="action" fontSize="small" />
                           </InputAdornment>
                         ),
                       }}
@@ -719,7 +747,7 @@ export default function FinancialDetailFormContainer() {
                       required
                       fullWidth
                       sx={{ background: 'white' }}
-                      placeholder="0.00"
+                      placeholder="0,00"
                     />
                   )}
                 </Field>

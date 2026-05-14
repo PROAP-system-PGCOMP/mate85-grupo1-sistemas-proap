@@ -21,6 +21,7 @@ import {
   FactCheck,
   Groups,
   AdminPanelSettings,
+  BarChart,
 } from '@mui/icons-material';
 import { BudgetFormValues } from './BudgetFormSchema';
 import { setBudget } from '../../services/budgetService';
@@ -31,6 +32,8 @@ import BudgetOverview from './BudgetOverviewContainer';
 import CeapgReviewRequests from './ceapg/CeapgReviewRequests';
 import useHasPermission from '../../hooks/auth/useHasPermission';
 import SettingContainer from './settings/SettingsContainer';
+import SolicitorValuesContainer from './SolicitorValuesContainer';
+import useLoadSolicitorValues from '../../hooks/admin/useLoadSolicitorValues';
 
 import useCeapgRequests from '../../hooks/admin/useLoadCeapgRequests';
 import useLoadApprovedRequests from '../../hooks/admin/useLoadApprovedRequests';
@@ -71,7 +74,8 @@ const AdminDashboardContainer = () => {
   const DASHBOARD_INDEX = 0;
   const APPROVED_REQUESTS_INDEX = 1;
   const CEAPG_REQUESTS_INDEX = 2;
-  const SETTINGS_INDEX = 3;
+  const SOLICITOR_VALUES_INDEX = 3;
+  const SETTINGS_INDEX = 4;
   const isCeapg = useHasPermission('CEAPG_ROLE');
   const isAdmin = useHasPermission('ADMIN_ROLE');
   const theme = useTheme();
@@ -88,6 +92,7 @@ const AdminDashboardContainer = () => {
 
   const [totalRequestsValue, setTotalRequestsValue] = useState<number>(0);
 
+  const solicitorValues = useLoadSolicitorValues();
   const ceapg = useCeapgRequests();
   const solicitationRequests = useLoadApprovedRequests();
 
@@ -118,6 +123,10 @@ const AdminDashboardContainer = () => {
 
     if (newValue === CEAPG_REQUESTS_INDEX && ceapg.ceapgRequests.length === 0) {
       ceapg.getCeapg();
+    }
+
+    if (newValue === SOLICITOR_VALUES_INDEX && solicitorValues.data.length === 0) {
+      solicitorValues.fetchData();
     }
 
     if (
@@ -270,6 +279,14 @@ const AdminDashboardContainer = () => {
             )}
             {isAdmin && (
               <Tab
+                icon={<BarChart />}
+                label={isMobile ? '' : 'Valores por Docente'}
+                iconPosition={isMobile ? 'top' : 'start'}
+                {...a11yProps(SOLICITOR_VALUES_INDEX)}
+              />
+            )}
+            {isAdmin && (
+              <Tab
                 icon={<Settings />}
                 label={isMobile ? '' : 'Configurações'}
                 iconPosition={isMobile ? 'top' : 'start'}
@@ -325,6 +342,17 @@ const AdminDashboardContainer = () => {
               onStartDateChange={() => {}}
               onEndDateChange={() => {}}
               onFilter={handleCeapgFilterApply}
+            />
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={SOLICITOR_VALUES_INDEX}>
+            <SectionHeader
+              icon={<BarChart color="primary" />}
+              title="Valores Acumulados por Docente"
+            />
+            <SolicitorValuesContainer
+              loading={solicitorValues.loading}
+              data={solicitorValues.data}
             />
           </TabPanel>
 

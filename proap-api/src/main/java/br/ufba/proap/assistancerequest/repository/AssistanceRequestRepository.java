@@ -34,4 +34,7 @@ public interface AssistanceRequestRepository extends JpaRepository<AssistanceReq
 
 	@Query(value = "SELECT COUNT(s) > 0 FROM proap_assistancerequest s WHERE s.user_id = :userId", nativeQuery = true)
 	Boolean userHasAnySolicitationRequests(Long userId);
+
+	@Query("SELECT ar.nomeDocente, SUM(ar.valorAprovado) FROM AssistanceRequest ar WHERE ar.situacao = 1 AND ar.solicitanteDocente = true GROUP BY ar.nomeDocente ORDER BY SUM(ar.valorAprovado) DESC")
+	List<Object[]> findAccumulatedValueBySolicitorDocente();
 }

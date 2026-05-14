@@ -72,3 +72,13 @@ export const getAvailableYears = async (): Promise<number[]> => {
   const response = await api.get('/admin/budget/available-years');
   return response.data;
 };
+
+export interface SolicitorAccumulatedValueDTO {
+  nomeDocente: string;
+  totalAprovado: number;
+}
+
+export const getSolicitorAccumulatedValues = async (): Promise<SolicitorAccumulatedValueDTO[]> => {
+  const response = await api.get('/admin/budget/solicitor-accumulated-values');
+  return response.data;
+};

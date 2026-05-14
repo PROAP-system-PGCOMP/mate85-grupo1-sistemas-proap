@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import br.ufba.proap.assistancerequest.repository.AssistanceRequestRepository;
 import br.ufba.proap.solicitationadminpanel.domain.SolicitationAdmin;
 import br.ufba.proap.solicitationadminpanel.domain.dto.AssistanceIdValueDTO;
+import br.ufba.proap.solicitationadminpanel.domain.dto.SolicitorAccumulatedValueDTO;
 import br.ufba.proap.solicitationadminpanel.repository.SolicitationAdminRepository;
 import jakarta.ws.rs.NotFoundException;
 
@@ -73,6 +74,12 @@ public class BudgetService {
         BigDecimal remainingBudget = getRemainingBudget(year);
 
         return totalBudget.subtract(remainingBudget);
+    }
+
+    @Transactional
+    public List<SolicitorAccumulatedValueDTO> getAccumulatedValueBySolicitorDocente() {
+        return SolicitorAccumulatedValueDTO.fromObjectArrayList(
+                assistanteRequestRepository.findAccumulatedValueBySolicitorDocente());
     }
 
     @Transactional

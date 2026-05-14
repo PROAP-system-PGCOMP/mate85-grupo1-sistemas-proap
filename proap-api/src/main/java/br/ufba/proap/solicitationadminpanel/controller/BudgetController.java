@@ -15,6 +15,7 @@ import br.ufba.proap.solicitationadminpanel.domain.SolicitationAdmin;
 import br.ufba.proap.solicitationadminpanel.service.BudgetService;
 import br.ufba.proap.solicitationadminpanel.domain.dto.AssistanceIdValueDTO;
 import br.ufba.proap.solicitationadminpanel.domain.dto.BudgetSummaryDTO;
+import br.ufba.proap.solicitationadminpanel.domain.dto.SolicitorAccumulatedValueDTO;
 import jakarta.ws.rs.NotFoundException;
 
 import java.math.BigDecimal;
@@ -127,5 +128,11 @@ public class BudgetController {
     public ResponseEntity<List<Integer>> getAvailableYears() {
         List<Integer> years = budgetService.getAvailableYears();
         return ResponseEntity.ok(years);
+    }
+
+    @GetMapping("/solicitor-accumulated-values")
+    public ResponseEntity<List<SolicitorAccumulatedValueDTO>> getSolicitorAccumulatedValues() {
+        List<SolicitorAccumulatedValueDTO> data = budgetService.getAccumulatedValueBySolicitorDocente();
+        return ResponseEntity.ok(data);
     }
 }

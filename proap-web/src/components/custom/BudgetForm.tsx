@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Field, Form, useFormikContext } from 'formik';
 import {
   Box,
@@ -8,10 +8,11 @@ import {
   Typography,
   Stack,
 } from '@mui/material';
-import { AttachMoney, CalendarToday } from '@mui/icons-material';
+import { CalendarToday } from '@mui/icons-material';
 import { BudgetFormValues } from '../../containers/admin-panel/BudgetFormSchema';
 // Importando o helper que você já usa no Overview
 import { formatNumberToBRL } from '../../helpers/formatter';
+import { getBudgetByYear } from '../../services/budgetService';
 
 interface BudgetFormProps {
   onSubmit: (values: BudgetFormValues) => void;
@@ -19,7 +20,6 @@ interface BudgetFormProps {
   totalBudget?: number; 
 }
 
-// Styled components
 const StyledTextField = (props: any) => (
   <TextField
     fullWidth
@@ -49,6 +49,21 @@ const StyledFormLabel = ({ children, ...props }: any) => (
 
 const BudgetForm: React.FC<BudgetFormProps> = ({ loading, totalBudget }) => {
   const { errors, touched } = useFormikContext<BudgetFormValues>();
+const BudgetForm: React.FC<BudgetFormProps> = ({ loading }) => {
+  const { errors, touched, values, setFieldValue } = useFormikContext<BudgetFormValues>();
+
+  useEffect(() => {
+    const year = Number(values.year);
+    if (!year || year < 2000 || year > 2100) return;
+
+    getBudgetByYear(year)
+      .then((data) => {
+        setFieldValue('budget', data.orcamentoAnual ?? 0);
+      })
+      .catch(() => {
+        setFieldValue('budget', 0);
+      });
+  }, [values.year]);
 
   return (
     <Form>
@@ -64,11 +79,6 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ loading, totalBudget }) => {
             type="number"
             InputProps={{
               inputProps: { min: 0, step: 0.01 },
-              startAdornment: (
-                <Box sx={{ color: 'text.secondary', mr: 1 }}>
-                  <AttachMoney fontSize="small" />
-                </Box>
-              ),
             }}
             error={touched.budget && Boolean(errors.budget)}
             helperText={touched.budget && errors.budget}

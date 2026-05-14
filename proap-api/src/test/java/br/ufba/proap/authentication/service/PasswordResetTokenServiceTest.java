@@ -3,12 +3,12 @@ package br.ufba.proap.authentication.service;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -61,6 +61,7 @@ public class PasswordResetTokenServiceTest {
 
         testUser = new User();
         testUser.setEmail(TEST_EMAIL);
+        ReflectionTestUtils.setField(testUser, "id", 1L);
         testUser.setPassword("old-password-hash");
 
         testToken = new PasswordResetToken();
@@ -71,21 +72,21 @@ public class PasswordResetTokenServiceTest {
 
     @Test
     public void createResetToken_WhenUserExists_ShouldCreateToken() {
-        when(userService.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(testUser));
         when(tokenRepository.findByUser(testUser)).thenReturn(Optional.empty());
         when(tokenRepository.save(any(PasswordResetToken.class))).thenReturn(testToken);
 
         String token = passwordResetTokenService.createResetToken(TEST_EMAIL);
 
         assertNotNull(token);
-        verify(userService).findByEmail(TEST_EMAIL);
+        verify(userRepository).findByEmail(TEST_EMAIL);
         verify(tokenRepository).findByUser(testUser);
         verify(tokenRepository).save(any(PasswordResetToken.class));
     }
 
     @Test
     public void createResetToken_WhenTokenExists_ShouldUpdateToken() {
-        when(userService.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(testUser));
         when(tokenRepository.findByUser(testUser)).thenReturn(Optional.of(testToken));
         when(tokenRepository.save(any(PasswordResetToken.class))).thenReturn(testToken);
 
@@ -97,7 +98,7 @@ public class PasswordResetTokenServiceTest {
 
     @Test
     public void createResetToken_WhenUserDoesNotExist_ShouldThrowException() {
-        when(userService.findByEmail(TEST_EMAIL)).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> {
             passwordResetTokenService.createResetToken(TEST_EMAIL);
@@ -108,7 +109,7 @@ public class PasswordResetTokenServiceTest {
 
     @Test
     public void createResetToken_WhenSaveFails_ShouldThrowException() {
-        when(userService.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(testUser));
         when(tokenRepository.findByUser(testUser)).thenReturn(Optional.empty());
         when(tokenRepository.save(any(PasswordResetToken.class))).thenThrow(new DataAccessException("Database error") {
         });
@@ -120,7 +121,7 @@ public class PasswordResetTokenServiceTest {
 
     @Test
     public void sendResetToken_ShouldPublishEvent() {
-        when(userService.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(testUser));
         when(tokenRepository.findByUser(testUser)).thenReturn(Optional.empty());
         when(tokenRepository.save(any(PasswordResetToken.class))).thenReturn(testToken);
 
@@ -161,22 +162,28 @@ public class PasswordResetTokenServiceTest {
     public void updatePassword_ShouldUpdateUserPassword() {
         when(tokenRepository.findByToken(TEST_TOKEN)).thenReturn(Optional.of(testToken));
 
+        when(passwordEncoder.encode((anyString()))).thenReturn(TEST_PASSWORD);
+
         passwordResetTokenService.updatePassword(TEST_TOKEN, TEST_PASSWORD);
 
-        verify(userService).updatePassword(testUser, TEST_PASSWORD);
+        verify(userRepository).updatePasswordById(anyLong(), eq(TEST_PASSWORD));
     }
 
     @Test
     public void updatePassword_WhenServiceFails_ShouldThrowException() {
+        org.springframework.test.util.ReflectionTestUtils.setField(testUser, "id", 1L);
+
         when(tokenRepository.findByToken(TEST_TOKEN)).thenReturn(Optional.of(testToken));
-        doThrow(new DataAccessException("Database error") {
-        }).when(userService).updatePassword(any(User.class), anyString());
+
+        when(passwordEncoder.encode(anyString())).thenReturn("anyEncodedPassword");
+
+        doThrow(new DataAccessException("Database error") {})
+                .when(userRepository).updatePasswordById(anyLong(), anyString());
 
         assertThrows(DataAccessException.class, () -> {
             passwordResetTokenService.updatePassword(TEST_TOKEN, TEST_PASSWORD);
         });
     }
-
     @Test
     public void deleteToken_ShouldDeleteToken() {
         when(tokenRepository.findByToken(TEST_TOKEN)).thenReturn(Optional.of(testToken));

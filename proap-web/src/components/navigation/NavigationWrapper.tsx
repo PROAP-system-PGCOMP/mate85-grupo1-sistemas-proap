@@ -1,9 +1,9 @@
 import { PropsWithChildren } from 'react';
 
 import { useMediaQuery, useTheme } from '@mui/material';
-import HomeIcon from '@mui/icons-material/Home';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 import {
-  AddRounded,
+  PersonAdd,
   AdminPanelSettings,
   Group,
   RateReview,
@@ -19,6 +19,7 @@ export interface NavigationItem {
   link: string;
   visible: boolean;
   icon?: React.ReactElement;
+  exact?: boolean;
 }
 
 export const NavigationWrapper = ({ children }: PropsWithChildren) => {
@@ -30,8 +31,8 @@ export const NavigationWrapper = ({ children }: PropsWithChildren) => {
   const isCollaborator = useHasPermission('FUNCIONARIO_ROLE');
   const navigationItems: NavigationItem[] = [
     {
-      label: 'Página Inicial',
-      icon: <HomeIcon />,
+      label: 'Solicitações',
+      icon: <AssignmentIcon />,
       link: '/home',
       visible: true,
     },
@@ -40,9 +41,16 @@ export const NavigationWrapper = ({ children }: PropsWithChildren) => {
       icon: <Group />,
       link: '/users',
       visible: userCanViewPage,
+      exact: true,
     },
     {
-      label: 'Painel Administrativo',
+      label: 'Cadastrar Usuário',
+      icon: <PersonAdd />,
+      link: '/register-user',
+      visible: isAdmin,
+    },
+    {
+      label: 'Gestão',
       icon: <AdminPanelSettings />,
       link: '/admin-panel',
       visible: isAdmin || isCeapg || isCollaborator,
@@ -51,7 +59,7 @@ export const NavigationWrapper = ({ children }: PropsWithChildren) => {
       label: 'Avaliações CEAPG',
       icon: <RateReview />,
       link: '/ceapg-reviews',
-      visible: isCeapg,
+      visible: isCeapg || isAdmin,
     },
   ];
 

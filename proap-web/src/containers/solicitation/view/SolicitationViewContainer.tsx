@@ -393,6 +393,14 @@ export default function SolicitationViewContainer({ id }: { id: string }) {
                   </TruncatedLink>
                 }
               />
+              <InfoItem
+                label="Link da Página de Inscrição"
+                value={
+                  <TruncatedLink href={solicitation.linkPaginaInscricao}>
+                    {solicitation.linkPaginaInscricao}
+                  </TruncatedLink>
+                }
+              />
               <InfoItem label="País" value={solicitation.pais} />
               <InfoItem label="Cidade" value={solicitation.cidade} />
               <InfoItem label="Qualis" value={solicitation.qualis} />
@@ -409,14 +417,6 @@ export default function SolicitationViewContainer({ id }: { id: string }) {
               <InfoItem
                 label="Valor da Inscrição"
                 value={formatNumberToBRL(solicitation.valorInscricao)}
-              />
-              <InfoItem
-                label="Link da Página de Inscrição"
-                value={
-                  <TruncatedLink href={solicitation.linkPaginaInscricao}>
-                    {solicitation.linkPaginaInscricao}
-                  </TruncatedLink>
-                }
               />
               {solicitation.quantidadeDiariasSolicitadas > 0 && (
                 <InfoItem

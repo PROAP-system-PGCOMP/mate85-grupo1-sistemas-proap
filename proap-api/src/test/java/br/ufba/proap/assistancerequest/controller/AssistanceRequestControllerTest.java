@@ -647,42 +647,46 @@ class AssistanceRequestControllerTest {
         @Test
         @DisplayName("PUT /assistancerequest/reviewsolicitation reviews request successfully")
         void reviewSolicitation_shouldReviewRequest() throws Exception {
-                when(userService.getLoggedUser()).thenReturn(mockUser);
-                when(service.reviewSolicitation(any(AssistanceRequest.class), eq(mockUser)))
-                                .thenReturn(mockRequest);
+            when(userService.getLoggedUser()).thenReturn(adminUser);
 
-                mvc.perform(MockMvcRequestBuilders.put("/api/assistancerequest/reviewsolicitation")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(mockRequest)))
-                                .andExpect(status().isOk());
 
-                verify(service).reviewSolicitation(any(AssistanceRequest.class), eq(mockUser));
+            when(service.reviewSolicitation(any(AssistanceRequest.class), eq(adminUser)))
+                    .thenReturn(mockRequest);
+
+            mvc.perform(MockMvcRequestBuilders.put("/api/assistancerequest/reviewsolicitation")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(mockRequest)))
+                    .andExpect(status().isOk()); // Agora o "Guarda" da permissão deixa passar
+
+
+            verify(service).reviewSolicitation(any(AssistanceRequest.class), eq(adminUser));
         }
 
         @Test
         @DisplayName("PUT /assistancerequest/reviewsolicitation returns 400 when user not logged")
         void reviewSolicitation_shouldReturn400_whenNoUser() throws Exception {
-                when(userService.getLoggedUser()).thenReturn(null);
+            when(userService.getLoggedUser()).thenReturn(null);
 
-                mvc.perform(MockMvcRequestBuilders.put("/api/assistancerequest/reviewsolicitation")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(mockRequest)))
-                                .andExpect(status().isBadRequest());
+            mvc.perform(MockMvcRequestBuilders.put("/api/assistancerequest/reviewsolicitation")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(mockRequest)))
+                    .andExpect(status().isUnauthorized()); // Alterado de 400 para 401
 
-                verify(service, never()).reviewSolicitation(any(AssistanceRequest.class), any(User.class));
+            verify(service, never()).reviewSolicitation(any(AssistanceRequest.class), any(User.class));
         }
 
         @Test
         @DisplayName("PUT /assistancerequest/reviewsolicitation returns 404 when request not found")
         void reviewSolicitation_shouldReturn404_whenRequestNotFound() throws Exception {
-                when(userService.getLoggedUser()).thenReturn(mockUser);
-                when(service.reviewSolicitation(any(AssistanceRequest.class), eq(mockUser)))
-                                .thenReturn(null);
+            when(userService.getLoggedUser()).thenReturn(adminUser);
 
-                mvc.perform(MockMvcRequestBuilders.put("/api/assistancerequest/reviewsolicitation")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(mockRequest)))
-                                .andExpect(status().isNotFound());
+            when(service.reviewSolicitation(any(AssistanceRequest.class), eq(adminUser)))
+                    .thenReturn(null);
+
+            mvc.perform(MockMvcRequestBuilders.put("/api/assistancerequest/reviewsolicitation")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(mockRequest)))
+                    .andExpect(status().isNotFound());
         }
 
         @Test

@@ -1,10 +1,15 @@
-import { Field, FieldArray, Form, Formik } from 'formik';
+import { Field, FieldArray, Form, Formik, useFormikContext } from 'formik';
 import { SystemConfiguration, UrlMapper } from '../../../types';
 import { systemConfigSchema } from '../SystemConfigSchema';
 import {
   Box,
   Button,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   FormControlLabel,
   IconButton,
   InputAdornment,
@@ -23,13 +28,116 @@ import {
   TextFields,
   Public,
 } from '@mui/icons-material';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import TextFieldWithPreview from '../../../components/FormFields/TextFieldWithPreview';
 import CountryGroupField from '../../../components/FormFields/CountryGroupField';
+
+function UnsavedChangesBlocker({
+  onDirtyChange,
+  submitRef,
+}: {
+  onDirtyChange?: (dirty: boolean) => void;
+  submitRef?: React.MutableRefObject<(() => Promise<void>) | null>;
+}) {
+  const { dirty, submitForm, validateForm } = useFormikContext();
+
+  useEffect(() => {
+    onDirtyChange?.(dirty);
+  }, [dirty]);
+
+  useEffect(() => {
+    if (submitRef) submitRef.current = submitForm;
+    return () => { if (submitRef) submitRef.current = null; };
+  }, [submitForm]);
+  const [open, setOpen] = useState(false);
+  const proceedFn = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    if (!dirty) return;
+
+    // Bloqueia fechamento/refresh da aba
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => { e.preventDefault(); };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    // Intercepta navegação programática (Link, navigate())
+    const origPushState = window.history.pushState.bind(window.history);
+    const origReplaceState = window.history.replaceState.bind(window.history);
+
+    window.history.pushState = (...args: Parameters<typeof origPushState>) => {
+      proceedFn.current = () => origPushState(...args);
+      setOpen(true);
+    };
+    window.history.replaceState = (...args: Parameters<typeof origReplaceState>) => {
+      proceedFn.current = () => origReplaceState(...args);
+      setOpen(true);
+    };
+
+    // Intercepta botão voltar/avançar do browser
+    const handlePopState = () => {
+      // Empurra o estado atual de volta para cancelar a navegação
+      origPushState(window.history.state, '', window.location.href);
+      proceedFn.current = () => window.history.go(-1);
+      setOpen(true);
+    };
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('popstate', handlePopState);
+      window.history.pushState = origPushState;
+      window.history.replaceState = origReplaceState;
+    };
+  }, [dirty]);
+
+  const handleLeave = () => {
+    setOpen(false);
+    proceedFn.current?.();
+    proceedFn.current = null;
+  };
+
+  const handleSaveAndLeave = async () => {
+    const errors = await validateForm();
+    if (Object.keys(errors).length > 0) {
+      setOpen(false);
+      return;
+    }
+    await submitForm();
+    handleLeave();
+  };
+
+  const handleStay = () => {
+    setOpen(false);
+    proceedFn.current = null;
+  };
+
+  return (
+    <Dialog open={open} onClose={handleStay} maxWidth="xs" fullWidth>
+      <DialogTitle fontWeight="bold">Alterações não salvas</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          Você fez alterações que ainda não foram salvas. O que deseja fazer?
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+        <Button onClick={handleStay} color="inherit" sx={{ whiteSpace: 'nowrap' }}>
+          Continuar editando
+        </Button>
+        <Button onClick={handleLeave} color="error" variant="outlined" sx={{ whiteSpace: 'nowrap' }}>
+          Sair sem salvar
+        </Button>
+        <Button onClick={handleSaveAndLeave} variant="contained" color="primary" sx={{ whiteSpace: 'nowrap' }}>
+          Salvar e sair
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
 
 interface SystemConfigFormProps {
   initialValues: SystemConfiguration;
   onSubmit: (values: SystemConfiguration) => void;
+  onDirtyChange?: (dirty: boolean) => void;
+  submitRef?: React.MutableRefObject<(() => Promise<void>) | null>;
 }
 
 interface SectionCardProps {
@@ -79,14 +187,19 @@ function SectionCard({ icon, title, description, children }: SectionCardProps) {
   );
 }
 
-export default function SystemConfigFormContainer(props: SystemConfigFormProps) {
+export default function SystemConfigFormContainer({
+  initialValues,
+  onSubmit,
+  onDirtyChange,
+  submitRef,
+}: SystemConfigFormProps) {
   const [newCategory, setNewCategory] = useState<string>('');
 
   return (
     <Formik
-      initialValues={props.initialValues}
+      initialValues={initialValues}
       validationSchema={systemConfigSchema}
-      onSubmit={props.onSubmit}
+      onSubmit={onSubmit}
       enableReinitialize={true}
     >
       {({ errors, touched, values, setFieldValue }) => {
@@ -105,6 +218,7 @@ export default function SystemConfigFormContainer(props: SystemConfigFormProps) 
 
         return (
           <Box component={Form} sx={{ width: '100%' }}>
+            <UnsavedChangesBlocker onDirtyChange={onDirtyChange} submitRef={submitRef} />
             <Stack spacing={3}>
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>

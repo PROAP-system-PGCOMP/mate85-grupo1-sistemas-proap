@@ -1,3 +1,4 @@
+import React from 'react';
 import { AttachMoney, Computer, ExpandMore } from '@mui/icons-material';
 import {
   Accordion,
@@ -18,11 +19,15 @@ import SectionHeader from '../../../components/custom/SectionHeader';
 interface SettingContainerProps {
   handleBudgetSubmit: (values: BudgetFormValues) => Promise<void>;
   loading: boolean;
+  onDirtyChange?: (dirty: boolean) => void;
+  submitRef?: React.MutableRefObject<(() => Promise<void>) | null>;
 }
 
 export default function SettingContainer({
   handleBudgetSubmit,
   loading,
+  onDirtyChange,
+  submitRef,
 }: SettingContainerProps) {
   const { config, isLoading, error, saveConfig } = useSysConfig();
 
@@ -84,6 +89,8 @@ export default function SettingContainer({
             <SystemConfigFormContainer
               initialValues={config}
               onSubmit={handleSystemConfigSubmit}
+              onDirtyChange={onDirtyChange}
+              submitRef={submitRef}
             />
           )}
         </AccordionDetails>

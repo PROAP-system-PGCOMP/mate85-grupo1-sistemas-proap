@@ -12,7 +12,7 @@ import {
   useTheme,
   Paper,
 } from '@mui/material';
-import { AttachMoney, InfoOutlined } from '@mui/icons-material';
+import { AttachMoney, InfoOutlined, Square } from '@mui/icons-material';
 import {
   BarChart as RechartBarChart,
   Bar,
@@ -172,7 +172,7 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
                 <StatCard
                   title="Orçamento Total"
                   value={formatNumberToBRL(Number(totalBudget))}
-                  icon={<AttachMoney />}
+                  icon={<Square />}
                   color="primary.main"
                 />
 
@@ -180,7 +180,7 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
                   title="Utilizado"
                   value={formatNumberToBRL(Number(usedBudget))}
                   secondaryText={`${usedPercentage}% do orçamento total`}
-                  icon={<AttachMoney />}
+                  icon={<Square />}
                   color="warning.main"
                 />
 
@@ -190,7 +190,7 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
                   secondaryText={`${
                     100 - usedPercentage
                   }% do orçamento total restante`}
-                  icon={<AttachMoney />}
+                  icon={<Square />}
                   color="success.main"
                 />
               </Stack>

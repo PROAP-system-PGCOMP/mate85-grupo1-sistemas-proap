@@ -50,7 +50,7 @@ export const NavigationWrapper = ({ children }: PropsWithChildren) => {
       visible: isAdmin,
     },
     {
-      label: 'Painel Administrativo',
+      label: 'Gestão',
       icon: <AdminPanelSettings />,
       link: '/admin-panel',
       visible: isAdmin || isCeapg || isCollaborator,

@@ -144,7 +144,7 @@ const AdminDashboardContainer = () => {
     }
   };
 
-  const handleTabChange = (event: SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: SyntheticEvent, newValue: number) => {
     if (tabValue === SETTINGS_INDEX && isSettingsDirty && newValue !== SETTINGS_INDEX) {
       setPendingTab(newValue);
       setDirtyDialogOpen(true);
@@ -223,7 +223,7 @@ const AdminDashboardContainer = () => {
       >
         <AdminPanelSettings color="primary" fontSize="large" />
         <Typography variant="h5" fontWeight="bold" color="primary">
-          Painel Administrativo
+          Gestão
         </Typography>
       </Box>
 

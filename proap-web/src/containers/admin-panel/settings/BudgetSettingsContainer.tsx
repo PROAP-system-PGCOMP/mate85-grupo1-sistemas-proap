@@ -91,13 +91,15 @@ export default function BudgetSettingsContainer({
                     gap: 1.5,
                     mt: 3,
                     p: 2,
-                    bgcolor: 'info.main', // Alterado para uma cor padrão se info.lighter não existir no seu tema
+                    bgcolor: 'info.lighter',
                     borderRadius: 1,
                     opacity: 0.9
                   }}
                 >
-                  <InfoOutlined fontSize="small" sx={{ color: 'white' }} />
-                  <Typography variant="body2" color="white">
+                  <Box sx={{ color: 'info.main', display: 'flex' }}>
+                    <InfoOutlined fontSize="small" />
+                  </Box>
+                  <Typography variant="body2" color="info.dark">
                     Ao definir um novo orçamento para um ano já existente, o
                     valor anterior será substituído.
                   </Typography>

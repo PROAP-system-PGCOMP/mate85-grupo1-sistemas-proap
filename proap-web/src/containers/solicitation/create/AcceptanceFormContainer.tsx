@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import { Field, useFormikContext } from 'formik';
 import { InitialSolicitationFormValues } from '../SolicitationFormSchema';
-import { Gavel, CheckCircle } from '@mui/icons-material';
+import { Gavel, CheckCircle, RadioButtonUnchecked } from '@mui/icons-material';
 
 export default function AcceptanceFormContainer() {
   const { errors, touched } = useFormikContext<InitialSolicitationFormValues>();
@@ -106,7 +106,7 @@ export default function AcceptanceFormContainer() {
                       <Checkbox
                         {...field}
                         color="primary"
-                        icon={<CheckCircle color="disabled" />}
+                        icon={<RadioButtonUnchecked color="disabled" />}
                         checkedIcon={<CheckCircle color="success" />}
                         sx={{
                           '& .MuiSvgIcon-root': {

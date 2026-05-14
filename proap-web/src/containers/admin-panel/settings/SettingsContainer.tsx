@@ -18,11 +18,13 @@ import SectionHeader from '../../../components/custom/SectionHeader';
 interface SettingContainerProps {
   handleBudgetSubmit: (values: BudgetFormValues) => Promise<void>;
   loading: boolean;
+  totalBudget: number;
 }
 
 export default function SettingContainer({
   handleBudgetSubmit,
   loading,
+  totalBudget,
 }: SettingContainerProps) {
   const { config, isLoading, error, saveConfig } = useSysConfig();
 
@@ -53,6 +55,7 @@ export default function SettingContainer({
           <BudgetSettingsContainer
             handleBudgetSubmit={handleBudgetSubmit}
             loading={loading}
+            totalBudget={totalBudget}
           />
         </AccordionDetails>
       </Accordion>

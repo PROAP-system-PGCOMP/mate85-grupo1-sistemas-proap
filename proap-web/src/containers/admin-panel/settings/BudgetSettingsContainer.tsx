@@ -11,11 +11,13 @@ import BudgetForm from '../../../components/custom/BudgetForm';
 interface BudgetSettingsContainerProps {
   handleBudgetSubmit: (values: BudgetFormValues) => Promise<void>;
   loading: boolean;
+  totalBudget: number;
 }
 
 export default function BudgetSettingsContainer({
   handleBudgetSubmit,
   loading,
+  totalBudget,
 }: BudgetSettingsContainerProps) {
   return (
     <Box
@@ -54,14 +56,17 @@ export default function BudgetSettingsContainer({
           </Box>
 
           <Formik
-            initialValues={INITIAL_FORM_VALUES}
+            initialValues={{ 
+              budget: totalBudget, // Se for 0 ou null, fica vazio para mostrar o placeholder
+              year: new Date().getFullYear() 
+            }}
             validationSchema={budgetFormSchema}
             onSubmit={handleBudgetSubmit}
             enableReinitialize
           >
             {(formikProps) => (
               <>
-                <BudgetForm onSubmit={handleBudgetSubmit} loading={loading} />
+                <BudgetForm onSubmit={handleBudgetSubmit} loading={loading} totalBudget={totalBudget}/>
 
                 <Box
                   sx={{

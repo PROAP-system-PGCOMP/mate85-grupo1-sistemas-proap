@@ -71,10 +71,6 @@ export default function BudgetSettingsContainer({
           </Box>
 
           <Formik
-            initialValues={{ 
-              budget: totalBudget, // Se for 0 ou null, fica vazio para mostrar o placeholder
-              year: new Date().getFullYear() 
-            }}
             initialValues={initialValues}
             validationSchema={budgetFormSchema}
             onSubmit={handleBudgetSubmit}

@@ -246,32 +246,48 @@ class AssistanceRequestControllerTest {
         @Test
         @DisplayName("POST /assistancerequest/create creates request successfully")
         void create_shouldCreateRequest() throws Exception {
-                when(userService.getLoggedUser()).thenReturn(mockUser);
-                when(service.save(any(AssistanceRequest.class))).thenReturn(mockRequest);
+            when(userService.getLoggedUser()).thenReturn(mockUser);
+            when(service.save(any(AssistanceRequest.class))).thenReturn(mockRequest);
 
-                AssistanceRequest newRequest = new AssistanceRequest();
+            setPrivateField(mockRequest, "nomeDocente", "Docente Teste");
+            setPrivateField(mockRequest, "nomeDiscente", "Discente Teste");
+            setPrivateField(mockRequest, "nomeEvento", "Evento Teste");
+            setPrivateField(mockRequest, "eventoInternacional", true);
+            setPrivateField(mockRequest, "qtdDiasEvento", 3);
+            setPrivateField(mockRequest, "linkHomePageEvento", "http://evento.com");
+            setPrivateField(mockRequest, "cidade", "Salvador");
+            setPrivateField(mockRequest, "pais", "Brasil");
+            setPrivateField(mockRequest, "qualis", "A1");
+            setPrivateField(mockRequest, "modalidadeParticipacao", "Oral");
+            setPrivateField(mockRequest, "valorInscricao", new java.math.BigDecimal("100.00"));
+            setPrivateField(mockRequest, "linkPaginaInscricao", "http://inscricao.com");
+            setPrivateField(mockRequest, "quantidadeDiariasSolicitadas", 2);
+            setPrivateField(mockRequest, "valorDiaria", new java.math.BigDecimal("50.00"));
+            setPrivateField(mockRequest, "ultimaDiariaIntegral", true);
+            setPrivateField(mockRequest, "justificativa", "Justificativa de teste");
 
-                mvc.perform(MockMvcRequestBuilders.post("/api/assistancerequest/create")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(newRequest)))
-                                .andExpect(status().isOk());
+            CreateAssistanceRequestDTO dto = CreateAssistanceRequestDTO.fromEntity(mockRequest);
 
-                verify(service).save(any(AssistanceRequest.class));
+            mvc.perform(MockMvcRequestBuilders.post("/api/assistancerequest/create")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(dto))) // Enviando o DTO perfeito
+                    .andExpect(status().isOk());
+
+            verify(service).save(any(AssistanceRequest.class));
         }
 
         @Test
-        @DisplayName("POST /assistancerequest/create returns 400 when user not logged")
-        void create_shouldReturn400_whenNoUser() throws Exception {
-                when(userService.getLoggedUser()).thenReturn(null);
+        @DisplayName("POST /assistancerequest/create returns 401 when user not logged")
+        void create_shouldReturn401_whenNoUser() throws Exception {
+            when(userService.getLoggedUser()).thenReturn(null);
 
-                AssistanceRequest newRequest = new AssistanceRequest();
+            CreateAssistanceRequestDTO dto = CreateAssistanceRequestDTO.fromEntity(mockRequest);
 
-                mvc.perform(MockMvcRequestBuilders.post("/api/assistancerequest/create")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(newRequest)))
-                                .andExpect(status().isBadRequest());
-
-                verify(service, never()).save(any(AssistanceRequest.class));
+            mvc.perform(MockMvcRequestBuilders.post("/api/assistancerequest/create")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isUnauthorized());
+            verify(service, never()).save(any(AssistanceRequest.class));
         }
 
         @Test

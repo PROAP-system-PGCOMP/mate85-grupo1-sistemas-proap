@@ -1,5 +1,10 @@
 package br.ufba.proap.solicitationadminpanel.service;
 
+import br.ufba.proap.assistancerequest.domain.AssistanceRequest;
+import br.ufba.proap.authentication.domain.User;
+import br.ufba.proap.exception.UnauthorizedException;
+import br.ufba.proap.solicitationadminpanel.domain.dto.CeapgReviewDTO;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +15,7 @@ import jakarta.ws.rs.NotFoundException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,5 +60,29 @@ public class CeapgService {
                             avaliadorProap, custoFinalCeapg, observacoesCeapg, avaliadorCeapg, dataAvaliacaoCeapg);
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public AssistanceRequest reviewCeapgRequest(Long id, CeapgReviewDTO data, User currentUser){
+        if (!currentUser.getPerfil().hasPermission("CEAPG_ROLE")){
+            throw new UnauthorizedException("Usuário não tem permissão para revisar solicitações do CEAPG");
+        }
+
+        Optional<AssistanceRequest> AssistenceRequestOptional = assistanceRequestRepository.findById(id);
+        if (AssistenceRequestOptional.isEmpty()){
+            throw new NotFoundException("Solicitação de assistência não encontrada");
+        }
+
+        if (AssistenceRequestOptional.get().getSituacao() != 1){
+            throw new IllegalArgumentException("A solicitação deve estar aprovada pelo Proap para ser revisada pelo CEAPG");
+        }
+
+        AssistanceRequest novo = AssistenceRequestOptional.get();
+        novo.setCustoFinalCeapg(data.valorFinal());
+        novo.setObservacoesCeapg(data.observacoes());
+        novo.setAvaliadorCeapg(currentUser);
+        novo.setDataAvaliacaoCeapg(LocalDate.now());
+
+        return assistanceRequestRepository.save(novo);
     }
 }

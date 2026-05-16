@@ -1,4 +1,6 @@
 package br.ufba.proap.solicitationadminpanel.domain.dto;
 
-public class CeapgReviewDTO {
+import java.math.BigDecimal;
+
+public record CeapgReviewDTO(BigDecimal valorFinal, String observacoes) {
 }

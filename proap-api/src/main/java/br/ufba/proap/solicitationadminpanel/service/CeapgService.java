@@ -64,7 +64,7 @@ public class CeapgService {
 
     @Transactional
     public AssistanceRequest reviewCeapgRequest(Long id, CeapgReviewDTO data, User currentUser){
-        if (!currentUser.getPerfil().hasPermission("CEAPG_ROLE")){
+        if (!currentUser.getPerfil().hasPermission("CEAPG_ROLE") && !currentUser.getPerfil().hasPermission("ADMIN_ROLE")){
             throw new UnauthorizedException("Usuário não tem permissão para revisar solicitações do CEAPG");
         }
 

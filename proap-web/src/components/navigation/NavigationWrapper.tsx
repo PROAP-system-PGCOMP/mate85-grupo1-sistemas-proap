@@ -58,7 +58,7 @@ export const NavigationWrapper = ({ children }: PropsWithChildren) => {
     {
       label: 'Avaliações CEAPG',
       icon: <RateReview />,
-      link: '/ceapg-reviews',
+      link: '/admin/ceapg',
       visible: isCeapg || isAdmin,
     },
   ];

@@ -4,6 +4,7 @@ import Toast from '../../helpers/notification';
 import { formatDateToAPI } from '../../helpers/conversion';
 import { getAllCeapgReviews } from '../../services/ceapgService';
 import { CeapgResponse } from '../../types';
+import api from '../../services';
 
 export default function useCeapgRequests() {
   const [loading, setLoading] = useState(false);
@@ -24,5 +25,10 @@ export default function useCeapgRequests() {
       setLoading(false);
     }
   }, []);
-  return { ceapgRequests, loading, getCeapg };
+  
+  const updateCeapgEvaluation = async (id: number, data: any) => {
+    return await api.patch(`/solicitations/${id}/ceapg-evaluation`, data);
+  };
+
+  return { ceapgRequests, loading, getCeapg, updateCeapgEvaluation, };
 }

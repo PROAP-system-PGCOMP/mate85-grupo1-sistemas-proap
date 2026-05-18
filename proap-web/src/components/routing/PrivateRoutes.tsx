@@ -1,4 +1,4 @@
-import { Route, Routes, Navigate } from 'react-router-dom';
+import { Route, Routes, Navigate, useParams } from 'react-router-dom';
 import {
   HomePage,
   NotFoundPage,
@@ -16,10 +16,18 @@ import ViewSolicitationPage from '../../pages/view-solicitation/ViewSolicitation
 import ViewExtraSolicitationPage from '../../pages/view-extra-solicitation/ViewExtraSolicitationPage';
 import AdminDashboardPage from '../../pages/admin-panel/AdminDashboardPage';
 import CeapgReviewsPage from '../../pages/ceapg-reviews/CeapgReviewsPage';
+import CeapgReviewPageContainer from '../../pages/admin/ceapg/CeapgReviewPageContainer';
 import useHasPermission from '../../hooks/auth/useHasPermission';
 import RedirectBasedOnRole from './RedirectBasedOnRole';
 import ReviewExtraSolicitationPage from '../../pages/review-extra-solicitation/ReviewExtraSolicitationPage';
 import UserRegisterPage from '../../pages/users/UserRegisterPage';
+import CeapgReviewPage from '../../pages/admin/ceapg/CeapgReviewPage';
+import CeapgSolicitationViewContainer from '../../containers/solicitation/view/CeapgSolicitationViewContainer';
+
+const CeapgSolicitationViewPage = () => {
+  const { id } = useParams<{ id: string }>();
+  return <CeapgSolicitationViewContainer id={id || ''} />;
+};
 
 export default function PrivateRoutes() {
   const isAdmin = useHasPermission('ADMIN_ROLE');
@@ -61,14 +69,29 @@ export default function PrivateRoutes() {
         />
         <Route path="/users" element={<UsersPage />} />
         <Route path="/user-profile" element={<UserProfilePage />} />
-        {(isAdmin || isCeapg || isCollaborator) && (
-          <Route path="/admin-panel" element={<AdminDashboardPage />} />
+        {(isAdmin || isCeapg) && (
+          <>
+            <Route path="/admin-panel" element={<AdminDashboardPage />} />
+            <Route path="/register-user" element={<UserRegisterPage />} />
+          </>
         )}
-        {isCeapg && (
-          <Route path="/ceapg-reviews" element={<CeapgReviewsPage />} />
+        {(isCeapg || isAdmin) && (
+          <>
+            <Route path="/ceapg-reviews" element={<CeapgReviewsPage />} />
+            <Route path="/admin/ceapg" element={<CeapgReviewPageContainer />} />
+            <Route path="/admin-panel/solicitation/view/:id" element={<ViewSolicitationPage />} />
+          </>
+        )}
+        {(isCeapg || isAdmin) && (
+          <>
+            {/* AJUSTADO: Rota de avaliação movida para o escopo /admin/ceapg */}
+            <Route path="/admin/ceapg/review/:id" element={<CeapgReviewPage />} />
+            
+            {/* AJUSTADO: Rota de consulta movida para o escopo /admin/ceapg */}
+            <Route path="/admin/ceapg/view/:id" element={<CeapgSolicitationViewPage />} />
+          </>
         )}
         <Route path="*" element={<NotFoundPage />} />
-        <Route path="/register-user" element={<UserRegisterPage />} />
       </Routes>
     </NavigationWrapper>
   );

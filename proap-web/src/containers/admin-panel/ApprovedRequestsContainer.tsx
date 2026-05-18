@@ -61,7 +61,7 @@ const ApprovedRequests: React.FC<ApprovedRequestsProps> = ({
   };
 
   const handleViewSolicitation = (id: number) => {
-    navigate(`/solicitation/view/${id}`);
+    navigate(`/admin-panel/solicitation/view/${id}`);
   };
 
   const formatDate = (dateString: string | null) => {

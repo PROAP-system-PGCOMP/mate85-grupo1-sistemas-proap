@@ -158,7 +158,7 @@ export default function SolicitantDetailFormContainer() {
             {({ field }: any) => (
               <StyledTextField
                 {...field}
-                label="Nome do Docente PGCOMP"
+                label="Nome do Docente Orientador do PGCOMP"
                 required
                 disabled={!userIsAdmin && values.solicitanteDocente}
                 error={touched.nomeDocente && !!errors.nomeDocente}

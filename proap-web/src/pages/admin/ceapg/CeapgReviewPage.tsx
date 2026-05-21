@@ -303,7 +303,7 @@ const CeapgReviewPage = () => {
                 InputProps={{
                   startAdornment: <InputAdornment position="start">R$</InputAdornment>,
                 }}
-                helperText="Digite o valor definitivo aprovado para esta solicitação."
+                helperText="Valor final informado pelo CEAPG"
               />
 
               <TextField

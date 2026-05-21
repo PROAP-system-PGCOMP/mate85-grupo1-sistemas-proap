@@ -157,7 +157,7 @@ export default function SolicitationReviewContainer() {
             {values.nomeDocente && (
               <StyledData>
                 <Typography variant="subtitle2" color="text.secondary">
-                  Nome do Docente PGCOMP
+                  Nome do Docente Orientador do PGCOMP
                 </Typography>
                 {values.nomeDocente.length > 50 ? (
                   <Tooltip title={values.nomeDocente} arrow placement="top">

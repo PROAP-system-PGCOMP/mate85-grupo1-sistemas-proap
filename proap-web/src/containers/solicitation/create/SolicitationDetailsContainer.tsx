@@ -62,7 +62,7 @@ export default function SolicitationDetailsContainer({
           </StyledData>
           <StyledData>
             <Typography>
-              Nome do Docente PGCOMP <span style={{ color: 'red' }}>*</span>
+              Nome do Docente Orientador do PGCOMP <span style={{ color: 'red' }}>*</span>
             </Typography>
             <TruncatedText variant="subtitle2">
               {solicitation.nomeDocente}

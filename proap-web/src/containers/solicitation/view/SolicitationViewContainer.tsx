@@ -263,7 +263,7 @@ export default function SolicitationViewContainer({ id }: { id: string }) {
                 showTooltip={solicitation.nomeDiscente.length > 50}
               />
               <InfoItem
-                label="Nome do Docente PGCOMP"
+                label="Nome do Docente Orientador do PGCOMP"
                 value={solicitation.nomeDocente}
                 showTooltip={solicitation.nomeDocente.length > 50}
               />

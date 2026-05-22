@@ -25,10 +25,13 @@ export interface NavigationItem {
 export const NavigationWrapper = ({ children }: PropsWithChildren) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const userCanViewPage = useHasPermission('VIEW_USER');
+  
   const isAdmin = useHasPermission('ADMIN_ROLE');
   const isCeapg = useHasPermission('CEAPG_ROLE');
   const isCollaborator = useHasPermission('FUNCIONARIO_ROLE');
+
+  const isPrivilegedUser = isAdmin || isCeapg || isCollaborator;
+
   const navigationItems: NavigationItem[] = [
     {
       label: 'Solicitações',
@@ -40,20 +43,20 @@ export const NavigationWrapper = ({ children }: PropsWithChildren) => {
       label: 'Usuários',
       icon: <Group />,
       link: '/users',
-      visible: userCanViewPage,
+      visible: isPrivilegedUser,
       exact: true,
     },
     {
       label: 'Cadastrar Usuário',
       icon: <PersonAdd />,
       link: '/register-user',
-      visible: isAdmin,
+      visible: isAdmin || isCeapg, 
     },
     {
       label: 'Gestão',
       icon: <AdminPanelSettings />,
       link: '/admin-panel',
-      visible: isAdmin || isCeapg || isCollaborator,
+      visible: isAdmin || isCeapg, 
     },
     {
       label: 'Avaliações CEAPG',

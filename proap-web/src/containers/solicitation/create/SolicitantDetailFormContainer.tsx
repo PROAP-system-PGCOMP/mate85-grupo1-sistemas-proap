@@ -39,13 +39,16 @@ export default function SolicitantDetailFormContainer() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+  // 1. Busca todos os usuários da API
   const { allUsers, isLoading: isLoadingUsers } = useUsers();
 
+  // 2. Extrai a lista de nomes para a Select Box (Filtrando perfis do banco)
   const listaTodosDocentes = useMemo(() => {
     const nomes = allUsers
       .filter((user) => ['Docente', 'Docente e Admin'].includes(user.profileName)) 
       .map((user) => user.name);
       
+    // Adiciona o nome do usuário atual como segurança de carregamento
     if (name && userIsDocente && !nomes.includes(name)) {
       nomes.push(name);
     }
@@ -53,7 +56,8 @@ export default function SolicitantDetailFormContainer() {
     return nomes;
   }, [allUsers, name, userIsDocente]);
 
-const showDocenteSelect = values.solicitanteDocente && !userIsDocente;
+  // 3. REGRA ATUALIZADA: A Select Box agora aparece SEMPRE que a solicitação for PARA Docente
+  const showDocenteSelect = values.solicitanteDocente;
 
   useEffect(() => {
     if (!userIsAdmin) {
@@ -105,14 +109,18 @@ const showDocenteSelect = values.solicitanteDocente && !userIsDocente;
                   const isDocente = event.target.value === 'true';
                   setFieldValue(field.name, isDocente);
 
+                  // Limpeza e injeção do nome ao trocar a opção
                   if (isDocente) {
                     setFieldValue('nomeDiscente', '');
                     setFieldValue('discenteNoPrazoDoCurso', undefined);
                     setFieldValue('mesesAtrasoCurso', undefined);
                     
+                    // Injeta o nome na variável do SelectBox para já vir marcado
                     if (userIsDocente) {
                       setFieldValue('nomeDocente', name);
                     }
+                  } else {
+                    setFieldValue('nomeDocente', '');
                   }
                 }}
               >
@@ -162,17 +170,17 @@ const showDocenteSelect = values.solicitanteDocente && !userIsDocente;
             </Field>
           )}
 
-          {/* Campo Dinâmico: Docente */}
           <Field name="nomeDocente">
             {({ field }: any) => {
               
+              // QUANDO FOR SOLICITAÇÃO PARA DOCENTE: Exibe Select Box livre para alteração
               if (showDocenteSelect) {
                 return (
                   <StyledTextField
-                    key="select-docente"
+                    key="select-docente" 
                     {...field}
                     select
-                    label={values.solicitanteDocente ? 'Nome do Docente' : 'Nome do Docente Orientador do PGCOMP'}
+                    label="Nome do Docente"
                     required
                     disabled={isLoadingUsers}
                     error={touched.nomeDocente && !!errors.nomeDocente}
@@ -180,7 +188,7 @@ const showDocenteSelect = values.solicitanteDocente && !userIsDocente;
                     fullWidth
                     sx={{
                       background: 'white',
-                      maxWidth: values.solicitanteDocente ? { xs: '100%', md: '40%' } : '100%',
+                      maxWidth: { xs: '100%', md: '40%' },
                     }}
                   >
                     {listaTodosDocentes.map((docenteName) => (
@@ -194,11 +202,10 @@ const showDocenteSelect = values.solicitanteDocente && !userIsDocente;
 
               return (
                 <StyledTextField
-                  key="input-docente"
+                  key="input-docente" 
                   {...field}
-                  label={values.solicitanteDocente ? 'Nome do Docente' : 'Nome do Docente Orientador do PGCOMP'}
+                  label="Nome do Docente Orientador do PGCOMP"
                   required
-                  disabled={!userIsAdmin && userIsDocente}
                   error={touched.nomeDocente && !!errors.nomeDocente}
                   helperText={touched.nomeDocente && errors.nomeDocente}
                   fullWidth
@@ -209,10 +216,7 @@ const showDocenteSelect = values.solicitanteDocente && !userIsDocente;
                       </InputAdornment>
                     ),
                   }}
-                  sx={{
-                    background: 'white',
-                    maxWidth: values.solicitanteDocente ? { xs: '100%', md: '49%' } : '100%',
-                  }}
+                  sx={{ background: 'white' }}
                 />
               );
             }}

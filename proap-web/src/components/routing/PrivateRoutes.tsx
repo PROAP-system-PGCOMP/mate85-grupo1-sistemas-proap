@@ -84,10 +84,7 @@ export default function PrivateRoutes() {
         )}
         {(isCeapg || isAdmin) && (
           <>
-            {/* AJUSTADO: Rota de avaliação movida para o escopo /admin/ceapg */}
             <Route path="/admin/ceapg/review/:id" element={<CeapgReviewPage />} />
-            
-            {/* AJUSTADO: Rota de consulta movida para o escopo /admin/ceapg */}
             <Route path="/admin/ceapg/view/:id" element={<CeapgSolicitationViewPage />} />
           </>
         )}

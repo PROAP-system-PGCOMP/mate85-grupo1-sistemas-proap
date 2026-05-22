@@ -8,17 +8,27 @@ const api = axios.create({
 });
 
 const isTokenExpired = (token: string): boolean => {
-  const decoded = jwtDecode<JwtPayload>(token);
-  return decoded.exp ? decoded.exp * 1000 < Date.now() : true;
+  try {
+    const decoded = jwtDecode<JwtPayload>(token);
+    return decoded.exp ? decoded.exp * 1000 < Date.now() : true;
+  } catch (error) {
+    return true; 
+  }
 };
+
 
 api.interceptors.request.use(
   (config) => {
     const token = LocalStorageToken.get();
+    
     if (token) {
       if (isTokenExpired(token)) {
         LocalStorageToken.clear();
+        window.location.href = '/login'; 
+        
+        return Promise.reject(new Error('Sessão expirada. Redirecionando para login...'));
       }
+      
       return {
         ...config,
         headers: {
@@ -32,6 +42,19 @@ api.interceptors.request.use(
   (error) => {
     return Promise.reject(error);
   },
+);
+
+api.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      LocalStorageToken.clear();
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
 );
 
 export default api;

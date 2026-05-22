@@ -2,7 +2,6 @@ import { Field, useFormikContext } from 'formik';
 import { InitialSolicitationFormValues } from '../SolicitationFormSchema';
 import {
   Box,
-  Checkbox,
   FormControl,
   FormControlLabel,
   FormHelperText,
@@ -15,6 +14,7 @@ import {
   IconButton,
   Tooltip,
   InputAdornment,
+  MenuItem,
   alpha,
   useTheme,
   useMediaQuery,
@@ -24,8 +24,9 @@ import {
   StyledTextField,
 } from '../SolicitationFormContainer.style';
 import useHasPermission from '../../../hooks/auth/useHasPermission';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import useCurrentUser from '../../../hooks/auth/useCurrentUser';
+import useUsers from '../../../hooks/auth/useUsers';
 import { Person, Help, School, AccessTime } from '@mui/icons-material';
 
 export default function SolicitantDetailFormContainer() {
@@ -38,12 +39,28 @@ export default function SolicitantDetailFormContainer() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+  const { allUsers, isLoading: isLoadingUsers } = useUsers();
+
+  const listaTodosDocentes = useMemo(() => {
+    const nomes = allUsers
+      .filter((user) => ['Docente', 'Docente e Admin'].includes(user.profileName)) 
+      .map((user) => user.name);
+      
+    if (name && userIsDocente && !nomes.includes(name)) {
+      nomes.push(name);
+    }
+    
+    return nomes;
+  }, [allUsers, name, userIsDocente]);
+
+const showDocenteSelect = values.solicitanteDocente && !userIsDocente;
+
   useEffect(() => {
     if (!userIsAdmin) {
       setFieldValue('solicitanteDocente', userIsDocente);
       setFieldValue(userIsDocente ? 'nomeDocente' : 'nomeDiscente', name);
     }
-  }, []);
+  }, [userIsAdmin, userIsDocente, name, setFieldValue]);
 
   return (
     <Paper
@@ -67,33 +84,16 @@ export default function SolicitantDetailFormContainer() {
       </Typography>
       <Divider sx={{ mb: 3 }} />
 
-      <Box
-        sx={{
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 3,
-        }}
-      >
+      <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 3 }}>
         <FormControl
-          error={Boolean(
-            touched.solicitanteDocente && errors.solicitanteDocente,
-          )}
+          error={Boolean(touched.solicitanteDocente && errors.solicitanteDocente)}
           sx={{
             p: 2,
             borderRadius: 1,
             bgcolor: alpha(theme.palette.primary.main, 0.04),
           }}
         >
-          <StyledFormLabel
-            required
-            sx={{
-              fontWeight: 'medium',
-              fontSize: '0.95rem',
-              color: 'text.primary',
-              mb: 1,
-            }}
-          >
+          <StyledFormLabel required sx={{ fontWeight: 'medium', fontSize: '0.95rem', color: 'text.primary', mb: 1 }}>
             Solicitação em nome do:
           </StyledFormLabel>
           <Field name="solicitanteDocente">
@@ -102,9 +102,19 @@ export default function SolicitantDetailFormContainer() {
                 {...field}
                 row
                 onChange={(event) => {
-                  setFieldValue(field.name, event.target.value === 'true');
+                  const isDocente = event.target.value === 'true';
+                  setFieldValue(field.name, isDocente);
+
+                  if (isDocente) {
+                    setFieldValue('nomeDiscente', '');
+                    setFieldValue('discenteNoPrazoDoCurso', undefined);
+                    setFieldValue('mesesAtrasoCurso', undefined);
+                    
+                    if (userIsDocente) {
+                      setFieldValue('nomeDocente', name);
+                    }
+                  }
                 }}
-                aria-labelledby="demo-row-radio-buttons-group-label"
               >
                 <FormControlLabel
                   disabled={!userIsAdmin}
@@ -128,52 +138,84 @@ export default function SolicitantDetailFormContainer() {
         </FormControl>
 
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
-          <Field name="nomeDiscente">
-            {({ field }: any) => (
-              <StyledTextField
-                {...field}
-                required={!values.solicitanteDocente}
-                label={
-                  values.solicitanteDocente
-                    ? 'Nome do Discente PGCOMP (se houver)'
-                    : 'Nome do Discente PGCOMP'
-                }
-                disabled={!userIsAdmin && !values.solicitanteDocente}
-                error={touched.nomeDiscente && !!errors.nomeDiscente}
-                helperText={touched.nomeDiscente && errors.nomeDiscente}
-                fullWidth
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <School color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{ background: 'white' }}
-              />
-            )}
-          </Field>
+          {!values.solicitanteDocente && (
+            <Field name="nomeDiscente">
+              {({ field }: any) => (
+                <StyledTextField
+                  {...field}
+                  required
+                  label="Nome do Discente PGCOMP"
+                  disabled={!userIsAdmin}
+                  error={touched.nomeDiscente && !!errors.nomeDiscente}
+                  helperText={touched.nomeDiscente && errors.nomeDiscente}
+                  fullWidth
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <School color="action" />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{ background: 'white' }}
+                />
+              )}
+            </Field>
+          )}
 
+          {/* Campo Dinâmico: Docente */}
           <Field name="nomeDocente">
-            {({ field }: any) => (
-              <StyledTextField
-                {...field}
-                label="Nome do Docente Orientador do PGCOMP"
-                required
-                disabled={!userIsAdmin && values.solicitanteDocente}
-                error={touched.nomeDocente && !!errors.nomeDocente}
-                helperText={touched.nomeDocente && errors.nomeDocente}
-                fullWidth
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Person color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{ background: 'white' }}
-              />
-            )}
+            {({ field }: any) => {
+              
+              if (showDocenteSelect) {
+                return (
+                  <StyledTextField
+                    key="select-docente"
+                    {...field}
+                    select
+                    label={values.solicitanteDocente ? 'Nome do Docente' : 'Nome do Docente Orientador do PGCOMP'}
+                    required
+                    disabled={isLoadingUsers}
+                    error={touched.nomeDocente && !!errors.nomeDocente}
+                    helperText={(touched.nomeDocente && errors.nomeDocente) || (isLoadingUsers ? 'Carregando docentes...' : '')}
+                    fullWidth
+                    sx={{
+                      background: 'white',
+                      maxWidth: values.solicitanteDocente ? { xs: '100%', md: '40%' } : '100%',
+                    }}
+                  >
+                    {listaTodosDocentes.map((docenteName) => (
+                      <MenuItem key={docenteName} value={docenteName}>
+                        {docenteName}
+                      </MenuItem>
+                    ))}
+                  </StyledTextField>
+                );
+              }
+
+              return (
+                <StyledTextField
+                  key="input-docente"
+                  {...field}
+                  label={values.solicitanteDocente ? 'Nome do Docente' : 'Nome do Docente Orientador do PGCOMP'}
+                  required
+                  disabled={!userIsAdmin && userIsDocente}
+                  error={touched.nomeDocente && !!errors.nomeDocente}
+                  helperText={touched.nomeDocente && errors.nomeDocente}
+                  fullWidth
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Person color="action" />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    background: 'white',
+                    maxWidth: values.solicitanteDocente ? { xs: '100%', md: '49%' } : '100%',
+                  }}
+                />
+              );
+            }}
           </Field>
         </Stack>
 
@@ -236,7 +278,6 @@ export default function SolicitantDetailFormContainer() {
                           );
                           setFieldValue('mesesAtrasoCurso', undefined);
                         }}
-                        aria-labelledby="demo-row-radio-buttons-group-label"
                       >
                         <FormControlLabel
                           value={true}

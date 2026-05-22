@@ -416,7 +416,7 @@ export default function SolicitationReviewContainer() {
                 <Typography variant="caption" color="text.secondary" display="block">
                   Valor Total da Solicitação
                 </Typography>
-                <Typography variant="h5" fontWeight="700" color="primary.main">
+                <Typography variant="h5" fontWeight="700" color="text.primary">
                   {formatNumberToBRL(values.valorTotal)}
                 </Typography>
               </Grid>

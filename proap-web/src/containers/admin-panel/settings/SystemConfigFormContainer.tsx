@@ -18,6 +18,8 @@ import {
   Switch,
   TextField,
   Typography,
+  Tabs,
+  Tab,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import {
@@ -27,10 +29,37 @@ import {
   Settings,
   TextFields,
   Public,
+  ErrorOutline,
 } from '@mui/icons-material';
 import { useEffect, useRef, useState } from 'react';
 import TextFieldWithPreview from '../../../components/FormFields/TextFieldWithPreview';
 import CountryGroupField from '../../../components/FormFields/CountryGroupField';
+
+// ============================================================================
+// COMPONENTES AUXILIARES
+// ============================================================================
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function CustomTabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`config-tabpanel-${index}`}
+      aria-labelledby={`config-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ pt: 3, pb: 1 }}>{children}</Box>}
+    </div>
+  );
+}
 
 function UnsavedChangesBlocker({
   onDirtyChange,
@@ -49,17 +78,16 @@ function UnsavedChangesBlocker({
     if (submitRef) submitRef.current = submitForm;
     return () => { if (submitRef) submitRef.current = null; };
   }, [submitForm]);
+  
   const [open, setOpen] = useState(false);
   const proceedFn = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     if (!dirty) return;
 
-    // Bloqueia fechamento/refresh da aba
     const handleBeforeUnload = (e: BeforeUnloadEvent) => { e.preventDefault(); };
     window.addEventListener('beforeunload', handleBeforeUnload);
 
-    // Intercepta navegação programática (Link, navigate())
     const origPushState = window.history.pushState.bind(window.history);
     const origReplaceState = window.history.replaceState.bind(window.history);
 
@@ -72,9 +100,7 @@ function UnsavedChangesBlocker({
       setOpen(true);
     };
 
-    // Intercepta botão voltar/avançar do browser
     const handlePopState = () => {
-      // Empurra o estado atual de volta para cancelar a navegação
       origPushState(window.history.state, '', window.location.href);
       proceedFn.current = () => window.history.go(-1);
       setOpen(true);
@@ -133,13 +159,6 @@ function UnsavedChangesBlocker({
   );
 }
 
-interface SystemConfigFormProps {
-  initialValues: SystemConfiguration;
-  onSubmit: (values: SystemConfiguration) => void;
-  onDirtyChange?: (dirty: boolean) => void;
-  submitRef?: React.MutableRefObject<(() => Promise<void>) | null>;
-}
-
 interface SectionCardProps {
   icon: React.ReactNode;
   title: string;
@@ -187,6 +206,17 @@ function SectionCard({ icon, title, description, children }: SectionCardProps) {
   );
 }
 
+// ============================================================================
+// COMPONENTE PRINCIPAL
+// ============================================================================
+
+interface SystemConfigFormProps {
+  initialValues: SystemConfiguration;
+  onSubmit: (values: SystemConfiguration) => void;
+  onDirtyChange?: (dirty: boolean) => void;
+  submitRef?: React.MutableRefObject<(() => Promise<void>) | null>;
+}
+
 export default function SystemConfigFormContainer({
   initialValues,
   onSubmit,
@@ -194,6 +224,11 @@ export default function SystemConfigFormContainer({
   submitRef,
 }: SystemConfigFormProps) {
   const [newCategory, setNewCategory] = useState<string>('');
+  const [activeTab, setActiveTab] = useState(0);
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
+  };
 
   return (
     <Formik
@@ -216,12 +251,70 @@ export default function SystemConfigFormContainer({
           );
         };
 
+        const checkTabHasError = (fieldNames: string[]) => {
+          return fieldNames.some((field) => touched[field as keyof typeof touched] && errors[field as keyof typeof errors]);
+        };
+
         return (
           <Box component={Form} sx={{ width: '100%' }}>
             <UnsavedChangesBlocker onDirtyChange={onDirtyChange} submitRef={submitRef} />
-            <Stack spacing={3}>
 
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              <Tabs 
+                value={activeTab} 
+                onChange={handleTabChange} 
+                variant="scrollable" 
+                scrollButtons="auto"
+                aria-label="painéis de configuração"
+              >
+                <Tab 
+                  label="Criação de solicitações" 
+                  icon={checkTabHasError(['enableSolicitation']) ? <ErrorOutline color="error" /> : undefined}
+                  iconPosition="end"
+                  sx={{ color: checkTabHasError(['enableSolicitation']) ? 'error.main' : 'inherit' }}
+                />
+                <Tab 
+                  label="Categorias Qualis" 
+                  icon={checkTabHasError(['qualis']) ? <ErrorOutline color="error" /> : undefined}
+                  iconPosition="end"
+                  sx={{ color: checkTabHasError(['qualis']) ? 'error.main' : 'inherit' }}
+                />
+                <Tab 
+                  label="URLs de Documentação" 
+                  icon={checkTabHasError(['sitePgcompURL', 'resolucaoProapURL']) ? <ErrorOutline color="error" /> : undefined}
+                  iconPosition="end"
+                  sx={{ color: checkTabHasError(['sitePgcompURL', 'resolucaoProapURL']) ? 'error.main' : 'inherit' }}
+                />
+                <Tab 
+                  label="Limites e Valores" 
+                  icon={checkTabHasError(['numMaxDiarias', 'valorDiariaBRL']) ? <ErrorOutline color="error" /> : undefined}
+                  iconPosition="end"
+                  sx={{ color: checkTabHasError(['numMaxDiarias', 'valorDiariaBRL']) ? 'error.main' : 'inherit' }}
+                />
+                <Tab 
+                  label="Textos Informativos" 
+                  icon={checkTabHasError(['textoAvisoQualis', 'textoAvisoValorInscricao', 'textoAvisoEnvioArquivoCarta', 'textoInformacaoQtdDiarias', 'textoInformacaoCalcularQualis', 'textoInformacaoValorDiaria', 'textoInformacaoValorPassagem']) ? <ErrorOutline color="error" /> : undefined}
+                  iconPosition="end"
+                  sx={{ color: checkTabHasError(['textoAvisoQualis', 'textoAvisoValorInscricao', 'textoAvisoEnvioArquivoCarta', 'textoInformacaoQtdDiarias', 'textoInformacaoCalcularQualis', 'textoInformacaoValorDiaria', 'textoInformacaoValorPassagem']) ? 'error.main' : 'inherit' }}
+                />
+                <Tab 
+                  label="Grupos de Países" 
+                  icon={checkTabHasError(['countryGroups']) ? <ErrorOutline color="error" /> : undefined}
+                  iconPosition="end"
+                  sx={{ color: checkTabHasError(['countryGroups']) ? 'error.main' : 'inherit' }}
+                />
+              </Tabs>
+            </Box>
+
+            {/* ==============================================
+                PAINEL 0: Criação de solicitações
+            ============================================== */}
+            <CustomTabPanel value={activeTab} index={0}>
+              <SectionCard
+                icon={<Block />}
+                title="Criação de solicitações"
+                description="Controle a permissão para abertura de novas solicitações de auxílio no sistema"
+              >
                 <Field name="enableSolicitation">
                   {({ field }: any) => (
                     <FormControlLabel
@@ -249,7 +342,7 @@ export default function SystemConfigFormContainer({
                                 : 'Criação de solicitações desativada'}
                             </Typography>
                           </Box>
-                          <Typography variant="caption" color="text.secondary">
+                          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
                             {values.enableSolicitation
                               ? 'Os usuários podem criar novas solicitações de auxílio.'
                               : 'Os usuários não podem criar novas solicitações até que esta opção seja reativada.'}
@@ -260,12 +353,13 @@ export default function SystemConfigFormContainer({
                     />
                   )}
                 </Field>
-                <Button type="submit" variant="contained" color="primary" size="large">
-                  Salvar Alterações
-                </Button>
-              </Box>
+              </SectionCard>
+            </CustomTabPanel>
 
-              {/* Categorias Qualis */}
+            {/* ==============================================
+                PAINEL 1: Categorias Qualis
+            ============================================== */}
+            <CustomTabPanel value={activeTab} index={1}>
               <SectionCard
                 icon={<School />}
                 title="Categorias Qualis"
@@ -329,8 +423,12 @@ export default function SystemConfigFormContainer({
                   )}
                 />
               </SectionCard>
+            </CustomTabPanel>
 
-              {/* URLs de Documentação */}
+            {/* ==============================================
+                PAINEL 2: URLs de Documentação
+            ============================================== */}
+            <CustomTabPanel value={activeTab} index={2}>
               <SectionCard
                 icon={<LinkIcon />}
                 title="URLs de Documentação"
@@ -357,8 +455,12 @@ export default function SystemConfigFormContainer({
                   />
                 </Stack>
               </SectionCard>
+            </CustomTabPanel>
 
-              {/* Limites e Valores */}
+            {/* ==============================================
+                PAINEL 3: Limites e Valores
+            ============================================== */}
+            <CustomTabPanel value={activeTab} index={3}>
               <SectionCard
                 icon={<Settings />}
                 title="Limites e Valores"
@@ -389,8 +491,12 @@ export default function SystemConfigFormContainer({
                   />
                 </Stack>
               </SectionCard>
+            </CustomTabPanel>
 
-              {/* Textos Informativos */}
+            {/* ==============================================
+                PAINEL 4: Textos Informativos
+            ============================================== */}
+            <CustomTabPanel value={activeTab} index={4}>
               <SectionCard
                 icon={<TextFields />}
                 title="Textos Informativos"
@@ -431,8 +537,12 @@ export default function SystemConfigFormContainer({
                   ))}
                 </Stack>
               </SectionCard>
+            </CustomTabPanel>
 
-              {/* Grupos de Países */}
+            {/* ==============================================
+                PAINEL 5: Grupos de Países
+            ============================================== */}
+            <CustomTabPanel value={activeTab} index={5}>
               <SectionCard
                 icon={<Public />}
                 title="Grupos de Países"
@@ -443,14 +553,15 @@ export default function SystemConfigFormContainer({
                   onChange={(groups) => setFieldValue('countryGroups', groups)}
                 />
               </SectionCard>
+            </CustomTabPanel>
 
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', pt: 1 }}>
+              {/* BARRA DE AÇÕES INFERIOR (SALVAMENTO GLOBAL EXTRA) */}
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', pt: 3, mt: 1 }}>
                 <Button type="submit" variant="contained" color="primary" size="large">
                   Salvar Alterações
                 </Button>
               </Box>
 
-            </Stack>
           </Box>
         );
       }}

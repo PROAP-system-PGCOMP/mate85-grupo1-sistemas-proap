@@ -39,16 +39,13 @@ export default function SolicitantDetailFormContainer() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  // 1. Busca todos os usuários da API
   const { allUsers, isLoading: isLoadingUsers } = useUsers();
 
-  // 2. Extrai a lista de nomes para a Select Box (Filtrando perfis do banco)
   const listaTodosDocentes = useMemo(() => {
     const nomes = allUsers
       .filter((user) => ['Docente', 'Docente e Admin'].includes(user.profileName)) 
       .map((user) => user.name);
       
-    // Adiciona o nome do usuário atual como segurança de carregamento
     if (name && userIsDocente && !nomes.includes(name)) {
       nomes.push(name);
     }
@@ -56,7 +53,6 @@ export default function SolicitantDetailFormContainer() {
     return nomes;
   }, [allUsers, name, userIsDocente]);
 
-  // 3. REGRA ATUALIZADA: A Select Box agora aparece SEMPRE que a solicitação for PARA Docente
   const showDocenteSelect = values.solicitanteDocente;
 
   useEffect(() => {
@@ -109,13 +105,11 @@ export default function SolicitantDetailFormContainer() {
                   const isDocente = event.target.value === 'true';
                   setFieldValue(field.name, isDocente);
 
-                  // Limpeza e injeção do nome ao trocar a opção
                   if (isDocente) {
                     setFieldValue('nomeDiscente', '');
                     setFieldValue('discenteNoPrazoDoCurso', undefined);
                     setFieldValue('mesesAtrasoCurso', undefined);
                     
-                    // Injeta o nome na variável do SelectBox para já vir marcado
                     if (userIsDocente) {
                       setFieldValue('nomeDocente', name);
                     }
@@ -173,7 +167,6 @@ export default function SolicitantDetailFormContainer() {
           <Field name="nomeDocente">
             {({ field }: any) => {
               
-              // QUANDO FOR SOLICITAÇÃO PARA DOCENTE: Exibe Select Box livre para alteração
               if (showDocenteSelect) {
                 return (
                   <StyledTextField

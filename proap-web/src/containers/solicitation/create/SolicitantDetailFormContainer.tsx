@@ -53,7 +53,7 @@ export default function SolicitantDetailFormContainer() {
     return nomes;
   }, [allUsers, name, userIsDocente]);
 
-const showDocenteSelect = values.solicitanteDocente && !userIsDocente;
+  const showDocenteSelect = values.solicitanteDocente;
 
   useEffect(() => {
     if (!userIsAdmin) {
@@ -113,6 +113,8 @@ const showDocenteSelect = values.solicitanteDocente && !userIsDocente;
                     if (userIsDocente) {
                       setFieldValue('nomeDocente', name);
                     }
+                  } else {
+                    setFieldValue('nomeDocente', '');
                   }
                 }}
               >
@@ -162,17 +164,16 @@ const showDocenteSelect = values.solicitanteDocente && !userIsDocente;
             </Field>
           )}
 
-          {/* Campo Dinâmico: Docente */}
           <Field name="nomeDocente">
             {({ field }: any) => {
               
               if (showDocenteSelect) {
                 return (
                   <StyledTextField
-                    key="select-docente"
+                    key="select-docente" 
                     {...field}
                     select
-                    label={values.solicitanteDocente ? 'Nome do Docente' : 'Nome do Docente Orientador do PGCOMP'}
+                    label="Nome do Docente"
                     required
                     disabled={isLoadingUsers}
                     error={touched.nomeDocente && !!errors.nomeDocente}
@@ -180,7 +181,7 @@ const showDocenteSelect = values.solicitanteDocente && !userIsDocente;
                     fullWidth
                     sx={{
                       background: 'white',
-                      maxWidth: values.solicitanteDocente ? { xs: '100%', md: '40%' } : '100%',
+                      maxWidth: { xs: '100%', md: '40%' },
                     }}
                   >
                     {listaTodosDocentes.map((docenteName) => (
@@ -194,11 +195,10 @@ const showDocenteSelect = values.solicitanteDocente && !userIsDocente;
 
               return (
                 <StyledTextField
-                  key="input-docente"
+                  key="input-docente" 
                   {...field}
-                  label={values.solicitanteDocente ? 'Nome do Docente' : 'Nome do Docente Orientador do PGCOMP'}
+                  label="Nome do Docente Orientador do PGCOMP"
                   required
-                  disabled={!userIsAdmin && userIsDocente}
                   error={touched.nomeDocente && !!errors.nomeDocente}
                   helperText={touched.nomeDocente && errors.nomeDocente}
                   fullWidth
@@ -209,10 +209,7 @@ const showDocenteSelect = values.solicitanteDocente && !userIsDocente;
                       </InputAdornment>
                     ),
                   }}
-                  sx={{
-                    background: 'white',
-                    maxWidth: values.solicitanteDocente ? { xs: '100%', md: '49%' } : '100%',
-                  }}
+                  sx={{ background: 'white' }}
                 />
               );
             }}

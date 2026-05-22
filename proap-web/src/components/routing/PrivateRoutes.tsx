@@ -34,7 +34,6 @@ export default function PrivateRoutes() {
   const isCeapg = useHasPermission('CEAPG_ROLE');
   const isCollaborator = useHasPermission('FUNCIONARIO_ROLE');
 
-  // Variável que agrupa "Admin e demais" para facilitar a leitura
   const isPrivilegedUser = isAdmin || isCeapg || isCollaborator;
 
   return (

@@ -10,7 +10,6 @@ import {
   eventDetailFormSchema,
   INITIAL_FORM_VALUES,
   solicitantionDataFormSchema,
-  SolicitationFormValues,
   solicitantDetailFormSchema,
   InitialSolicitationFormValues,
   confirmationDataFormSchema,
@@ -49,6 +48,27 @@ export default function SolicitationFormContainer({
   labels = defaultProps.labels,
   onSubmit = defaultProps.onSubmit,
 }: SolicitationFormContainerProps) {
+  
+  const formInitialValues = useMemo(() => {
+    const rascunhoSalvo = sessionStorage.getItem('rascunho-solicitacao-proap');
+    
+    if (rascunhoSalvo) {
+      try {
+        return JSON.parse(rascunhoSalvo);
+      } catch (error) {
+        console.error("Erro ao ler o rascunho, restaurando padrão.", error);
+        sessionStorage.removeItem('rascunho-solicitacao-proap');
+      }
+    }
+    
+    return initialValues;
+  }, []);
+
+  const handleFormSubmit = (values: FormikValues) => {
+    onSubmit(values); 
+    sessionStorage.removeItem('rascunho-solicitacao-proap'); 
+  };
+
   const registerFormSteps: FormStep[] = useMemo(
     () => [
       {
@@ -91,10 +111,12 @@ export default function SolicitationFormContainer({
         {title}
       </Typography>
       <StepperForm
-        initialValues={initialValues as FormikValues}
-        onSubmit={onSubmit}
+        initialValues={formInitialValues as FormikValues}
+        onSubmit={handleFormSubmit}
         steps={registerFormSteps}
         validateOnChange={false}
+        enableReinitialize={true} 
+        autoSaveKey="rascunho-solicitacao-proap"
         labels={
           labels || {
             submit: 'Enviar solicitação',

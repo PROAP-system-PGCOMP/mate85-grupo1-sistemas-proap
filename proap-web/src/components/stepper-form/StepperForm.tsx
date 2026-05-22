@@ -15,8 +15,9 @@ import {
   FormikConfig,
   FormikHelpers,
   FormikValues,
+  useFormikContext,
 } from 'formik';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react'; // 👇 useEffect ADICIONADO AQUI
 import { AnySchema } from 'yup';
 import { StepperCircularProgress } from './StepperForm.style';
 
@@ -29,6 +30,7 @@ export interface FormStep {
 export interface StepperFormProps<T> extends FormikConfig<T> {
   steps: FormStep[];
   activeStep?: number;
+  autoSaveKey?: string;
   labels: {
     previous?: string;
     submit?: string;
@@ -44,9 +46,23 @@ const MobileStepLabel = styled(Typography)(({ theme }) => ({
   maxWidth: '100%',
 }));
 
+function AutoSaveWatcher({ cacheKey }: { cacheKey: string }) {
+  const { values } = useFormikContext();
+
+  useEffect(() => {
+    if (cacheKey && values && Object.keys(values).length > 0) {
+      console.log("💾 [PROAP AutoSave] Guardando:", values);
+      sessionStorage.setItem(cacheKey, JSON.stringify(values));
+    }
+  }, [values, cacheKey]);
+
+  return null;
+}
+
 export default function StepperForm({
   activeStep: initialActiveStep = 0,
   onSubmit,
+  autoSaveKey, 
   labels = {
     previous: 'Anterior',
     submit: 'Enviar',
@@ -134,6 +150,9 @@ export default function StepperForm({
       >
         {({ isSubmitting }) => (
           <Form id="stepper-form" noValidate>
+            
+            {autoSaveKey && <AutoSaveWatcher cacheKey={autoSaveKey} />}
+
             {steps.map(
               ({ component: FormComponent }, index) =>
                 index === activeStep && (

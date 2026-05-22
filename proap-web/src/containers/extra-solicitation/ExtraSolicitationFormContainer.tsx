@@ -25,6 +25,26 @@ export default function ExtraSolicitationFormContainer(
 ) {
   const { title, initialValues, labels, onSubmit } = props;
 
+  const formInitialValues = useMemo(() => {
+    const rascunhoSalvo = sessionStorage.getItem('rascunho-solicitacao-extra-proap');
+    
+    if (rascunhoSalvo) {
+      try {
+        return JSON.parse(rascunhoSalvo);
+      } catch (error) {
+        console.error("Erro ao ler o rascunho extra, restaurando padrão.", error);
+        sessionStorage.removeItem('rascunho-solicitacao-extra-proap');
+      }
+    }
+    
+    return initialValues;
+  }, []); 
+
+  const handleFormSubmit = async (values: FormikValues) => {
+    await onSubmit(values); 
+    sessionStorage.removeItem('rascunho-solicitacao-extra-proap'); 
+  };
+
   const extraSolicitationFormSteps: FormStep[] = useMemo(
     () => [
       {
@@ -52,10 +72,12 @@ export default function ExtraSolicitationFormContainer(
         {title}
       </Typography>
       <StepperForm
-        initialValues={initialValues as FormikValues}
-        onSubmit={onSubmit}
+        initialValues={formInitialValues as FormikValues}
+        onSubmit={handleFormSubmit}
         steps={extraSolicitationFormSteps}
         validateOnChange={false}
+        enableReinitialize={true}
+        autoSaveKey="rascunho-solicitacao-extra-proap"
         labels={
           labels || {
             submit: 'Criar solicitação',

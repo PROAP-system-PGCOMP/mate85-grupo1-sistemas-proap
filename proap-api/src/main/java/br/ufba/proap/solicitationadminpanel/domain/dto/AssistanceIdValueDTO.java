@@ -12,7 +12,8 @@ public record AssistanceIdValueDTO(
         LocalDate createdAt,
         LocalDate dataAvaliacaoProap,
         String avaliadorProap,
-        String docente
+        String docente,
+        String perfil
 ) {
 
     public static List<AssistanceIdValueDTO> convertPairsToDTOs(List<Object[]> data) {
@@ -25,13 +26,17 @@ public record AssistanceIdValueDTO(
 
                     LocalDate createdAt = (objArray[2] instanceof LocalDateTime)
                             ? ((LocalDateTime) objArray[2]).toLocalDate()
-                            : null;
+                            : (objArray[2] instanceof LocalDate ? (LocalDate) objArray[2] : null);
 
-                    LocalDate dataAvaliacaoProap = (LocalDate) objArray[3];
+                    LocalDate dataAvaliacaoProap = (objArray[3] instanceof LocalDateTime)
+                            ? ((LocalDateTime) objArray[3]).toLocalDate()
+                            : (objArray[3] instanceof LocalDate ? (LocalDate) objArray[3] : null);
+
                     String avaliadorProap = (String) objArray[4];
                     String docente = (objArray.length > 5) ? (String) objArray[5] : null;
+                    String perfil = (objArray.length > 6) ? (String) objArray[6] : null;
 
-                    return new AssistanceIdValueDTO(id, value, createdAt, dataAvaliacaoProap, avaliadorProap, docente);
+                    return new AssistanceIdValueDTO(id, value, createdAt, dataAvaliacaoProap, avaliadorProap, docente, perfil);
                 })
                 .collect(Collectors.toList());
     }

@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import { Field, Form, Formik, FormikHelpers } from 'formik';
 import { useCallback, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; 
 import React from 'react';
 import { signIn } from '../../services/authService';
 import { useAppDispatch } from '../../store';
@@ -51,6 +51,8 @@ export default function LoginFormContainer() {
   const [loginError, setLoginError] = useState<string | null>(null);
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down('sm'));
+  
+  const navigate = useNavigate(); 
 
   const handleSubmit = useCallback(
     async (
@@ -62,23 +64,28 @@ export default function LoginFormContainer() {
         ...values,
         username: values.username.toLowerCase(),
       };
-      return dispatch(signIn(transformedValues)).catch((error) => {
-        if (error.response?.status === 401) {
-          actions.setFieldError('password', 'Senha incorreta');
-          setLoginError('Credenciais inválidas. Verifique seu e-mail e senha.');
-        } else {
-          setLoginError(
-            error.response?.data?.message ||
-              'Erro ao fazer login. Tente novamente.',
+      
+      return dispatch(signIn(transformedValues))
+        .then(() => {
+          navigate('/home');
+        })
+        .catch((error) => {
+          if (error.response?.status === 401) {
+            actions.setFieldError('password', 'Senha incorreta');
+            setLoginError('Credenciais inválidas. Verifique seu e-mail e senha.');
+          } else {
+            setLoginError(
+              error.response?.data?.message ||
+                'Erro ao fazer login. Tente novamente.',
+            );
+          }
+          Toast.error(
+            'Erro ao fazer login: ' +
+              (error.response?.data?.message || 'Ocorreu um erro inesperado'),
           );
-        }
-        Toast.error(
-          'Erro ao fazer login: ' +
-            (error.response?.data?.message || 'Ocorreu um erro inesperado'),
-        );
-      });
+        });
     },
-    [dispatch],
+    [dispatch, navigate],
   );
 
   const handleClickShowPassword = () => {

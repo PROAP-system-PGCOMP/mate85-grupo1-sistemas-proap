@@ -17,7 +17,11 @@ public interface AssistanceRequestRepository extends JpaRepository<AssistanceReq
 
 	long countByUser(User user);
 
+<<<<<<< Updated upstream
 	@Query("SELECT ar.id, ar.valorAprovado, ar.createdAt, ar.dataAvaliacaoProap, ap.name FROM AssistanceRequest ar LEFT JOIN ar.avaliadorProap ap WHERE DATE(ar.createdAt) BETWEEN :startDate AND :endDate AND ar.situacao = 1 ")
+=======
+	@Query("SELECT ar.id, ar.valorAprovado, ar.createdAt, ar.dataAvaliacaoProap, ap.name, u.name, u.perfil.name FROM AssistanceRequest ar LEFT JOIN ar.avaliadorProap ap LEFT JOIN ar.user u WHERE DATE(ar.createdAt) BETWEEN :startDate AND :endDate AND ar.situacao = 1")
+>>>>>>> Stashed changes
 	List<Object[]> findTotalApprovedValueByDateRange(LocalDate startDate, LocalDate endDate);
 
 	@Query("SELECT SUM(ar.valorAprovado) FROM AssistanceRequest ar WHERE YEAR(ar.createdAt) = :year AND ar.situacao = 1")

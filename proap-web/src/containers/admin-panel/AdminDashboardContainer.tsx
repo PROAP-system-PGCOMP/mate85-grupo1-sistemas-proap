@@ -90,13 +90,12 @@ const AdminDashboardContainer = () => {
 
   const ceapg = useCeapgRequests();
   const solicitationRequests = useLoadApprovedRequests();
-
   const budgetByYear = useLoadBudget();
-
   const historicalData = useLoadHistoricalBudget();
 
   useEffect(() => {
     budgetByYear.getBudget(selectedYear);
+    solicitationRequests.getApprovedRequests(); 
   }, [selectedYear]);
 
   useEffect(() => {
@@ -121,7 +120,7 @@ const AdminDashboardContainer = () => {
     }
 
     if (
-      newValue === APPROVED_REQUESTS_INDEX &&
+      (newValue === APPROVED_REQUESTS_INDEX || newValue === DASHBOARD_INDEX) &&
       solicitationRequests.approvedRequests.length === 0
     ) {
       solicitationRequests.getApprovedRequests();
@@ -209,7 +208,7 @@ const AdminDashboardContainer = () => {
       historicalData.fetchHistoricalBudget();
     }
   };
-
+  console.log("DADOS DA API:", solicitationRequests.approvedRequests);
   return (
     <Box sx={{ pb: 4 }}>
       <Box
@@ -296,6 +295,13 @@ const AdminDashboardContainer = () => {
               availableYears={historicalData.availableYears}
               yearsLoading={historicalData.yearsLoading}
               onYearChange={handleYearChange}
+              
+              solicitacoes={solicitationRequests.approvedRequests
+              .filter((req: any) => req.perfil && req.perfil.toUpperCase() === 'DOCENTE') 
+              .map((req: any) => ({
+                nomeDocente: req.docente || 'Docente não identificado',
+                valorSolicitado: req.value || 0,
+              }))}
             />
           </TabPanel>
 

@@ -17,11 +17,10 @@ public interface AssistanceRequestRepository extends JpaRepository<AssistanceReq
 
 	long countByUser(User user);
 
-    @Query("SELECT ar.id, ar.valorAprovado, ar.createdAt, ar.dataAvaliacaoProap, ap.name, u FROM AssistanceRequest ar LEFT JOIN ar.avaliadorProap ap LEFT JOIN ar.user u WHERE DATE(ar.createdAt) BETWEEN :startDate AND :endDate AND ar.situacao = 1")
-    List<Object[]> findTotalApprovedValueByDateRange(LocalDate startDate, LocalDate endDate);
+  @Query("SELECT ar.id, ar.valorAprovado, ar.createdAt, ar.dataAvaliacaoProap, ap.name, u.name, u.perfil.name FROM AssistanceRequest ar LEFT JOIN ar.avaliadorProap ap LEFT JOIN ar.user u WHERE DATE(ar.createdAt) BETWEEN :startDate AND :endDate AND ar.situacao = 1")
+  List<Object[]> findTotalApprovedValueByDateRange(LocalDate startDate, LocalDate endDate);
 
-
-    @Query("SELECT SUM(ar.valorAprovado) FROM AssistanceRequest ar WHERE YEAR(ar.createdAt) = :year AND ar.situacao = 1")
+  @Query("SELECT SUM(ar.valorAprovado) FROM AssistanceRequest ar WHERE YEAR(ar.createdAt) = :year AND ar.situacao = 1")
 	BigDecimal findTotalApprovedValueByYear(Integer year);
 
 	@Query("SELECT ar.id, ar.valorAprovado, ar.dataAvaliacaoProap, ap.name, ar.custoFinalCeapg, ar.observacoesCeapg, ac.name, ar.dataAvaliacaoCeapg FROM AssistanceRequest ar LEFT JOIN ar.avaliadorProap ap LEFT JOIN ar.avaliadorCeapg ac WHERE DATE(ar.dataAvaliacaoProap) BETWEEN :startDate AND :endDate AND ar.situacao = 1")

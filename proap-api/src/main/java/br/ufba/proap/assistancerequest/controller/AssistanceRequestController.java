@@ -126,26 +126,27 @@ public class AssistanceRequestController {
     // TODO: Débito técnico - Refatorar para service
     @Transactional
     @PostMapping("/create")
-    public ResponseEntity<AssistanceRequest> create(@RequestBody AssistanceRequest assistanceReques) {
+    public ResponseEntity<AssistanceRequest> create(@Valid @RequestBody CreateAssistanceRequestDTO dto) {
 
         User currentUser = serviceUser.getLoggedUser();
 
         if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         try {
+            AssistanceRequest assistanceRequest = dto.toEntity();
 
-            assistanceReques.setSituacao(0);
-            assistanceReques.setUser(currentUser);
+            assistanceRequest.setSituacao(0);
+            assistanceRequest.setUser(currentUser);
 
-            return ResponseEntity.ok().body(service.save(assistanceReques));
+            return ResponseEntity.ok().body(service.save(assistanceRequest));
+
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error("Erro ao criar solicitação: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
-
     // TODO: Débito técnico - Refatorar para service
     @Transactional
     @PostMapping(value = "/create-with-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

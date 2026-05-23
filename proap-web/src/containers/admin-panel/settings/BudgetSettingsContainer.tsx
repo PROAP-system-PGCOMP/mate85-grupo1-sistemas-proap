@@ -6,7 +6,7 @@ import {
 } from './../BudgetFormSchema';
 import { InfoOutlined } from '@mui/icons-material';
 import { Formik } from 'formik';
-import BudgetForm from '../../../components/custom/BudgetForm';
+import BudgetForm from '../../../components/custom/BudgetForm'; // O erro está dentro deste arquivo!
 import { useEffect, useState } from 'react';
 import { getBudgetByYear } from '../../../services/budgetService';
 
@@ -27,10 +27,15 @@ export default function BudgetSettingsContainer({
     const currentYear = new Date().getFullYear();
     getBudgetByYear(currentYear)
       .then((data) => {
-        setInitialValues({ budget: data.orcamentoAnual ?? 0, year: data.year });
+        if (data) {
+          setInitialValues({ 
+            budget: data.orcamentoAnual ?? 0, 
+            year: data.year ?? currentYear 
+          });
+        }
       })
       .catch(() => {
-        // Nenhum orçamento definido para o ano atual — mantém os valores padrão
+        // Mantém os valores iniciais caso não encontre orçamento
       });
   }, []);
 
@@ -55,18 +60,12 @@ export default function BudgetSettingsContainer({
           }}
         >
           <Box sx={{ mb: 3 }}>
-            <Typography
-              variant="h6"
-              fontWeight="bold"
-              color="text.primary"
-              gutterBottom
-            >
+            <Typography variant="h6" fontWeight="bold" color="text.primary" gutterBottom>
               Configure o orçamento
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Defina o valor do orçamento anual para acompanhar os gastos e
-              solicitações aprovadas. Este valor será utilizado para calcular o
-              saldo disponível.
+              solicitações aprovadas.
             </Typography>
           </Box>
 
@@ -74,11 +73,16 @@ export default function BudgetSettingsContainer({
             initialValues={initialValues}
             validationSchema={budgetFormSchema}
             onSubmit={handleBudgetSubmit}
-            enableReinitialize
+            enableReinitialize // Essencial para o Formik atualizar quando o initialValues mudar
           >
-            {(formikProps) => (
+            {() => (
               <>
-                <BudgetForm onSubmit={handleBudgetSubmit} loading={loading} totalBudget={totalBudget}/>
+                {/* O componente BudgetForm deve conter os inputs e o botão de submit */}
+                <BudgetForm 
+                  onSubmit={handleBudgetSubmit} 
+                  loading={loading} 
+                  totalBudget={totalBudget}
+                />
 
                 <Box
                   sx={{
@@ -89,6 +93,7 @@ export default function BudgetSettingsContainer({
                     p: 2,
                     bgcolor: 'info.lighter',
                     borderRadius: 1,
+                    opacity: 0.9
                   }}
                 >
                   <Box sx={{ color: 'info.main', display: 'flex' }}>

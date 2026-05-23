@@ -122,7 +122,7 @@ public class BudgetControllerTest {
     public void getTotalAssistanceRequestsValue_WithDefaultDates_ReturnsList() {
         LocalDate now = LocalDate.now();
         List<AssistanceIdValueDTO> expectedList = Arrays
-                .asList(new AssistanceIdValueDTO(1L, new BigDecimal("5000.00"), now, now, "Avaliador"));
+                .asList(new AssistanceIdValueDTO(1L, new BigDecimal("5000.00"), now, now, "Avaliador", "TesteTeacher", "TestPerfil"));
         when(budgetService.getTotalApprovedAssistanceRequestsValue(any(LocalDate.class), any(LocalDate.class)))
                 .thenReturn(expectedList);
 
@@ -138,7 +138,7 @@ public class BudgetControllerTest {
         LocalDate start = LocalDate.parse("01-01-2023", DateTimeFormatter.ofPattern("dd-MM-yyyy"));
         LocalDate end = LocalDate.parse("31-12-2023", DateTimeFormatter.ofPattern("dd-MM-yyyy"));
         List<AssistanceIdValueDTO> expectedList = Arrays
-                .asList(new AssistanceIdValueDTO(1L, new BigDecimal("5000.00"), start, start, "Avaliador"));
+                .asList(new AssistanceIdValueDTO(1L, new BigDecimal("5000.00"), start, start, "Avaliador", "TesteTeacher", "TestPerfil"));
 
         when(budgetService.getTotalApprovedAssistanceRequestsValue(eq(start), eq(end)))
                 .thenReturn(expectedList);

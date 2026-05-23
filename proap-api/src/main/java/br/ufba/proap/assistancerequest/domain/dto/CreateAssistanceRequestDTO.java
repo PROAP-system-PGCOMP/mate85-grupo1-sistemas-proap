@@ -7,36 +7,39 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import br.ufba.proap.assistancerequest.domain.AssistanceRequest;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 public record CreateAssistanceRequestDTO(
-        String tituloPublicacao,
+        @NotBlank String tituloPublicacao,
         List<String> coautores,
         Boolean algumCoautorPGCOMP,
         Boolean solicitanteDocente,
-        String nomeDocente,
-        String nomeDiscente,
+        @NotBlank String nomeDocente,
+        @NotBlank String nomeDiscente,
         Boolean discenteNoPrazoDoCurso,
         Integer mesesAtrasoCurso,
-        String nomeEvento,
-        Boolean eventoInternacional,
+        @NotBlank String nomeEvento,
+        @NotNull Boolean eventoInternacional,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy") LocalDate dataInicio,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy") LocalDate dataFim,
-        Integer qtdDiasEvento,
-        String linkHomePageEvento,
-        String cidade,
-        String pais,
-        String qualis,
-        String modalidadeParticipacao,
-        BigDecimal valorInscricao,
-        String linkPaginaInscricao,
-        Integer quantidadeDiariasSolicitadas,
-        BigDecimal valorDiaria,
-        Boolean ultimaDiariaIntegral,
+        @NotNull @Positive Integer qtdDiasEvento,
+        @NotBlank String linkHomePageEvento,
+        @NotBlank String cidade,
+        @NotBlank String pais,
+        @NotBlank String qualis,
+        @NotBlank String modalidadeParticipacao,
+        @NotNull @Positive BigDecimal valorInscricao,
+        @NotBlank String linkPaginaInscricao,
+        @NotNull @Positive Integer quantidadeDiariasSolicitadas,
+        @NotNull @Positive BigDecimal valorDiaria,
+        @NotNull Boolean ultimaDiariaIntegral,
         Boolean isDolar,
         BigDecimal cotacaoMoeda,
         BigDecimal valorPassagem,
         BigDecimal valorTotal,
-        String justificativa) {
+        @NotBlank String justificativa) {
 
     public static CreateAssistanceRequestDTO fromEntity(AssistanceRequest entity) {
         return new CreateAssistanceRequestDTO(

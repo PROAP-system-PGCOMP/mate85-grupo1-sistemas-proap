@@ -23,9 +23,14 @@ public class Perfil implements Serializable {
 	private static final long serialVersionUID = 6718249363254821367L;
 	private static final String DEFAULT_PERFIL_NAME = "Discente";
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "perfil_seq")
+    @SequenceGenerator(
+            name = "perfil_seq",
+            sequenceName = "aut_perfil_id_seq", // O nome da sequence real no seu Postgres
+            allocationSize = 1
+    )
+    private Long id;
 
 	@Column(nullable = false, unique = true)
 	private String name;

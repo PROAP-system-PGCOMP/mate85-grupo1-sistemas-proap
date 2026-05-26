@@ -5,6 +5,7 @@ import java.util.List;
 import br.ufba.proap.Interceptor.Domain.DataConfig;
 import br.ufba.proap.Interceptor.Repository.InterceptorRepository;
 import br.ufba.proap.sysadminpanel.domain.dto.PeriodRequestDTO;
+import br.ufba.proap.sysadminpanel.domain.dto.PeriodResponseDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,8 @@ import br.ufba.proap.authentication.service.UserService;
 import br.ufba.proap.sysadminpanel.domain.dto.SystemConfigurationDTO;
 import br.ufba.proap.sysadminpanel.domain.dto.UrlMapperDTO;
 import br.ufba.proap.sysadminpanel.service.SystemConfigurationService;
+
+import javax.xml.crypto.Data;
 
 @RestController
 @RequestMapping("/api/admin/system-config")
@@ -133,5 +136,19 @@ public class SystemConfigurationController {
 
         return ResponseEntity.ok("Período atualizado com sucesso");
 
+    }
+
+    @GetMapping("/find-period")
+    public ResponseEntity<?> findPeriod() {
+        ResponseEntity<String> permissionCheck = checkAdminPermission();
+        if (permissionCheck != null ) {
+            return permissionCheck;
+        }
+
+        DataConfig config = interceptorRepository.findById(1L)
+                .orElseThrow(() -> new RuntimeException("Period is Not Configurated"));
+
+        PeriodResponseDTO data = new PeriodResponseDTO(config);
+        return ResponseEntity.ok(data);
     }
 }

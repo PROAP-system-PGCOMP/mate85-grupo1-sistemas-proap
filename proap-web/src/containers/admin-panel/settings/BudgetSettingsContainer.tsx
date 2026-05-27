@@ -6,7 +6,7 @@ import {
 } from './../BudgetFormSchema';
 import { InfoOutlined } from '@mui/icons-material';
 import { Formik } from 'formik';
-import BudgetForm from '../../../components/custom/BudgetForm'; // O erro está dentro deste arquivo!
+import BudgetForm from '../../../components/custom/BudgetForm';
 import { useEffect, useState } from 'react';
 import { getBudgetByYear } from '../../../services/budgetService';
 
@@ -29,13 +29,12 @@ export default function BudgetSettingsContainer({
       .then((data) => {
         if (data) {
           setInitialValues({ 
-            budget: data.orcamentoAnual ?? 0, 
+            budget: totalBudget ?? 0, 
             year: data.year ?? currentYear 
           });
         }
       })
       .catch(() => {
-        // Mantém os valores iniciais caso não encontre orçamento
       });
   }, []);
 
@@ -73,11 +72,10 @@ export default function BudgetSettingsContainer({
             initialValues={initialValues}
             validationSchema={budgetFormSchema}
             onSubmit={handleBudgetSubmit}
-            enableReinitialize // Essencial para o Formik atualizar quando o initialValues mudar
+            enableReinitialize
           >
             {() => (
               <>
-                {/* O componente BudgetForm deve conter os inputs e o botão de submit */}
                 <BudgetForm 
                   onSubmit={handleBudgetSubmit} 
                   loading={loading} 

@@ -3,8 +3,7 @@ import {
   Alert,
   Box,
   CircularProgress,
-  Tab,
-  Tabs,
+  Chip,
   useMediaQuery,
   useTheme,
   Table,
@@ -17,6 +16,10 @@ import {
   IconButton,
   Tooltip,
   Paper,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { CeapgResponse } from '../../../types';
@@ -24,13 +27,7 @@ import { formatNumberToBRL } from '../../../helpers/formatter';
 import GradingIcon from '@mui/icons-material/Grading';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import {
-  CheckCircle,
-  AccessTime,
-  Visibility,
-  RateReview,
-  ExpandMore,
-} from '@mui/icons-material';
+import { Visibility, ExpandMore, AccountBalanceWallet, Savings } from '@mui/icons-material';
 import DateRangeFilter from '../../../components/custom/DateRangeFilter';
 
 interface TableCellHeaderProps {
@@ -70,7 +67,7 @@ const TableCellHeader: React.FC<TableCellHeaderProps> = ({
           flexDirection: align === 'center' ? 'row' : 'inherit',
           '& .MuiTableSortLabel-icon': {
             marginLeft: align === 'center' ? '4px' : 'inherit',
-            transition: 'transform 0.2s ease-in-out', // Suaviza a rotação da seta
+            transition: 'transform 0.2s ease-in-out',
           },
         }}
       >
@@ -85,6 +82,7 @@ interface CeapgReviewRequestsProps {
   requests: CeapgResponse[];
   startDate?: string;
   endDate?: string;
+  montanteTotal?: number; // <-- ADICIONADO: O componente pai deve passar o orçamento total aqui
   onStartDateChange: (date: string) => void;
   onEndDateChange: (date: string) => void;
   onFilter: (startDate?: string, endDate?: string) => void;
@@ -92,40 +90,12 @@ interface CeapgReviewRequestsProps {
   handleClickSortTable?: (prop: string) => void;
 }
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-const TabPanel = (props: TabPanelProps) => {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`ceapg-tabpanel-${index}`}
-      aria-labelledby={`ceapg-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
-    </div>
-  );
-};
-
-const a11yProps = (index: number) => {
-  return {
-    id: `ceapg-tab-${index}`,
-    'aria-controls': `ceapg-tabpanel-${index}`,
-  };
-};
-
 const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
   loading,
   requests,
   startDate,
   endDate,
+  montanteTotal = 0, // Padrão 0 caso não seja passado
   onStartDateChange,
   onEndDateChange,
   onFilter,
@@ -133,20 +103,16 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
   handleClickSortTable,
 }) => {
   const navigate = useNavigate();
-  const [tabValue, setTabValue] = useState(0);
-
   const [localStartDate, setLocalStartDate] = useState(startDate);
   const [localEndDate, setLocalEndDate] = useState(endDate);
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  // --- IMPLEMENTAÇÃO DA LÓGICA DE ORDENAÇÃO LOCAL ---
+  // --- LÓGICA DE ORDENAÇÃO LOCAL ---
   const [localSortConfig, setLocalSortConfig] = useState<{ key: string; asc: boolean }>({
     key: 'id',
     asc: true,
   });
 
-  // Se o componente pai não passar as props de ordenação, usamos o estado local automaticamente
   const activeSortRecord = selectedPropToSortTable && Object.keys(selectedPropToSortTable).length > 0
     ? selectedPropToSortTable
     : { [localSortConfig.key]: localSortConfig.asc };
@@ -170,6 +136,12 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
       let aVal = a[currentKey];
       let bVal = b[currentKey];
 
+      // Se a ordenação for por status (isCompleted virtual)
+      if (currentKey === 'isCompleted') {
+        aVal = !!a.avaliadorCeapg ? 1 : 0;
+        bVal = !!b.avaliadorCeapg ? 1 : 0;
+      }
+
       if (aVal === null || aVal === undefined) return 1;
       if (bVal === null || bVal === undefined) return -1;
 
@@ -179,6 +151,19 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
     });
   };
   // --------------------------------------------------
+
+  // --- CÁLCULOS DOS SALDOS ---
+  // Total Solicitado = Soma de todos os 'valorAprovado' (pois o que foi rejeitado não chega aqui)
+  const totalSolicitado = requests.reduce((acc, req) => acc + Number(req.valorAprovado || 0), 0);
+  
+  // Total Gasto = Soma apenas das concluídas (usando custoFinalCeapg)
+  const totalGasto = requests
+    .filter((req) => !!req.avaliadorCeapg)
+    .reduce((acc, req) => acc + Number(req.custoFinalCeapg || req.valorAprovado || 0), 0);
+
+  const saldoPrevisto = montanteTotal - totalSolicitado;
+  const saldoReal = montanteTotal - totalGasto;
+  // ---------------------------
 
   useEffect(() => {
     setLocalStartDate(startDate);
@@ -217,21 +202,6 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
     }
   };
 
-  const pendingReviews = requests.filter(
-    (request) => !request.avaliadorCeapg
-  );
-
-const completedReviews = requests.filter(
-  (request) => !!request.avaliadorCeapg
-);
-
-  const orderedPending = sortData(pendingReviews);
-  const orderedCompleted = sortData(completedReviews);
-
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-  };
-
   return (
     <>
       <DateRangeFilter
@@ -248,201 +218,132 @@ const completedReviews = requests.filter(
           <CircularProgress />
         </Box>
       ) : requests.length === 0 ? (
-        <Alert severity="info">Nenhuma solicitação encontrada no período selecionado.</Alert>
+        <Alert severity="info" sx={{ mt: 2 }}>Nenhuma solicitação encontrada no período selecionado.</Alert>
       ) : (
-        <Box sx={{ width: '100%' }}>
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Tabs
-              value={tabValue}
-              onChange={handleTabChange}
-              aria-label="ceapg review tabs"
-              indicatorColor="primary"
-              textColor="primary"
-              variant={isMobile ? 'scrollable' : 'standard'}
-              scrollButtons="auto"
-              allowScrollButtonsMobile
-            >
-              <Tab
-                label={`Pendentes (${pendingReviews.length})`}
-                icon={<AccessTime />}
-                iconPosition="start"
-                {...a11yProps(0)}
-              />
-              <Tab
-                label={`Avaliadas (${completedReviews.length})`}
-                icon={<CheckCircle />}
-                iconPosition="start"
-                {...a11yProps(1)}
-              />
-            </Tabs>
-          </Box>
+        <Box sx={{ width: '100%', mt: 2 }}>
+          <TableContainer
+            component={Paper}
+            sx={{
+              maxHeight: '500px',
+              boxShadow: 'none',
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 1,
+              mb: 2,
+            }}
+          >
+            <Table stickyHeader aria-label="ceapg unified table">
+              <TableHead>
+                <TableRow>
+                  <TableCellHeader
+                    text="Solicitação"
+                    sortBy="id"
+                    selectedPropToSortTable={activeSortRecord}
+                    handleClickSortTable={handleSortClick}
+                  />
+                  <TableCellHeader
+                    text="Valor"
+                    sortBy="valorAprovado"
+                    align="center"
+                    selectedPropToSortTable={activeSortRecord}
+                    handleClickSortTable={handleSortClick}
+                  />
+                  <TableCellHeader
+                    text="Avaliador"
+                    sortBy="avaliadorProap"
+                    align="center"
+                    selectedPropToSortTable={activeSortRecord}
+                    handleClickSortTable={handleSortClick}
+                  />
+                  <TableCellHeader
+                    text="Data"
+                    sortBy="dataAvaliacaoProap"
+                    align="center"
+                    selectedPropToSortTable={activeSortRecord}
+                    handleClickSortTable={handleSortClick}
+                  />
+                  <TableCellHeader
+                    text="ATA"
+                    sortBy="numeroAta"
+                    align="center"
+                    selectedPropToSortTable={activeSortRecord}
+                    handleClickSortTable={handleSortClick}
+                  />
+                  <TableCellHeader
+                    text="Status"
+                    sortBy="isCompleted"
+                    align="center"
+                    selectedPropToSortTable={activeSortRecord}
+                    handleClickSortTable={handleSortClick}
+                  />
+                  <TableCell align="center" sx={{ fontWeight: 'bold', backgroundColor: 'grey.50' }}>
+                    Ações
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {sortData(requests).map((request) => {
+                  const isCompleted = !!request.avaliadorCeapg;
 
-          {/* TABELA 1: SOLICITAÇÕES PENDENTES */}
-          <TabPanel value={tabValue} index={0}>
-            {orderedPending.length === 0 ? (
-              <Alert severity="info">Nenhuma avaliação pendente.</Alert>
-            ) : (
-              <TableContainer
-                component={Paper}
-                sx={{
-                  maxHeight: '500px',
-                  boxShadow: 'none',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  borderRadius: 1,
-                  mb: 2,
-                }}
-              >
-                <Table stickyHeader aria-label="pending ceapg table">
-                  <TableHead>
-                    <TableRow>
-                      <TableCellHeader
-                        text="Solicitação"
-                        sortBy="id"
-                        selectedPropToSortTable={activeSortRecord}
-                        handleClickSortTable={handleSortClick}
-                      />
-                      <TableCellHeader
-                        text="Aprovado por"
-                        sortBy="avaliadorProap"
-                        align="center"
-                        selectedPropToSortTable={activeSortRecord}
-                        handleClickSortTable={handleSortClick}
-                      />
-                      <TableCellHeader
-                        text="Data da Aprovação"
-                        sortBy="dataAvaliacaoProap"
-                        align="center"
-                        selectedPropToSortTable={activeSortRecord}
-                        handleClickSortTable={handleSortClick}
-                      />
-                      <TableCellHeader
-                        text="Valor Aprovado"
-                        sortBy="valorAprovado"
-                        align="center"
-                        selectedPropToSortTable={activeSortRecord}
-                        handleClickSortTable={handleSortClick}
-                      />
-                      <TableCell align="center" sx={{ fontWeight: 'bold', backgroundColor: 'grey.50' }}>
-                        Ações
+                  return (
+                    <TableRow key={request.id} hover>
+                      <TableCell>#{request.id}</TableCell>
+
+                      <TableCell align="center" sx={{ fontWeight: isCompleted ? 600 : 400 }}>
+                        {formatNumberToBRL(
+                          isCompleted
+                            ? (request.custoFinalCeapg || request.valorAprovado)
+                            : request.valorAprovado
+                        )}
                       </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {orderedPending.map((request) => (
-                      <TableRow key={request.id} hover>
-                        <TableCell>#{request.id}</TableCell>
-                        <TableCell align="center">{request.avaliadorProap || 'Sistema'}</TableCell>
-                        <TableCell align="center">{formatDate(request.dataAvaliacaoProap)}</TableCell>
-                        <TableCell align="center">
-                          {formatNumberToBRL(request.valorAprovado)}
-                        </TableCell>
-                        <TableCell align="center">
+
+                      <TableCell align="center">
+                        {isCompleted
+                          ? (request.avaliadorCeapg || '-')
+                          : (request.avaliadorProap || 'Sistema')}
+                      </TableCell>
+
+                      <TableCell align="center">
+                        {formatDate(isCompleted ? request.dataAvaliacaoCeapg : request.dataAvaliacaoProap)}
+                      </TableCell>
+
+                      <TableCell align="center">{request.numeroAta || '-'}</TableCell>
+
+                      <TableCell align="center">
+                        <Chip
+                          label={isCompleted ? 'Avaliada' : 'Pendente'}
+                          color={isCompleted ? 'success' : 'warning'}
+                          size="small"
+                          variant={isCompleted ? 'filled' : 'outlined'}
+                          sx={{ fontWeight: 'bold' }}
+                        />
+                      </TableCell>
+
+                      <TableCell align="center">
+                        {isCompleted ? (
+                          <Tooltip title="Visualizar Detalhes">
+                            <IconButton onClick={() => handleViewSolicitation(request.id)} size="small">
+                              <Visibility fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        ) : (
                           <Tooltip title="Avaliar Prestação de Contas">
                             <IconButton
-                              color="default"
+                              color="primary"
                               onClick={() => handleReviewSolicitation(request.id)}
                               size="small"
                             >
                               <GradingIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            )}
-          </TabPanel>
-
-          {/* TABELA 2: SOLICITAÇÕES JÁ AVALIADAS */}
-          <TabPanel value={tabValue} index={1}>
-            {orderedCompleted.length === 0 ? (
-              <Alert severity="info">Nenhuma solicitação avaliada ainda.</Alert>
-            ) : (
-              <TableContainer
-                component={Paper}
-                sx={{
-                  maxHeight: '500px',
-                  boxShadow: 'none',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  borderRadius: 1,
-                  mb: 2,
-                }}
-              >
-                <Table stickyHeader aria-label="completed ceapg table">
-                  <TableHead>
-                    <TableRow>
-                      <TableCellHeader
-                        text="Solicitação"
-                        sortBy="id"
-                        selectedPropToSortTable={activeSortRecord}
-                        handleClickSortTable={handleSortClick}
-                      />
-                      <TableCellHeader
-                        text="Valor Final Real"
-                        sortBy="custoFinalCeapg"
-                        align="center"
-                        selectedPropToSortTable={activeSortRecord}
-                        handleClickSortTable={handleSortClick}
-                      />
-                      <TableCellHeader
-                        text="Avaliador CEAPG"
-                        sortBy="avaliadorCeapg"
-                        align="center"
-                        selectedPropToSortTable={activeSortRecord}
-                        handleClickSortTable={handleSortClick}
-                      />
-                      <TableCellHeader
-                        text="Data de Avaliação"
-                        sortBy="dataAvaliacaoCeapg"
-                        align="center"
-                        selectedPropToSortTable={activeSortRecord}
-                        handleClickSortTable={handleSortClick}
-                      />
-                      <TableCellHeader
-                        text="ATA"
-                        sortBy="numeroAta"
-                        align="center"
-                        selectedPropToSortTable={activeSortRecord}
-                        handleClickSortTable={handleSortClick}
-                      />
-                      <TableCell align="center" sx={{ fontWeight: 'bold', backgroundColor: 'grey.50' }}>
-                        Ações
+                        )}
                       </TableCell>
                     </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {orderedCompleted.map((request) => (
-                      <TableRow key={request.id} hover>
-                        <TableCell>#{request.id}</TableCell>
-                        
-                        <TableCell align="center" sx={{ fontWeight: 600 }}>
-                          {formatNumberToBRL(request.custoFinalCeapg || request.valorAprovado)}
-                        </TableCell>
-                        
-                        <TableCell align="center">{request.avaliadorCeapg || '-'}</TableCell>
-                        
-                        <TableCell align="center">{formatDate(request.dataAvaliacaoCeapg)}</TableCell>
-
-                        <TableCell align="center">{request.numeroAta || '-'}</TableCell>
-                                            
-                        <TableCell align="center">
-                          <Tooltip title="Visualizar Detalhes">
-                            <IconButton onClick={() => handleViewSolicitation(request.id)} size="small">
-                              <Visibility fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            )}
-          </TabPanel>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Box>
       )}
     </>

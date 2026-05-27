@@ -37,7 +37,7 @@ export const setBudget = async (
 
 export const getBudgetByYear = async (
   year: number,
-): Promise<SolicitationAdmin> => {
+): Promise<BudgetSummaryDTO> => {
   const response = await api.get(`/admin/budget/view/${year}`);
   return response.data;
 };

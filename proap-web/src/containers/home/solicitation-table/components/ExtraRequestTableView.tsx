@@ -98,7 +98,7 @@ const ExtraRequestTableView: React.FC<ExtraRequestTableViewProps> = ({
     <TableContainer
       component={Paper}
       sx={{
-        maxHeight: '500px',
+        overflowX: 'auto',
         boxShadow: 'none',
         border: '1px solid',
         borderColor: 'divider',
@@ -106,7 +106,7 @@ const ExtraRequestTableView: React.FC<ExtraRequestTableViewProps> = ({
         mb: 2,
       }}
     >
-      <Table stickyHeader aria-label="extra requests table">
+      <Table aria-label="extra requests table">
         <TableHead>
           <TableRow>
             <TableCellHeader

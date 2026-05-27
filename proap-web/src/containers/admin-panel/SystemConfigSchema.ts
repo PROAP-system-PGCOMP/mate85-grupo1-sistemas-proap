@@ -12,6 +12,25 @@ export const systemConfigSchema = Yup.object().shape({
   valorDiariaBRL: Yup.number()
     .required('Valor da diária é obrigatório')
     .min(0, 'Valor da diária deve ser maior que 0'),
+
+  enableSolicitation: Yup.boolean().notRequired(),
+  
+  startDate: Yup.date()
+    .nullable()
+    .notRequired(),
+    
+  endDate: Yup.date()
+    .nullable()
+    .when(['startDate'], {
+      is: (startDate: any) => !!startDate,
+      then: (schema) => 
+        schema
+          .min(Yup.ref('startDate'), 'Data de fim deve ser após a data de início')
+          .notRequired(),
+      // Se não, fica livre
+      otherwise: (schema) => schema.nullable().notRequired(),
+    }),
+    
   textoAvisoQualis: Yup.string().required(
     'Texto de aviso Qualis é obrigatório',
   ),
@@ -40,5 +59,4 @@ export const systemConfigSchema = Yup.object().shape({
       fieldName: Yup.string().required('Nome do campo é obrigatório'),
     }),
   ),
-  enableSolicitation: Yup.boolean().notRequired(),
 });

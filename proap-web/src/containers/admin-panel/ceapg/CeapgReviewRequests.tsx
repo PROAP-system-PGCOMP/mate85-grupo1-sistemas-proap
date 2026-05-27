@@ -37,7 +37,7 @@ interface TableCellHeaderProps {
   text: string;
   sortBy: string;
   selectedPropToSortTable: Record<string, boolean>;
-  handleClickSortTable: (prop: string) => void;
+  handleClickSortTable: (prop: any) => void;
   align?: 'left' | 'center' | 'right';
 }
 
@@ -162,7 +162,6 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
     }
   };
 
-  // Função auxiliar para ordenar os arrays dinamicamente antes de renderizar na tabela
   const sortData = (arrayToSort: CeapgResponse[]) => {
     const currentKey = Object.keys(activeSortRecord)[0] || 'id';
     const isAsc = activeSortRecord[currentKey];
@@ -222,12 +221,10 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
     (request) => !request.avaliadorCeapg
   );
 
-// Se TEM avaliador preenchido, a revisão foi concluída
 const completedReviews = requests.filter(
   (request) => !!request.avaliadorCeapg
 );
 
-  // Aplicando a ordenação ativa nas listas filtradas
   const orderedPending = sortData(pendingReviews);
   const orderedCompleted = sortData(completedReviews);
 
@@ -406,9 +403,9 @@ const completedReviews = requests.filter(
                         handleClickSortTable={handleSortClick}
                       />
                       <TableCellHeader
-                        text="Observações"
-                        sortBy="observacoesCeapg"
-                        align="left"
+                        text="ATA"
+                        sortBy="numeroAta"
+                        align="center"
                         selectedPropToSortTable={activeSortRecord}
                         handleClickSortTable={handleSortClick}
                       />
@@ -422,21 +419,16 @@ const completedReviews = requests.filter(
                       <TableRow key={request.id} hover>
                         <TableCell>#{request.id}</TableCell>
                         
-                        {/* CORRIGIDO: De custoFinalCeapg para valorAprovado */}
                         <TableCell align="center" sx={{ fontWeight: 600 }}>
-                          {formatNumberToBRL(request.valorAprovado)}
+                          {formatNumberToBRL(request.custoFinalCeapg || request.valorAprovado)}
                         </TableCell>
                         
-                        {/* CORRIGIDO: De avaliadorCeapg para avaliadorProap */}
-                        <TableCell align="center">{request.avaliadorProap}</TableCell>
+                        <TableCell align="center">{request.avaliadorCeapg || '-'}</TableCell>
                         
-                        {/* CORRIGIDO: De dataAvaliacaoCeapg para dataAvaliacaoProap */}
-                        <TableCell align="center">{formatDate(request.dataAvaliacaoProap)}</TableCell>
-                        
-                        <TableCell sx={{ maxWidth: 250, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {request.observacoesCeapg || '-'}
-                        </TableCell>
-                        
+                        <TableCell align="center">{formatDate(request.dataAvaliacaoCeapg)}</TableCell>
+
+                        <TableCell align="center">{request.numeroAta || '-'}</TableCell>
+                                            
                         <TableCell align="center">
                           <Tooltip title="Visualizar Detalhes">
                             <IconButton onClick={() => handleViewSolicitation(request.id)} size="small">

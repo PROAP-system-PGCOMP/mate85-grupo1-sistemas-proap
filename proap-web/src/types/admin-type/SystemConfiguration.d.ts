@@ -29,4 +29,6 @@ export interface SystemConfiguration {
   resourceLinks?: UrlMapper[];
   countryGroups?: CountryGroup[];
   enableSolicitation: boolean;
+  startDate?: string | null;
+  endDate?: string | null;
 }

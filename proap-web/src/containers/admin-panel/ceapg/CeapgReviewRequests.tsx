@@ -148,16 +148,6 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
       return 0;
     });
   };
- 
-  const totalSolicitado = requests.reduce((acc, req) => acc + Number(req.valorAprovado || 0), 0);
-  
-  const totalGasto = requests
-    .filter((req) => !!req.avaliadorCeapg)
-    .reduce((acc, req) => acc + Number(req.custoFinalCeapg || req.valorAprovado || 0), 0);
-
-  const saldoPrevisto = montanteTotal - totalSolicitado;
-  const saldoReal = montanteTotal - totalGasto;
-  // ---------------------------
 
   useEffect(() => {
     setLocalStartDate(startDate);
@@ -236,8 +226,15 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
                     handleClickSortTable={handleSortClick}
                   />
                   <TableCellHeader
-                    text="Valor"
+                    text="Valor aprovado pelo revisor"
                     sortBy="valorAprovado"
+                    align="center"
+                    selectedPropToSortTable={activeSortRecord}
+                    handleClickSortTable={handleSortClick}
+                  />
+                  <TableCellHeader
+                    text="Valor aprovado em reunião"
+                    sortBy="custoFinalCeapg"
                     align="center"
                     selectedPropToSortTable={activeSortRecord}
                     handleClickSortTable={handleSortClick}
@@ -283,12 +280,14 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
                     <TableRow key={request.id} hover>
                       <TableCell>#{request.id}</TableCell>
 
-                      <TableCell align="center" sx={{ fontWeight: isCompleted ? 600 : 400 }}>
-                        {formatNumberToBRL(
-                          isCompleted
-                            ? (request.custoFinalCeapg || request.valorAprovado)
-                            : request.valorAprovado
-                        )}
+                      <TableCell align="center" sx={{ fontWeight: 'normal' }}>
+                        {formatNumberToBRL(request.valorAprovado)}
+                      </TableCell>
+
+                      <TableCell align="center" sx={{ fontWeight: 'normal' }}>
+                        {isCompleted
+                          ? formatNumberToBRL(request.custoFinalCeapg || request.valorAprovado)
+                          : '-'}
                       </TableCell>
 
                       <TableCell align="center">
@@ -323,7 +322,7 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
                         ) : (
                           <Tooltip title="Avaliar Prestação de Contas">
                             <IconButton
-                              color="primary"
+                              color="default"
                               onClick={() => handleReviewSolicitation(request.id)}
                               size="small"
                             >

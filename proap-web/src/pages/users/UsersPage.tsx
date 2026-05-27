@@ -268,6 +268,7 @@ export default function UsersPage() {
                 direction={orderBy === 'profileName' ? order : 'asc'}
                 IconComponent={ExpandMore}
                 onClick={() => handleRequestSort('profileName')}
+
               >
                 Perfil de Usuário
               </TableSortLabel>
@@ -294,6 +295,7 @@ export default function UsersPage() {
                     label={profileName.charAt(0).toUpperCase() + profileName.slice(1)}
                     color={getProfileChipColor(profileName)}
                     size="small"
+                    sx={{ fontWeight: 'medium', color: 'white' }}
                   />
                 </TableCell>
                 <TableCell align="center">

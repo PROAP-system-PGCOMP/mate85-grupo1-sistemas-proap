@@ -305,11 +305,11 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
 
                       <TableCell align="center">
                         <Chip
-                          label={isCompleted ? 'Avaliada' : 'Pendente'}
+                          label={isCompleted ? 'Finalizado' : 'Pendente'}
                           color={isCompleted ? 'success' : 'warning'}
                           size="small"
                           variant={isCompleted ? 'filled' : 'outlined'}
-                          sx={{ fontWeight: 'bold' }}
+                          sx={{ fontWeight: 'medium', color: isCompleted ? 'white' : 'warning.main' }}
                         />
                       </TableCell>
 

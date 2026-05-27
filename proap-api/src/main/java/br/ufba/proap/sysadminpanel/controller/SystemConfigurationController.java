@@ -146,7 +146,7 @@ public class SystemConfigurationController {
         }
 
         DataConfig config = interceptorRepository.findById(1L)
-                .orElseThrow(() -> new RuntimeException("Period is Not Configurated"));
+                .orElse(new DataConfig());
 
         PeriodResponseDTO data = new PeriodResponseDTO(config);
         return ResponseEntity.ok(data);

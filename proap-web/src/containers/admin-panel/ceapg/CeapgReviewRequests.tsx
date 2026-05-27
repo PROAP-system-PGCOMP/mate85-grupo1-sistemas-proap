@@ -82,7 +82,7 @@ interface CeapgReviewRequestsProps {
   requests: CeapgResponse[];
   startDate?: string;
   endDate?: string;
-  montanteTotal?: number; // <-- ADICIONADO: O componente pai deve passar o orçamento total aqui
+  montanteTotal?: number;
   onStartDateChange: (date: string) => void;
   onEndDateChange: (date: string) => void;
   onFilter: (startDate?: string, endDate?: string) => void;
@@ -95,7 +95,7 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
   requests,
   startDate,
   endDate,
-  montanteTotal = 0, // Padrão 0 caso não seja passado
+  montanteTotal = 0, 
   onStartDateChange,
   onEndDateChange,
   onFilter,
@@ -107,7 +107,6 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
   const [localEndDate, setLocalEndDate] = useState(endDate);
   const theme = useTheme();
 
-  // --- LÓGICA DE ORDENAÇÃO LOCAL ---
   const [localSortConfig, setLocalSortConfig] = useState<{ key: string; asc: boolean }>({
     key: 'id',
     asc: true,
@@ -136,7 +135,6 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
       let aVal = a[currentKey];
       let bVal = b[currentKey];
 
-      // Se a ordenação for por status (isCompleted virtual)
       if (currentKey === 'isCompleted') {
         aVal = !!a.avaliadorCeapg ? 1 : 0;
         bVal = !!b.avaliadorCeapg ? 1 : 0;
@@ -150,13 +148,9 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
       return 0;
     });
   };
-  // --------------------------------------------------
-
-  // --- CÁLCULOS DOS SALDOS ---
-  // Total Solicitado = Soma de todos os 'valorAprovado' (pois o que foi rejeitado não chega aqui)
+ 
   const totalSolicitado = requests.reduce((acc, req) => acc + Number(req.valorAprovado || 0), 0);
   
-  // Total Gasto = Soma apenas das concluídas (usando custoFinalCeapg)
   const totalGasto = requests
     .filter((req) => !!req.avaliadorCeapg)
     .reduce((acc, req) => acc + Number(req.custoFinalCeapg || req.valorAprovado || 0), 0);

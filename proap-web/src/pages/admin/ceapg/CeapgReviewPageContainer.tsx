@@ -58,7 +58,6 @@ const CeapgReviewPageContainer = () => {
     }
   };
 
-  // --- CÁLCULOS DOS SALDOS ---
   const requestsArray = ceapgRequests || [];
   const totalSolicitado = requestsArray.reduce((acc: number, req: CeapgResponse) => acc + Number(req.valorAprovado || 0), 0);
   const totalGasto = requestsArray
@@ -67,16 +66,14 @@ const CeapgReviewPageContainer = () => {
 
   const saldoPrevisto = totalBudget - totalSolicitado;
   const saldoReal = totalBudget - totalGasto;
-  // ---------------------------
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       
-      {/* CABEÇALHO FLEX: Título na esquerda, Cards na direita */}
       <Box sx={{ 
         mb: 4, 
         display: 'flex', 
-        flexDirection: { xs: 'column', md: 'row' }, // Empilha no celular, lado a lado no PC
+        flexDirection: { xs: 'column', md: 'row' },
         justifyContent: 'space-between', 
         alignItems: { xs: 'flex-start', md: 'center' },
         gap: 3
@@ -90,7 +87,6 @@ const CeapgReviewPageContainer = () => {
           </Typography>
         </Box>
 
-        {/* CARDS DE SALDO */}
         <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
           <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', bgcolor: 'primary.50', minWidth: '220px' }}>
             <CardContent sx={{ display: 'flex', alignItems: 'center', p: 1.5, '&:last-child': { pb: 1.5 } }}>

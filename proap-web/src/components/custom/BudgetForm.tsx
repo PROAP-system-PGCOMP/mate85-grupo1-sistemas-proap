@@ -51,17 +51,15 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ loading, totalBudget }) => {
 
   useEffect(() => {
     const year = Number(values.year);
-    // Validação simples para evitar chamadas desnecessárias à API
     if (!year || year < 2000 || year > 2100) return;
 
     getBudgetByYear(year)
       .then((data) => {
         if (data) {
-          setFieldValue('budget', data.orcamentoAnual ?? 0);
+          setFieldValue('budget', totalBudget ?? 0);
         }
       })
       .catch(() => {
-        // Se não encontrar orçamentos para o ano, opcionalmente resetar ou manter
         setFieldValue('budget', 0);
       });
   }, [values.year, setFieldValue]);

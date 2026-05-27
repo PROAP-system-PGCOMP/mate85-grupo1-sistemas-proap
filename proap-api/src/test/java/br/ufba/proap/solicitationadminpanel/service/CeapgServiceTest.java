@@ -47,7 +47,7 @@ public class CeapgServiceTest {
 
         expectedDtos = new ArrayList<>();
         CeapgResponseDTO dto = new CeapgResponseDTO(1L, new BigDecimal("1000.00"), LocalDate.of(2023, 2, 15),
-                "Avaliador 1", new BigDecimal("900.00"), "Observação", "Avaliador CEAPG", LocalDate.of(2023, 3, 1));
+                "Avaliador 1", new BigDecimal("900.00"), "Observação", "Avaliador CEAPG", LocalDate.of(2023, 3, 1), "10");
         expectedDtos.add(dto);
     }
 

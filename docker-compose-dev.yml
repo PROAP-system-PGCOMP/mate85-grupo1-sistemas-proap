@@ -6,31 +6,35 @@ services:
     volumes:
       - ./proap-api:/app
     working_dir: /app
-    command: ["sh", "-c", "mvn clean -am install -DskipTests && mvn spring-boot:run"]
+    command: ["sh", "-c", "mvn clean install -DskipTests && mvn spring-boot:run"]
     environment:
+      - SPRING_PROFILES_ACTIVE=dev # Força a aplicação a usar as configs de prod
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update # <-- ADICIONE ESTA LINHA AQUI
       - API_PORT=8080
-      - DB_HOST=proap_dev_db
+      - DB_HOST=proap_production_db # Garante que esse nome seja IGUAL ao do serviço de banco abaixo
       - DB_PORT=5432
       - DB_NAME=proap
       - DB_USERNAME=proap
       - DB_PASSWORD=password
       - FILE_UPLOAD_DIR=/app/uploads
-      - FRONTEND_BASE_URL=${FRONTEND_BASE_URL}
-      - MAIL_ENABLED=${MAIL_ENABLED}
-      - MAIL_HOST=${MAIL_HOST}
-      - MAIL_PORT=${MAIL_PORT}
-      - MAIL_USERNAME=${MAIL_USERNAME}
-      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - FRONTEND_BASE_URL=${FRONTEND_BASE_URL:-http://localhost:5173}
+      - MAIL_ENABLED=${MAIL_ENABLED:-true}
+      # Mantendo o padrão que o Spring pediu no log anterior
+      - SPRING_MAIL_HOST=smtp.gmail.com
+      - SPRING_MAIL_PORT=587
+      - SPRING_MAIL_USERNAME=${MAIL_USERNAME}
+      - SPRING_MAIL_PASSWORD=${MAIL_PASSWORD}
       - MAIL_FROM=${MAIL_FROM}
-      - MAIL_FROM_ALIAS=${MAIL_FROM_ALIAS}
+      - MAIL_FROM_ALIAS=${MAIL_FROM_ALIAS:-Sistema PROAP}
+      - RECOVER_PASSWORD_URL=http://localhost:5173/recover-password
     ports:
       - "8080:8080"
     depends_on:
-      - proap_dev_db
+      - proap_production_db
 
-  proap_dev_db:
-    image: postgres:15
-    container_name: proap_dev_db
+  proap_production_db: # Nome alterado para bater com o que a API busca
+    image: postgres:15 # Versão fixa para evitar o erro da v18+
+    container_name: proap_production_db
     environment:
       - POSTGRES_DB=proap
       - POSTGRES_USER=proap
@@ -38,7 +42,8 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - proap_dev_db_data:/var/lib/postgresql/data
+      # Usando o caminho compatível com a versão 15
+      - proap_db_data:/var/lib/postgresql/data
 
 volumes:
-  proap_dev_db_data:
+  proap_db_data:

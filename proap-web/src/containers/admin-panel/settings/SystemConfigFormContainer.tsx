@@ -234,10 +234,12 @@ export default function SystemConfigFormContainer({
     <Formik
       initialValues={initialValues}
       validationSchema={systemConfigSchema}
-      onSubmit={onSubmit}
+      onSubmit={(values) => {
+        onSubmit(values); 
+      }}
       enableReinitialize={true}
     >
-      {({ errors, touched, values, setFieldValue }) => {
+      {({ errors, touched, values, setFieldValue, submitForm }) => {
         const handleAddResourceLink = (resourceLink: UrlMapper) => {
           const currentLinks = values.resourceLinks || [];
           setFieldValue('resourceLinks', [...currentLinks, resourceLink]);
@@ -247,58 +249,78 @@ export default function SystemConfigFormContainer({
           const currentLinks = values.resourceLinks || [];
           setFieldValue(
             'resourceLinks',
-            currentLinks.filter((_, i) => i !== index),
+            currentLinks.filter((_, i) => i !== index)
           );
         };
 
         const checkTabHasError = (fieldNames: string[]) => {
-          return fieldNames.some((field) => touched[field as keyof typeof touched] && errors[field as keyof typeof errors]);
+          return fieldNames.some(
+            (field) => touched[field as keyof typeof touched] && errors[field as keyof typeof errors]
+          );
         };
 
         return (
-          <Box component={Form} sx={{ width: '100%' }}>
+          <Form style={{ width: '100%' }}>
             <UnsavedChangesBlocker onDirtyChange={onDirtyChange} submitRef={submitRef} />
 
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-              <Tabs 
-                value={activeTab} 
-                onChange={handleTabChange} 
-                variant="scrollable" 
+              <Tabs
+                value={activeTab}
+                onChange={handleTabChange}
+                variant="scrollable"
                 scrollButtons="auto"
                 aria-label="painéis de configuração"
               >
-                <Tab 
-                  label="Criação de solicitações" 
-                  icon={checkTabHasError(['enableSolicitation']) ? <ErrorOutline color="error" /> : undefined}
+                <Tab
+                  label="Criação de solicitações"
+                  icon={checkTabHasError(['enableSolicitation', 'startDate', 'endDate']) ? <ErrorOutline color="error" /> : undefined}
                   iconPosition="end"
-                  sx={{ color: checkTabHasError(['enableSolicitation']) ? 'error.main' : 'inherit' }}
+                  sx={{ color: checkTabHasError(['enableSolicitation', 'startDate', 'endDate']) ? 'error.main' : 'inherit' }}
                 />
-                <Tab 
-                  label="Categorias Qualis" 
+                <Tab
+                  label="Categorias Qualis"
                   icon={checkTabHasError(['qualis']) ? <ErrorOutline color="error" /> : undefined}
                   iconPosition="end"
                   sx={{ color: checkTabHasError(['qualis']) ? 'error.main' : 'inherit' }}
                 />
-                <Tab 
-                  label="URLs de Documentação" 
+                <Tab
+                  label="URLs de Documentação"
                   icon={checkTabHasError(['sitePgcompURL', 'resolucaoProapURL']) ? <ErrorOutline color="error" /> : undefined}
                   iconPosition="end"
                   sx={{ color: checkTabHasError(['sitePgcompURL', 'resolucaoProapURL']) ? 'error.main' : 'inherit' }}
                 />
-                <Tab 
-                  label="Limites e Valores" 
+                <Tab
+                  label="Limites e Valores"
                   icon={checkTabHasError(['numMaxDiarias', 'valorDiariaBRL']) ? <ErrorOutline color="error" /> : undefined}
                   iconPosition="end"
                   sx={{ color: checkTabHasError(['numMaxDiarias', 'valorDiariaBRL']) ? 'error.main' : 'inherit' }}
                 />
-                <Tab 
-                  label="Textos Informativos" 
-                  icon={checkTabHasError(['textoAvisoQualis', 'textoAvisoValorInscricao', 'textoAvisoEnvioArquivoCarta', 'textoInformacaoQtdDiarias', 'textoInformacaoCalcularQualis', 'textoInformacaoValorDiaria', 'textoInformacaoValorPassagem']) ? <ErrorOutline color="error" /> : undefined}
+                <Tab
+                  label="Textos Informativos"
+                  icon={checkTabHasError([
+                    'textoAvisoQualis',
+                    'textoAvisoValorInscricao',
+                    'textoAvisoEnvioArquivoCarta',
+                    'textoInformacaoQtdDiarias',
+                    'textoInformacaoCalcularQualis',
+                    'textoInformacaoValorDiaria',
+                    'textoInformacaoValorPassagem',
+                  ]) ? <ErrorOutline color="error" /> : undefined}
                   iconPosition="end"
-                  sx={{ color: checkTabHasError(['textoAvisoQualis', 'textoAvisoValorInscricao', 'textoAvisoEnvioArquivoCarta', 'textoInformacaoQtdDiarias', 'textoInformacaoCalcularQualis', 'textoInformacaoValorDiaria', 'textoInformacaoValorPassagem']) ? 'error.main' : 'inherit' }}
+                  sx={{
+                    color: checkTabHasError([
+                      'textoAvisoQualis',
+                      'textoAvisoValorInscricao',
+                      'textoAvisoEnvioArquivoCarta',
+                      'textoInformacaoQtdDiarias',
+                      'textoInformacaoCalcularQualis',
+                      'textoInformacaoValorDiaria',
+                      'textoInformacaoValorPassagem',
+                    ]) ? 'error.main' : 'inherit',
+                  }}
                 />
-                <Tab 
-                  label="Grupos de Países" 
+                <Tab
+                  label="Grupos de Países"
                   icon={checkTabHasError(['countryGroups']) ? <ErrorOutline color="error" /> : undefined}
                   iconPosition="end"
                   sx={{ color: checkTabHasError(['countryGroups']) ? 'error.main' : 'inherit' }}
@@ -307,58 +329,115 @@ export default function SystemConfigFormContainer({
             </Box>
 
             {/* ==============================================
-                PAINEL 0: Criação de solicitações
-            ============================================== */}
+                  PAINEL 0: Criação de solicitações
+              ============================================== */}
             <CustomTabPanel value={activeTab} index={0}>
               <SectionCard
                 icon={<Block />}
                 title="Criação de solicitações"
-                description="Controle a permissão para abertura de novas solicitações de auxílio no sistema"
+                description="Controle a permissão e o período para abertura de novas solicitações"
               >
-                <Field name="enableSolicitation">
-                  {({ field }: any) => (
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          {...field}
-                          checked={field.value}
-                          onChange={(event) =>
-                            setFieldValue(field.name, event.target.checked)
+                <Stack spacing={3}>
+                  <Field name="enableSolicitation">
+                    {({ field }: any) => {
+                      let statusText = 'O sistema não aceitará novas solicitações no momento.';
+                      
+                      if (field.value) {
+                        const hasStart = !!values.startDate;
+                        const hasEnd = !!values.endDate;
+                        
+                        const formatBR = (dateStr: string) => {
+                          if (!dateStr) return '';
+                          const [year, month, day] = dateStr.split('-');
+                          return `${day}/${month}/${year}`;
+                        };
+
+                        if (!hasStart && !hasEnd) {
+                          statusText = 'Criação de solicitações permitida por tempo indeterminado.';
+                        } else if (hasStart && hasEnd) {
+                          statusText = `Criação permitida do dia ${formatBR(values.startDate as string)} até o dia ${formatBR(values.endDate as string)}.`;
+                        } else if (hasStart) {
+                          statusText = `Criação permitida a partir do dia ${formatBR(values.startDate as string)} por tempo indeterminado.`;
+                        } else if (hasEnd) {
+                          statusText = `Criação permitida até o dia ${formatBR(values.endDate as string)}.`;
+                        }
+                      }
+
+                      return (
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              {...field}
+                              checked={field.value}
+                              onChange={(event) => {
+                                setFieldValue(field.name, event.target.checked);
+                                if (!event.target.checked) {
+                                  setFieldValue('startDate', '');
+                                  setFieldValue('endDate', '');
+                                }
+                              }}
+                              color={field.value ? 'success' : 'error'}
+                            />
                           }
-                          color={field.value ? 'success' : 'error'}
+                          label={
+                            <Box>
+                              <Typography variant="body2" fontWeight="bold" color={field.value ? 'success.dark' : 'error.dark'}>
+                                {field.value ? 'Criação de solicitações ATIVADA' : 'Criação de solicitações DESATIVADA'}
+                              </Typography>
+                              <Typography 
+                                variant="caption" 
+                                color={field.value && !values.startDate && !values.endDate ? 'primary.main' : 'text.secondary'} 
+                                sx={{ fontWeight: field.value && !values.startDate && !values.endDate ? 500 : 400 }}
+                              >
+                                {statusText}
+                              </Typography>
+                            </Box>
+                          }
                         />
-                      }
-                      label={
-                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                            {!values.enableSolicitation && <Block color="error" fontSize="small" />}
-                            <Typography
-                              variant="body2"
-                              fontWeight="medium"
-                              color={values.enableSolicitation ? 'success.dark' : 'error.dark'}
-                            >
-                              {values.enableSolicitation
-                                ? 'Criação de solicitações ativada'
-                                : 'Criação de solicitações desativada'}
-                            </Typography>
-                          </Box>
-                          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
-                            {values.enableSolicitation
-                              ? 'Os usuários podem criar novas solicitações de auxílio.'
-                              : 'Os usuários não podem criar novas solicitações até que esta opção seja reativada.'}
-                          </Typography>
-                        </Box>
-                      }
-                      sx={{ m: 0 }}
-                    />
+                      );
+                    }}
+                  </Field>
+
+                  {values.enableSolicitation && (
+                    <Paper elevation={0} sx={{ p: 2, bgcolor: 'rgba(0,0,0,0.02)', border: '1px dashed #ccc' }}>
+                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3}>
+                        <Field name="startDate">
+                          {({ field, meta }: any) => (
+                            <TextField
+                              {...field}
+                              label="Data de Início (Opcional)"
+                              type="date"
+                              fullWidth
+                              InputLabelProps={{ shrink: true }}
+                              error={meta.touched && !!meta.error}
+                              helperText={(meta.touched && meta.error) || 'Deixe em branco para liberar imediatamente'}
+                            />
+                          )}
+                        </Field>
+
+                        <Field name="endDate">
+                          {({ field, meta }: any) => (
+                            <TextField
+                              {...field}
+                              label="Data de Fim (Opcional)"
+                              type="date"
+                              fullWidth
+                              InputLabelProps={{ shrink: true }}
+                              error={meta.touched && !!meta.error}
+                              helperText={(meta.touched && meta.error) || 'Deixe em branco para tempo indeterminado'}
+                            />
+                          )}
+                        </Field>
+                      </Stack>
+                    </Paper>
                   )}
-                </Field>
+                </Stack>
               </SectionCard>
             </CustomTabPanel>
 
             {/* ==============================================
-                PAINEL 1: Categorias Qualis
-            ============================================== */}
+                  PAINEL 1: Categorias Qualis
+              ============================================== */}
             <CustomTabPanel value={activeTab} index={1}>
               <SectionCard
                 icon={<School />}
@@ -426,8 +505,8 @@ export default function SystemConfigFormContainer({
             </CustomTabPanel>
 
             {/* ==============================================
-                PAINEL 2: URLs de Documentação
-            ============================================== */}
+                  PAINEL 2: URLs de Documentação
+              ============================================== */}
             <CustomTabPanel value={activeTab} index={2}>
               <SectionCard
                 icon={<LinkIcon />}
@@ -458,8 +537,8 @@ export default function SystemConfigFormContainer({
             </CustomTabPanel>
 
             {/* ==============================================
-                PAINEL 3: Limites e Valores
-            ============================================== */}
+                  PAINEL 3: Limites e Valores
+              ============================================== */}
             <CustomTabPanel value={activeTab} index={3}>
               <SectionCard
                 icon={<Settings />}
@@ -494,8 +573,8 @@ export default function SystemConfigFormContainer({
             </CustomTabPanel>
 
             {/* ==============================================
-                PAINEL 4: Textos Informativos
-            ============================================== */}
+                  PAINEL 4: Textos Informativos
+              ============================================== */}
             <CustomTabPanel value={activeTab} index={4}>
               <SectionCard
                 icon={<TextFields />}
@@ -540,8 +619,8 @@ export default function SystemConfigFormContainer({
             </CustomTabPanel>
 
             {/* ==============================================
-                PAINEL 5: Grupos de Países
-            ============================================== */}
+                  PAINEL 5: Grupos de Países
+              ============================================== */}
             <CustomTabPanel value={activeTab} index={5}>
               <SectionCard
                 icon={<Public />}
@@ -555,14 +634,28 @@ export default function SystemConfigFormContainer({
               </SectionCard>
             </CustomTabPanel>
 
-              {/* BARRA DE AÇÕES INFERIOR (SALVAMENTO GLOBAL EXTRA) */}
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', pt: 3, mt: 1 }}>
-                <Button type="submit" variant="contained" color="primary" size="large">
-                  Salvar Alterações
-                </Button>
+            {/* ==============================================
+                  BARRA DE AÇÕES INFERIOR
+              ============================================== */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pt: 3, mt: 1 }}>
+              <Box>
+                {Object.keys(errors).length > 0 && (
+                  <Typography color="error" variant="body2" fontWeight="bold">
+                    Existem campos com erro. Verifique as abas marcadas em vermelho.
+                  </Typography>
+                )}
               </Box>
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                onClick={() => submitForm()}
+              >
+                Salvar Alterações
+              </Button>
+            </Box>
 
-          </Box>
+          </Form>
         );
       }}
     </Formik>

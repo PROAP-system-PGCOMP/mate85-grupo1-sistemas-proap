@@ -16,7 +16,6 @@ const isTokenExpired = (token: string): boolean => {
   }
 };
 
-
 api.interceptors.request.use(
   (config) => {
     const token = LocalStorageToken.get();
@@ -49,10 +48,16 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (error.response && error.response.status === 401) {
+    const url = error.config?.url || '';
+    
+    console.log("A URL que deu erro 401 foi:", url);
+
+    const isLoginRequest = url.includes('signin') || url.includes('authentication');
+    if (error.response && error.response.status === 401 && !isLoginRequest) {
       LocalStorageToken.clear();
       window.location.href = '/login';
     }
+    
     return Promise.reject(error);
   }
 );

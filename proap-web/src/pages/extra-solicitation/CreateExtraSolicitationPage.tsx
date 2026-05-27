@@ -15,10 +15,25 @@ export default function ExtraSolicitationPage() {
   const { config } = useSysConfig();
 
   const handleSubmit = (values: FormikValues) => {
-    return createExtraAssistanceRequest(values as ExtraRequest).then(() => {
-      Toast.success('Solicitação criada com sucesso');
-      navigate('/');
-    });
+    const payload = {
+      ...values,
+      itemSolicitado: values.itemSolicitado || 'Solicitação Extra (Sem item especificado)', 
+    };
+
+    return createExtraAssistanceRequest(payload as ExtraRequest)
+      .then(() => {
+        Toast.success('Solicitação criada com sucesso');
+        navigate('/');
+      })
+      .catch((error) => {
+        console.error('Erro na criação:', error.response?.data);
+        Toast.error(
+          error.response?.data?.itemSolicitado || 
+          error.response?.data?.message || 
+          'Falha ao criar solicitação. Verifique os dados.'
+        );
+        return Promise.reject(error);
+      });
   };
 
   if (!config.enableSolicitation) {

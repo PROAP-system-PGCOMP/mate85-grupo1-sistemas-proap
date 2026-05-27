@@ -63,22 +63,16 @@ export default function ReviewDataFormContainer() {
     setIsEditingDate(false);
   };
 
-  /**
-   * Remove a avaliação atual, resetando a solicitação para o estado pendente.
-   * Isso permite que o usuário salve a solicitação sem uma decisão final.
-   */
+  
   const handleRemoveEvaluation = async () => {
-    // 1. Resetamos o estado para pendente (0)
     setFieldValue('situacao', 0);
     
-    // 2. Limpamos os campos obrigatórios da análise
     setFieldValue('valorAprovado', '');
     setFieldValue('numeroDiariasAprovadas', 0);
     setFieldValue('numeroAta', '');
     setFieldValue('observacao', '');
 
-    // Opcional: Se quiser que o botão já dispare o salvamento automático:
-    // await submitForm();
+  
   };
 
   const formatDisplayDate = (dateString?: string) => {
@@ -97,7 +91,6 @@ export default function ReviewDataFormContainer() {
         Avaliação da solicitação
       </Typography>
 
-      {/* Seção: Data e Número ATA */}
       <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 2, mb: 3 }}>
         <Box sx={{ flex: 1, mb: isMobile ? 2 : 0 }}>
           {isEditingDate ? (
@@ -139,7 +132,7 @@ export default function ReviewDataFormContainer() {
             as={StyledTextField}
             fullWidth
             label="Número da ATA"
-            required={values.situacao !== 0} // Só é obrigatório se houver uma decisão
+            required={values.situacao !== 0}
             name="numeroAta"
             type="number"
             error={Boolean(touched.numeroAta && errors.numeroAta)}
@@ -148,7 +141,6 @@ export default function ReviewDataFormContainer() {
         </Box>
       </Box>
 
-      {/* Seção: Valores e Impacto Orçamentário */}
       <Box sx={{ mb: 3, p: 2, border: '1px solid #e0e0e0', borderRadius: 2 }}>
         <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 2 : 4 }}>
           <Box sx={{ flex: 1 }}>
@@ -207,12 +199,10 @@ export default function ReviewDataFormContainer() {
         </Box>
       </Box>
 
-      {/* Observação */}
       <Box sx={{ mb: 3 }}>
         <Field as={StyledTextField} fullWidth label="Observação" name="observacao" multiline rows={3} />
       </Box>
 
-      {/* Seção de Decisão / Ações */}
       <Box sx={{ mt: 4, pt: 3, borderTop: '1px solid', borderColor: 'divider' }}>
         <StyledFormLabel required sx={{ mb: 2 }}>Decisão da Avaliação PROAP</StyledFormLabel>
         <Box sx={{ display: 'flex', gap: 2, flexDirection: isMobile ? 'column' : 'row' }}>
@@ -222,7 +212,7 @@ export default function ReviewDataFormContainer() {
             fullWidth
             onClick={() => handleDecisionSelect(1)}
             startIcon={<CheckCircle />}
-            sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold' }}
+            sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', color: 'white' }}
           >
             Aprovar
           </Button>

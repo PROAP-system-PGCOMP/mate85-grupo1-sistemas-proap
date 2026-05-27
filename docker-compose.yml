@@ -2,43 +2,54 @@ version: '3.8'
 
 services:
   proap_api:
-    build:
-      context: ./proap-api
-    container_name: proap_api
+    image: maven:3-eclipse-temurin-21-alpine
+    volumes:
+      - ./proap-api:/app
+    working_dir: /app
+    # O comando clean install pode demorar um pouco no primeiro boot
+    command: ["sh", "-c", "mvn clean install -DskipTests && mvn spring-boot:run"]
     environment:
-      - JWT_SECRET=${JWT_SECRET}
+      - SPRING_PROFILES_ACTIVE=dev # Força a aplicação a usar as configs de prod
+      - DB_URL=jdbc:postgresql://proap_production_db:5432/proap
       - API_PORT=8080
-      - DB_HOST=proap_production_db
+      - DB_HOST=proap_production_db # Garante que esse nome seja IGUAL ao do serviço de banco abaixo
       - DB_PORT=5432
       - DB_NAME=proap
       - DB_USERNAME=proap
-      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_PASSWORD=password
       - FILE_UPLOAD_DIR=/app/uploads
-      - FRONTEND_BASE_URL=${FRONTEND_BASE_URL}
-      - MAIL_ENABLED=${MAIL_ENABLED}
-      - MAIL_HOST=${MAIL_HOST}
-      - MAIL_PORT=${MAIL_PORT}
-      - MAIL_USERNAME=${MAIL_USERNAME}
-      - MAIL_PASSWORD=${MAIL_PASSWORD}
-      - SPRING_PROFILES_ACTIVE=prod
-      # - MAIL_FROM=${MAIL_FROM}
-      # - MAIL_FROM_ALIAS=${MAIL_FROM_ALIAS}
+      - FRONTEND_BASE_URL=${FRONTEND_BASE_URL:-http://localhost:5173}
+      - MAIL_ENABLED=${MAIL_ENABLED:-true}
+      # Mantendo o padrão que o Spring pediu no log anterior
+      - SPRING_MAIL_HOST=smtp.gmail.com
+      - SPRING_MAIL_PORT=587
+      - SPRING_MAIL_USERNAME=${MAIL_USERNAME}
+      - SPRING_MAIL_PASSWORD=${MAIL_PASSWORD}
+      - MAIL_FROM=${MAIL_FROM}
+      - MAIL_FROM_ALIAS=${MAIL_FROM_ALIAS:-Sistema PROAP}
+      - RECOVER_PASSWORD_URL=http://localhost:5173/recover-password
     ports:
       - "8080:8080"
     depends_on:
-      - proap_production_db
+      proap_production_db:
+        condition: service_healthy # Espera o banco estar realmente pronto
 
   proap_production_db:
-    image: postgres:latest
+    image: postgres:15
     container_name: proap_production_db
     environment:
       - POSTGRES_DB=proap
       - POSTGRES_USER=proap
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_PASSWORD=password
     ports:
-      - "5432:5432"
+      - "5433:5432" 
     volumes:
-      - proap_db_data:/var/lib/postgresql/data
+      - proap_production_db_data:/var/lib/postgresql
+    healthcheck: # Garante que a API só tente conectar quando o banco aceitar conexões
+      test: ["CMD-SHELL", "pg_isready -U proap -d proap"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
-  proap_db_data:
+  proap_production_db_data:

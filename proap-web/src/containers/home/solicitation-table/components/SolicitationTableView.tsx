@@ -100,7 +100,7 @@ const SolicitationTableView: React.FC<SolicitationTableViewProps> = ({
     <TableContainer
       component={Paper}
       sx={{
-        maxHeight: '500px',
+        overflowX: 'auto',
         boxShadow: 'none',
         border: '1px solid',
         borderColor: 'divider',
@@ -108,7 +108,7 @@ const SolicitationTableView: React.FC<SolicitationTableViewProps> = ({
         mb: 2,
       }}
     >
-      <Table stickyHeader aria-label="solicitations table">
+      <Table aria-label="solicitations table">
         <TableHead>
           <TableRow>
             <TableCellHeader

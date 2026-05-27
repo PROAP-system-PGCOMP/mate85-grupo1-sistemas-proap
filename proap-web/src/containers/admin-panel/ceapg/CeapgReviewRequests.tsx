@@ -162,7 +162,6 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
     }
   };
 
-  // Função auxiliar para ordenar os arrays dinamicamente antes de renderizar na tabela
   const sortData = (arrayToSort: CeapgResponse[]) => {
     const currentKey = Object.keys(activeSortRecord)[0] || 'id';
     const isAsc = activeSortRecord[currentKey];
@@ -222,12 +221,10 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
     (request) => !request.avaliadorCeapg
   );
 
-// Se TEM avaliador preenchido, a revisão foi concluída
 const completedReviews = requests.filter(
   (request) => !!request.avaliadorCeapg
 );
 
-  // Aplicando a ordenação ativa nas listas filtradas
   const orderedPending = sortData(pendingReviews);
   const orderedCompleted = sortData(completedReviews);
 

@@ -56,8 +56,8 @@ public record ResponseAssistanceRequestDTO(
         BigDecimal custoFinalCeapg,
         String observacoesCeapg,
         BigDecimal percentualOrcamentoAnual,
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy") LocalDateTime createdAt,
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy") LocalDateTime updatedAt) {
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm") LocalDateTime createdAt,
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm") LocalDateTime updatedAt) {
 
     public AssistanceRequest toEntity() {
         AssistanceRequest entity = new AssistanceRequest();

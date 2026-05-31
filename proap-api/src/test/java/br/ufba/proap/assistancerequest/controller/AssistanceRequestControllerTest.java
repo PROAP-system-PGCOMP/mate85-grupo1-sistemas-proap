@@ -131,7 +131,7 @@ class AssistanceRequestControllerTest {
                 true, 0, "Evento Teste", false, LocalDate.now(), LocalDate.now().plusDays(2),
                 1, "http://link.com", "Cidade", "BR", "A1", "Modalidade",
                 BigDecimal.TEN, "http://inscricao.com", 1, BigDecimal.TEN, true, false,
-                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, "Justificativa aceitável");
+                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, "Justificativa aceitável", "");
     }
 
     @Test

@@ -319,6 +319,7 @@ export default function SolicitationTableRequests() {
           onReview={(id) => navigate(`/solicitation/review/${id}`)}
           onView={(id) => navigate(`/solicitation/view/${id}`)}
           onDelete={(id) => { setSolicitationToDelete(id); setOpenDeleteConfirmation(true); }}
+          onClone={(id) => navigate(`/solicitation/create?cloneFrom=${id}`)}
           onShowDetails={(props) => { setDetailsDialogData(props); setOpenDetailsDialog(true); }}
         />
       ) : (
@@ -333,6 +334,7 @@ export default function SolicitationTableRequests() {
           onReview={(id) => navigate(`/solicitation/review/${id}`)}
           onView={(id) => navigate(`/solicitation/view/${id}`)}
           onDelete={(id) => { setSolicitationToDelete(id); setOpenDeleteConfirmation(true); }}
+          onClone={(id) => navigate(`/solicitation/create?cloneFrom=${id}`)}
           onShowDetails={(props) => { setDetailsDialogData(props); setOpenDetailsDialog(true); }}
         />
       )}

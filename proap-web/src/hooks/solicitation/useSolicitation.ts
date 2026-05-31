@@ -10,6 +10,8 @@ export default function useSolicitation(id: string | undefined) {
 
   useEffect(() => {
     if (id) {
+      setIsLoading(true);
+      setSolicitation(INITIAL_REVIEW_FORM_VALUES);
       getAssistanceRequestById(id)
         .then(({ data }) => {
           const { dataInicio, dataFim, dataAvaliacaoProap, coautores } = data;

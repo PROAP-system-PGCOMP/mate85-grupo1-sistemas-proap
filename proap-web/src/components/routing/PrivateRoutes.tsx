@@ -11,6 +11,7 @@ import {
 } from '../../pages';
 
 import NavigationWrapper from '../navigation/NavigationWrapper';
+import { NavigationGuardProvider } from '../../contexts/NavigationGuardContext';
 import UserProfilePage from '../../pages/user-profile/UserProfilePage';
 import ViewSolicitationPage from '../../pages/view-solicitation/ViewSolicitationPage';
 import ViewExtraSolicitationPage from '../../pages/view-extra-solicitation/ViewExtraSolicitationPage';
@@ -37,6 +38,7 @@ export default function PrivateRoutes() {
   const isPrivilegedUser = isAdmin || isCeapg || isCollaborator;
 
   return (
+    <NavigationGuardProvider>
     <NavigationWrapper>
       <Routes>
         
@@ -77,5 +79,6 @@ export default function PrivateRoutes() {
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </NavigationWrapper>
+    </NavigationGuardProvider>
   );
 }

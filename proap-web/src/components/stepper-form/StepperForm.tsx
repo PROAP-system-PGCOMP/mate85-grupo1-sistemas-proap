@@ -31,10 +31,13 @@ export interface StepperFormProps<T> extends FormikConfig<T> {
   steps: FormStep[];
   activeStep?: number;
   autoSaveKey?: string;
+  onCancel?: () => void;
+  onDirtyChange?: (isDirty: boolean) => void;
   labels: {
     previous?: string;
     submit?: string;
     next?: string;
+    cancel?: string;
   };
 }
 
@@ -51,7 +54,6 @@ function AutoSaveWatcher({ cacheKey }: { cacheKey: string }) {
 
   useEffect(() => {
     if (cacheKey && values && Object.keys(values).length > 0) {
-      console.log("💾 [PROAP AutoSave] Guardando:", values);
       sessionStorage.setItem(cacheKey, JSON.stringify(values));
     }
   }, [values, cacheKey]);
@@ -59,14 +61,27 @@ function AutoSaveWatcher({ cacheKey }: { cacheKey: string }) {
   return null;
 }
 
+function DirtyWatcher({ onChange }: { onChange: (dirty: boolean) => void }) {
+  const { dirty } = useFormikContext();
+
+  useEffect(() => {
+    onChange(dirty);
+  }, [dirty, onChange]);
+
+  return null;
+}
+
 export default function StepperForm({
   activeStep: initialActiveStep = 0,
   onSubmit,
-  autoSaveKey, 
+  autoSaveKey,
+  onCancel,
+  onDirtyChange,
   labels = {
     previous: 'Anterior',
     submit: 'Enviar',
     next: 'Próximo',
+    cancel: 'Cancelar',
   },
   steps,
   ...formikProps
@@ -90,6 +105,7 @@ export default function StepperForm({
       previous: 'Anterior',
       submit: 'Enviar',
       next: 'Próximo',
+      cancel: 'Cancelar',
       ...labels,
     }),
     [],
@@ -152,6 +168,7 @@ export default function StepperForm({
           <Form id="stepper-form" noValidate>
             
             {autoSaveKey && <AutoSaveWatcher cacheKey={autoSaveKey} />}
+            {onDirtyChange && <DirtyWatcher onChange={onDirtyChange} />}
 
             {steps.map(
               ({ component: FormComponent }, index) =>
@@ -163,22 +180,35 @@ export default function StepperForm({
               sx={{
                 display: 'flex',
                 marginTop: 2,
-                flexDirection: isMobile && activeStep !== 0 ? 'column' : 'row',
-                gap: isMobile ? 2 : 0,
-                justifyContent: activeStep === 0 ? 'end' : 'space-between',
+                flexDirection: isMobile ? 'column' : 'row',
+                gap: isMobile ? 2 : 1,
+                justifyContent: 'space-between',
               }}
             >
-              {activeStep > 0 && (
-                <Button
-                  onClick={handleClickPreviousStep}
-                  disabled={isSubmitting || activeStep === 0}
-                  variant="outlined"
-                  type="button"
-                  fullWidth={isMobile}
-                >
-                  {componentLabels.previous}
-                </Button>
-              )}
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                {onCancel && (
+                  <Button
+                    onClick={onCancel}
+                    variant="outlined"
+                    color="error"
+                    type="button"
+                    fullWidth={isMobile}
+                  >
+                    {componentLabels.cancel}
+                  </Button>
+                )}
+                {activeStep > 0 && (
+                  <Button
+                    onClick={handleClickPreviousStep}
+                    disabled={isSubmitting || activeStep === 0}
+                    variant="outlined"
+                    type="button"
+                    fullWidth={isMobile}
+                  >
+                    {componentLabels.previous}
+                  </Button>
+                )}
+              </Box>
               <Button
                 variant="contained"
                 type="submit"

@@ -39,7 +39,8 @@ public record CreateAssistanceRequestDTO(
         BigDecimal cotacaoMoeda,
         BigDecimal valorPassagem,
         BigDecimal valorTotal,
-        @NotBlank String justificativa) {
+        @NotBlank String justificativa,
+        String cartaAceite) {
 
     public static CreateAssistanceRequestDTO fromEntity(AssistanceRequest entity) {
         return new CreateAssistanceRequestDTO(
@@ -70,7 +71,8 @@ public record CreateAssistanceRequestDTO(
                 entity.getCotacaoMoeda(),
                 entity.getValorPassagem(),
                 entity.getValorTotal(),
-                entity.getJustificativa());
+                entity.getJustificativa(),
+                entity.getCartaAceite());
     }
 
     public AssistanceRequest toEntity() {
@@ -103,6 +105,9 @@ public record CreateAssistanceRequestDTO(
         entity.setValorPassagem(this.valorPassagem());
         entity.setValorTotal(this.valorTotal());
         entity.setJustificativa(this.justificativa());
+        if (this.cartaAceite() != null) {
+            entity.setCartaAceite(this.cartaAceite());
+        }
         return entity;
     }
 }

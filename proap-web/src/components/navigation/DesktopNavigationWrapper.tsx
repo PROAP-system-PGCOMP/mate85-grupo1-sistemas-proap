@@ -17,7 +17,8 @@ import MenuIcon from '@mui/icons-material/Menu';
 import PersonIcon from '@mui/icons-material/Person';
 
 import { PropsWithChildren, useCallback, useEffect, useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { useNavigationGuard } from '../../contexts/NavigationGuardContext';
 
 import {
   DesktopNavigationChildrenInner,
@@ -50,6 +51,8 @@ export default function DesktopNavigationWrapper({
 }: DesktopNavigationWrapperProps) {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { guardNavigation } = useNavigationGuard();
   const { name } = useAuth();
   const userProfileState = useCurrentUser();
   const [viewName, setViewName] = useState(name);
@@ -98,14 +101,17 @@ export default function DesktopNavigationWrapper({
               visible && (
                 <ListItem key={label} disablePadding>
                   <ListItemButton
-                    component={NavLink}
-                    to={link}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      guardNavigation(() => navigate(link));
+                    }}
+                    selected={location.pathname === link}
                     sx={{
                       padding: '10px 16px',
                       borderRadius: '0 20px 20px 0',
                       margin: '4px 8px 4px 0',
                       justifyContent: isCollapsed ? 'center' : 'flex-start',
-                      '&.active': {
+                      '&.Mui-selected': {
                         backgroundColor: 'rgba(24, 74, 127, 0.1)',
                         color: '#184a7f',
                         fontWeight: 'bold',

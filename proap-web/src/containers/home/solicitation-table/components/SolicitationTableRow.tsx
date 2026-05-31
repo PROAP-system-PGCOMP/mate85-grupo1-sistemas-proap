@@ -13,6 +13,7 @@ import {
 import { CheckCircle, Visibility, MoreVert } from '@mui/icons-material';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { formatNumberToBRL } from '../../../../helpers/formatter';
 import { SolicitationDetailsDialogProps } from '../../request-dialog/SolicitationDetailsDialog';
 import { StatusChip } from './index';
@@ -53,6 +54,7 @@ interface SolicitationTableRowProps extends SolicitationRowData {
   onReview: (id: number) => void;
   onView: (id: number) => void;
   onDelete: (id: number) => void;
+  onClone: (id: number) => void;
   onShowDetails: (props: SolicitationDetailsDialogProps) => void;
 }
 
@@ -88,6 +90,7 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
   onReview,
   onView,
   onDelete,
+  onClone,
   onShowDetails,
 }) => {
   // Menu state
@@ -128,6 +131,11 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
       onDelete(id);
       handleCloseMenu();
     }
+  };
+
+  const handleClone = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (id !== undefined) onClone(id);
   };
 
   const handleShowDetailsClick = (e: React.MouseEvent) => {
@@ -198,6 +206,12 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
               </IconButton>
             </Tooltip>
           )}
+
+          <Tooltip title="Clonar solicitação">
+            <IconButton size="small" onClick={handleClone}>
+              <ContentCopyIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
 
           <Tooltip title="Editar solicitação">
             <span>

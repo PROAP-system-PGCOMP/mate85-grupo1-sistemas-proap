@@ -78,6 +78,7 @@ interface SolicitationTableViewProps {
   onReview: (id: number) => void;
   onView: (id: number) => void;
   onDelete: (id: number) => void;
+  onClone: (id: number) => void;
   onShowDetails: (props: SolicitationDetailsDialogProps) => void;
 }
 
@@ -94,6 +95,7 @@ const SolicitationTableView: React.FC<SolicitationTableViewProps> = ({
   onReview,
   onView,
   onDelete,
+  onClone,
   onShowDetails,
 }) => {
   return (
@@ -189,6 +191,7 @@ const SolicitationTableView: React.FC<SolicitationTableViewProps> = ({
                 onReview={onReview}
                 onView={onView}
                 onDelete={onDelete}
+                onClone={onClone}
                 onShowDetails={onShowDetails}
               />
             ))

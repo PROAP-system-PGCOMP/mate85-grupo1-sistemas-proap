@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Optional;
 
 import br.ufba.proap.assistancerequest.domain.dto.CreateExtraRequestDTO;
+import br.ufba.proap.assistancerequest.domain.dto.ExtraRequestResponseDTO;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -86,7 +86,7 @@ public class ExtraRequestController {
     }
 
     @GetMapping("/find/{id}")
-    public ResponseEntity<ExtraRequest> findById(@PathVariable Long id) {
+    public ResponseEntity<ExtraRequestResponseDTO> findById(@PathVariable Long id) {
         User currentUser = serviceUser.getLoggedUser();
 
         if (currentUser == null) {
@@ -109,7 +109,18 @@ public class ExtraRequestController {
                 currentUser.getPerfil().hasPermission("VIEW_ALL_REQUESTS");
 
         if (canViewAll || isOwner) {
-            return ResponseEntity.ok(request);
+            return ResponseEntity.ok(new ExtraRequestResponseDTO(
+                    request.getId(),
+                    request.getTitulo(),
+                    request.getItemSolicitado(),
+                    request.getJustificativa(),
+                    request.getValorSolicitado(),
+                    request.getSolicitacaoApoio(),
+                    request.getSolicitacaoAuxilioOutrasFontes(),
+                    request.getNomeSolicitacao(),
+                    request.getNomeAgenciaFomento(),
+                    request.getValorSolicitadoAgenciaFormento()
+            ));
         }
 
         // Se não for dono nem admin, bloqueia

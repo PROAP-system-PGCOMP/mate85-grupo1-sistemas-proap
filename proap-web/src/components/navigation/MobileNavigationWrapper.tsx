@@ -25,8 +25,9 @@ import MenuIcon from '@mui/icons-material/Menu';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PersonIcon from '@mui/icons-material/Person';
 
-import { NavLink, useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { NavigationItem } from './NavigationWrapper';
+import { useNavigationGuard } from '../../contexts/NavigationGuardContext';
 import {
   MobileNavigationChildren,
   ImgLogo,
@@ -51,6 +52,8 @@ export const MobileNavigationWrapper = ({
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { guardNavigation } = useNavigationGuard();
   const { name } = useAuth();
   const userProfileState = useCurrentUser();
 
@@ -155,9 +158,11 @@ export const MobileNavigationWrapper = ({
                 {visible && (
                   <ListItem>
                     <ListItemButton
-                      component={NavLink}
-                      to={link}
-                      onClick={handleClickNavigation}
+                      selected={location.pathname === link}
+                      onClick={() => {
+                        handleDrawerClose();
+                        guardNavigation(() => navigate(link));
+                      }}
                     >
                       {icon}
                       <ListItemText primary={label} />

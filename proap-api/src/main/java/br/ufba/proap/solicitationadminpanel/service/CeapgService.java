@@ -83,6 +83,7 @@ public class CeapgService {
         novo.setObservacoesCeapg(data.observacoes());
         novo.setAvaliadorCeapg(currentUser);
         novo.setDataAvaliacaoCeapg(LocalDate.now());
+        novo.setNumeroAta(data.numeroAta());
 
         return assistanceRequestRepository.save(novo);
     }

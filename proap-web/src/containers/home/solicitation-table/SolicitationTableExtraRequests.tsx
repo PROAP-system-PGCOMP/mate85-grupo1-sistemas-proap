@@ -12,12 +12,15 @@ import {
   Tooltip,
   MenuItem,
   Select,
+  FormControl,
+  alpha,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
   Button,
+  SelectChangeEvent,
 } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -29,10 +32,9 @@ import Pagination from '@mui/material/Pagination';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import SearchIcon from '@mui/icons-material/Search';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import SortIcon from '@mui/icons-material/Sort';
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import ClearIcon from '@mui/icons-material/Clear';
 
-import { removeAssistanceRequestById } from '../../../services/assistanceRequestService';
 import {
   ExtraRequestPropToSort,
   deleteExtraAssistanceRequest,
@@ -43,13 +45,16 @@ import { useAuth } from '../../../hooks';
 import usePrevious from '../../../helpers/usePrevious';
 import useHasPermission from '../../../hooks/auth/useHasPermission';
 import { useViewModePreference } from '../../../hooks';
-import { ExtraRequestTableView, ExtraRequestGridView } from './components';
+import { ExtraRequestTableView, ExtraRequestGridView, StatusChip } from './components';
+import { SolicitationDetailsDialogProps } from '../request-dialog/SolicitationDetailsDialog';
 
-/**
- * Component that displays a table of extra assistance requests
- * Allows sorting, pagination, and actions like edit, review, delete
- */
-export default function SolicitationTableExtraRequests() {
+interface SolicitationTableExtraRequestsProps {
+  onShowDetails: (props: SolicitationDetailsDialogProps) => void;
+}
+
+export default function SolicitationTableExtraRequests({ 
+  onShowDetails 
+}: SolicitationTableExtraRequestsProps) {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const theme = useTheme();
@@ -61,11 +66,15 @@ export default function SolicitationTableExtraRequests() {
   const isCeapg = useHasPermission('CEAPG_ROLE');
   const userCanReviewRequests = useHasPermission('APPROVE_REQUEST');
 
-  // View mode (table or grid) com preferência salva
   const [viewMode, setViewMode] = useViewModePreference(currentUser.email);
-
-  // Search filter
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<number | null>(null);
+
+  const statusOptions = [
+    { value: 0, text: 'Pendente' },
+    { value: 1, text: 'Aprovada' },
+    { value: 2, text: 'Não aprovada' },
+  ];
 
   // Table sorting
   const [selectedPropToSortTable, setSelectedPropToSortTable] = useState<{
@@ -74,22 +83,16 @@ export default function SolicitationTableExtraRequests() {
     createdAt: false,
   });
 
-  const getSelectedProp = () => {
+  const getSelectedProp = useCallback(() => {
     return Object.getOwnPropertyNames(
       selectedPropToSortTable,
     )[0] as ExtraRequestPropToSort;
-  };
+  }, [selectedPropToSortTable]);
 
   const handleClickSortTable = (sortBy: ExtraRequestPropToSort) => {
-    if (selectedPropToSortTable[sortBy]) {
-      setSelectedPropToSortTable({
-        [sortBy]: false,
-      });
-    } else {
-      setSelectedPropToSortTable({
-        [sortBy]: true,
-      });
-    }
+    setSelectedPropToSortTable({
+      [sortBy]: !selectedPropToSortTable[sortBy],
+    });
   };
 
   // Pagination
@@ -98,11 +101,8 @@ export default function SolicitationTableExtraRequests() {
   const [size, setSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(0);
 
-  // Deletion confirmation
   const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState(false);
-  const [solicitationToDelete, setSolicitationToDelete] = useState<
-    number | null
-  >(null);
+  const [solicitationToDelete, setSolicitationToDelete] = useState<number | null>(null);
 
   // Data fetching
   const { extraRequests } = useSelector(
@@ -110,42 +110,43 @@ export default function SolicitationTableExtraRequests() {
   );
 
   const updateRequestList = useCallback(
-    (
-      sortBy: ExtraRequestPropToSort,
-      ascending: boolean,
-      size: number,
-      page: number,
-    ) => {
+    (sortBy: ExtraRequestPropToSort, ascending: boolean, size: number, page: number) => {
       dispatch(getExtraAssistanceRequests(sortBy, ascending, page, size)).then(
-        (extraRequests) =>
-          setNumberPages(Math.trunc(extraRequests.payload.total / size) + 1),
+        (response: any) => {
+          if (response.payload?.total) {
+            setNumberPages(Math.ceil(response.payload.total / size));
+          }
+        }
       );
     },
     [dispatch],
   );
 
-  const updateRequestListWithCurrentParameters = () => {
+  const updateRequestListWithCurrentParameters = useCallback(() => {
     updateRequestList(
       getSelectedProp(),
       selectedPropToSortTable[getSelectedProp()] as boolean,
       size,
       currentPage,
     );
+  }, [updateRequestList, getSelectedProp, selectedPropToSortTable, size, currentPage]);
+
+  const handleStatusFilterChange = (event: SelectChangeEvent<string | number>) => {
+    const value = event.target.value;
+    setStatusFilter(value === '' ? null : Number(value));
+  };
+
+  const getStatusAlphaColor = (status: number | null) => {
+    if (status === 1) return alpha('#4caf50', 0.05);
+    if (status === 2) return alpha('#f44336', 0.05);
+    if (status === 0) return alpha('#ff9800', 0.05);
+    return 'transparent';
   };
 
   // Action handlers
-  const handleClickEdit = (id: number) => {
-    navigate(`/extra-solicitation/edit/${id}`);
-  };
-
-  const handleClickReview = (id: number) => {
-    navigate(`/extra-solicitation/review/${id}`);
-  };
-
-  const handleClickView = (id: number) => {
-    // Navigate to view page
-    navigate(`/extra-solicitation/view/${id}`);
-  };
+  const handleClickEdit = (id: number) => navigate(`/extra-solicitation/edit/${id}`);
+  const handleClickReview = (id: number) => navigate(`/extra-solicitation/review/${id}`);
+  const handleClickView = (id: number) => navigate(`/extra-solicitation/view/${id}`);
 
   const openDeleteDialog = (id: number) => {
     setSolicitationToDelete(id);
@@ -166,40 +167,22 @@ export default function SolicitationTableExtraRequests() {
           closeDeleteDialog();
         })
         .catch((error) => {
-          console.error('Erro ao remover solicitação extra:', error);
+          console.error(error);
           toast.error('Erro ao remover solicitação extra');
           closeDeleteDialog();
         });
     }
   };
 
-  const handleShowText = (text: string) => {
-    if (text == null) {
-      let message =
-        'Texto de solicitação\n\nTexto não disponível, solicitação ainda não foi avaliada. Avalie a solicitação e volte para conferir.';
-      alert(message);
-    } else {
-      alert('Texto de solicitação\n\n' + text);
-    }
-  };
-
-  const handleViewModeChange = (
-    _: React.MouseEvent<HTMLElement>,
-    newMode: 'table' | 'grid',
-  ) => {
-    if (newMode !== null) {
-      setViewMode(newMode);
-    }
+  const handleViewModeChange = (_: React.MouseEvent<HTMLElement>, newMode: 'table' | 'grid') => {
+    if (newMode !== null) setViewMode(newMode);
   };
 
   // Effects
   useEffect(() => {
-    if (
-      prevNumberPages &&
-      prevNumberPages > numberPages &&
-      currentPage >= numberPages
-    )
-      setCurrentPage(numberPages - 1);
+    if (prevNumberPages && prevNumberPages > numberPages && currentPage >= numberPages) {
+      setCurrentPage(Math.max(0, numberPages - 1));
+    }
   }, [numberPages, prevNumberPages, currentPage]);
 
   useEffect(() => {
@@ -209,85 +192,156 @@ export default function SolicitationTableExtraRequests() {
       size,
       currentPage,
     );
-  }, [currentPage, size, selectedPropToSortTable, updateRequestList]);
+  }, [currentPage, size, selectedPropToSortTable, updateRequestList, getSelectedProp]);
 
-  // Initial load
-  useEffect(() => {
-    updateRequestListWithCurrentParameters();
-  }, []);
-
-  // Filter requests based on search query
-  const filteredRequests = extraRequests.list.filter(
+  // Combined Filter
+  const filteredRequests = (extraRequests?.list || []).filter(
     (request) =>
-      !searchQuery ||
-      request.user.name.toLowerCase().includes(searchQuery.toLowerCase()),
+      (!searchQuery || request.user?.name?.toLowerCase().includes(searchQuery.toLowerCase())) &&
+      (statusFilter === null || request.situacao === statusFilter)
   );
+
+  const menuProps = {
+    PaperProps: {
+      sx: {
+        borderRadius: '4px',
+        marginTop: '4px',
+        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+        '& .MuiList-root': { padding: '4px' },
+        '& .MuiMenuItem-root': {
+          borderRadius: '2px',
+          minHeight: '48px',
+          padding: '12px 16px',
+          transition: 'background-color 0.2s',
+          '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' },
+          '&.Mui-selected': {
+            backgroundColor: 'rgba(0, 0, 0, 0.08)',
+            '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.12)' },
+          },
+        },
+      },
+    },
+  };
 
   return (
     <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 2 }}>
       <Box sx={{ mb: 3 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            mb: 2,
-          }}
-        >
-          <Typography variant="h6" component="h2">
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h6" component="h2" fontWeight="bold" color="primary">
             Solicitações de Demanda Extra
           </Typography>
-
-          <ToggleButtonGroup
-            value={viewMode}
-            exclusive
-            onChange={handleViewModeChange}
-            aria-label="view mode"
-            size="small"
-          >
-            <ToggleButton value="table" aria-label="table view">
-              <Tooltip title="Visualização em tabela">
-                <ViewListIcon />
-              </Tooltip>
+          <ToggleButtonGroup value={viewMode} exclusive onChange={handleViewModeChange} size="small">
+            <ToggleButton value="table">
+              <Tooltip title="Visualização em tabela"><ViewListIcon /></Tooltip>
             </ToggleButton>
-            <ToggleButton value="grid" aria-label="grid view">
-              <Tooltip title="Visualização em cards">
-                <ViewModuleIcon />
-              </Tooltip>
+            <ToggleButton value="grid">
+              <Tooltip title="Visualização em cards"><ViewModuleIcon /></Tooltip>
             </ToggleButton>
           </ToggleButtonGroup>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-          <TextField
-            variant="outlined"
-            size="small"
-            placeholder="Buscar solicitações"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            sx={{ flexGrow: 1 }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon fontSize="small" />
-                </InputAdornment>
-              ),
-            }}
-          />
+        {/* BARRA DE FILTROS SINCRONIZADA - PADRÃO PROAP */}
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: isMobile ? 'column' : 'row', 
+          gap: 2, 
+          alignItems: 'center', 
+          width: '100%',
+          mb: 0
+        }}>
+          <FormControl sx={{ flexGrow: 1 }} size="small">
+            <TextField
+              margin="none"
+              fullWidth
+              variant="outlined"
+              size="small"
+              placeholder="Buscar por solicitante..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" color="action" />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ '& .MuiOutlinedInput-root': { height: 47, backgroundColor: 'white' } }}
+            />
+          </FormControl>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Tooltip title="Filtros">
-              <IconButton size="small">
-                <FilterListIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
+          <FormControl sx={{ minWidth: isMobile ? '100%' : '220px' }} size="small">
+            <Select
+              displayEmpty
+              value={statusFilter ?? ''}
+              onChange={handleStatusFilterChange}
+              MenuProps={menuProps}
+              sx={{
+                height: 47,
+                backgroundColor: getStatusAlphaColor(statusFilter),
+                '& .MuiSelect-select': {
+                  height: '47px !important',
+                  padding: '0 !important',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'start',
+                  boxSizing: 'border-box',
+                },
+              }}
+              renderValue={(selected) => {
+                if (String(selected) === '') {
+                  return (
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, px: 2, color: 'text.secondary' }}>
+                      <FilterAltIcon fontSize="small" />
+                      <Typography variant="body2">Filtrar</Typography>
+                    </Box>
+                  );
+                }
+                return (
+                  <StatusChip 
+                    status={Number(selected)} 
+                    sx={{ 
+                      width: '100%', 
+                      height: '47px !important', 
+                      borderRadius: 0, 
+                      border: 'none',
+                      backgroundColor: 'transparent',
+                      '& .MuiChip-label': { width: '100%', textAlign: 'center' }
+                    }} 
+                  />
+                );
+              }}
+            >
+              <MenuItem 
+                value="" 
+                sx={{ 
+                  color: 'default',
+                  py: 1.5,
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  fontWeight: 500,
+                  borderColor: 'divider',
+                  mb: 1
+                }}
+              >
+                <FilterAltIcon fontSize="small" />
+                Limpar filtro
+              </MenuItem>
+              {statusOptions.map((opt) => (
+                <MenuItem key={opt.value} value={opt.value}>
+                  <StatusChip status={opt.value} sx={{ width: '100%', pointerEvents: 'none' }} />
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Box>
       </Box>
 
       {viewMode === 'table' ? (
         <ExtraRequestTableView
           extraRequests={filteredRequests}
+          searchQuery={searchQuery}
           currentUserEmail={currentUser.email}
           userCanViewAllRequests={userCanViewAllRequests}
           userCanReviewRequests={userCanReviewRequests}
@@ -298,11 +352,12 @@ export default function SolicitationTableExtraRequests() {
           onReview={handleClickReview}
           onView={handleClickView}
           onDelete={openDeleteDialog}
-          onShowText={handleShowText}
+          onShowDetails={onShowDetails}
         />
       ) : (
         <ExtraRequestGridView
           extraRequests={filteredRequests}
+          searchQuery={searchQuery}
           currentUserEmail={currentUser.email}
           userCanViewAllRequests={userCanViewAllRequests}
           userCanReviewRequests={userCanReviewRequests}
@@ -311,40 +366,22 @@ export default function SolicitationTableExtraRequests() {
           onReview={handleClickReview}
           onView={handleClickView}
           onDelete={openDeleteDialog}
-          onShowText={handleShowText}
+          onShowDetails={onShowDetails}
         />
       )}
 
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 2,
-        }}
-      >
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="body2" color="text.secondary">
-            Itens por página:
-          </Typography>
-          <Select
-            value={size}
-            onChange={(e) => setSize(e.target.value as number)}
-            size="small"
-            sx={{ minWidth: 70 }}
-          >
-            <MenuItem value={5}>5</MenuItem>
-            <MenuItem value={10}>10</MenuItem>
-            <MenuItem value={20}>20</MenuItem>
-            <MenuItem value={30}>30</MenuItem>
+          <Typography variant="body2" color="text.secondary">Itens por página:</Typography>
+          <Select value={size} onChange={(e) => setSize(e.target.value as number)} size="small" sx={{ minWidth: 70 }}>
+            {[5, 10, 20, 30].map(val => <MenuItem key={val} value={val}>{val}</MenuItem>)}
           </Select>
         </Box>
 
         <Pagination
           count={numberPages}
           page={currentPage + 1}
-          onChange={(e, v) => setCurrentPage(v - 1)}
+          onChange={(_, v) => setCurrentPage(v - 1)}
           color="primary"
           showFirstButton
           showLastButton
@@ -352,29 +389,18 @@ export default function SolicitationTableExtraRequests() {
         />
 
         <Typography variant="body2" color="text.secondary">
-          Total: {extraRequests.total} solicitações
+          Total: <strong>{extraRequests?.total || 0}</strong> solicitações
         </Typography>
       </Box>
 
-      <Dialog
-        open={openDeleteConfirmation}
-        onClose={closeDeleteDialog}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">
-          Remoção de solicitação
-        </DialogTitle>
+      <Dialog open={openDeleteConfirmation} onClose={closeDeleteDialog}>
+        <DialogTitle>Remoção de solicitação</DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            <b>Deseja realmente remover esta solicitação?</b>
-          </DialogContentText>
+          <DialogContentText>Deseja realmente remover esta solicitação extra?</DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={closeDeleteDialog}>Não</Button>
-          <Button onClick={handleClickRemoveRequest} autoFocus>
-            Sim
-          </Button>
+          <Button onClick={handleClickRemoveRequest} autoFocus>Sim</Button>
         </DialogActions>
       </Dialog>
     </Paper>

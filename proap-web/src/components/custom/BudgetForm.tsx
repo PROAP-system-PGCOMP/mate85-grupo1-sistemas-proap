@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Field, Form, useFormikContext } from 'formik';
 import {
   Box,
@@ -10,13 +10,15 @@ import {
 } from '@mui/material';
 import { AttachMoney, CalendarToday } from '@mui/icons-material';
 import { BudgetFormValues } from '../../containers/admin-panel/BudgetFormSchema';
+import { formatNumberToBRL } from '../../helpers/formatter';
+import { getBudgetByYear } from '../../services/budgetService';
 
 interface BudgetFormProps {
   onSubmit: (values: BudgetFormValues) => void;
   loading: boolean;
+  totalBudget?: number; 
 }
 
-// Styled components
 const StyledTextField = (props: any) => (
   <TextField
     fullWidth
@@ -44,19 +46,34 @@ const StyledFormLabel = ({ children, ...props }: any) => (
   </Typography>
 );
 
-const BudgetForm: React.FC<BudgetFormProps> = ({ loading }) => {
-  const { errors, touched } = useFormikContext<BudgetFormValues>();
+const BudgetForm: React.FC<BudgetFormProps> = ({ loading, totalBudget }) => {
+  const { errors, touched, values, setFieldValue } = useFormikContext<BudgetFormValues>();
+
+  useEffect(() => {
+    const year = Number(values.year);
+    if (!year || year < 2000 || year > 2100) return;
+
+    getBudgetByYear(year)
+      .then((data) => {
+        if (data) {
+          setFieldValue('budget', totalBudget ?? 0);
+        }
+      })
+      .catch(() => {
+        setFieldValue('budget', 0);
+      });
+  }, [values.year, setFieldValue]);
 
   return (
     <Form>
       <Stack spacing={2}>
         <Box>
-          <StyledFormLabel required>Valor do Orçamento (R$)</StyledFormLabel>
+          <StyledFormLabel required>Valor do orçamento (R$)</StyledFormLabel>
           <Field
             as={StyledTextField}
             fullWidth
             name="budget"
-            placeholder="0,00"
+            placeholder={formatNumberToBRL(Number(totalBudget || 0))}
             type="number"
             InputProps={{
               inputProps: { min: 0, step: 0.01 },
@@ -97,7 +114,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ loading }) => {
           variant="contained"
           color="primary"
           disabled={loading}
-          startIcon={loading ? <CircularProgress size={20} /> : null}
+          startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
           sx={{
             mt: 2,
             py: 1,
@@ -108,7 +125,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ loading }) => {
             },
           }}
         >
-          Definir Orçamento
+          {loading ? 'Salvando...' : 'Definir Orçamento'}
         </Button>
       </Stack>
     </Form>

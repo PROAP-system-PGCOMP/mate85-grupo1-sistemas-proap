@@ -3,8 +3,14 @@ import Tab from '@mui/material/Tab';
 import SolicitationTableRequests from './SolicitationTableRequests';
 import SolicitationTableExtraRequests from './SolicitationTableExtraRequests';
 import { useState } from 'react';
+// Importação do tipo necessária para o TypeScript
+import { SolicitationDetailsDialogProps } from '../request-dialog/SolicitationDetailsDialog';
 
-export default function SolicitationTable() {
+interface SolicitationTableProps {
+  onShowDetails: (props: SolicitationDetailsDialogProps) => void;
+}
+
+export default function SolicitationTable({ onShowDetails }: SolicitationTableProps) {
   const [currentTab, setCurrentTab] = useState(0);
 
   return (
@@ -14,8 +20,13 @@ export default function SolicitationTable() {
         <Tab label="Demanda Extra" />
       </Tabs>
 
+      {/* Aba normal: Mantida sem alterações */}
       {currentTab == 0 && <SolicitationTableRequests />}
-      {currentTab == 1 && <SolicitationTableExtraRequests />}
+      
+      {/* Aba Extra: Agora recebe a função onShowDetails */}
+      {currentTab == 1 && (
+        <SolicitationTableExtraRequests onShowDetails={onShowDetails} />
+      )}
     </>
   );
 }

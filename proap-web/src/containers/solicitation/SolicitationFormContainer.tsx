@@ -1,7 +1,8 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { Typography } from '@mui/material';
 import { FormikValues } from 'formik';
+import { useNavigate } from 'react-router-dom';
 
 import SolicitationDataFormContainer from './create/SolicitationDataFormContainer';
 
@@ -10,7 +11,6 @@ import {
   eventDetailFormSchema,
   INITIAL_FORM_VALUES,
   solicitantionDataFormSchema,
-  SolicitationFormValues,
   solicitantDetailFormSchema,
   InitialSolicitationFormValues,
   confirmationDataFormSchema,
@@ -22,6 +22,9 @@ import SolicitantDetailFormContainer from './create/SolicitantDetailFormContaine
 import ConfirmationFormContainer from './create/ConfirmationFormContainer';
 import EventDetailFormContainer from './create/EventDetailFormContainer';
 import FinancialDetailFormContainer from './create/FinancialDetailFormContainer';
+import useUnsavedChangesWarning from '../../hooks/useUnsavedChangesWarning';
+import { useNavigationGuard } from '../../contexts/NavigationGuardContext';
+import { ConfirmationDialog } from '../../components/dialogs';
 
 interface SolicitationFormContainerProps {
   onSubmit: (values: FormikValues) => void;
@@ -49,6 +52,65 @@ export default function SolicitationFormContainer({
   labels = defaultProps.labels,
   onSubmit = defaultProps.onSubmit,
 }: SolicitationFormContainerProps) {
+  const navigate = useNavigate();
+  const { setDirty: setGlobalDirty } = useNavigationGuard();
+  const [isDirty, setIsDirty] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+
+  const isUsingCustomInitialValues = initialValues !== defaultProps.initialValues;
+
+  useUnsavedChangesWarning(isDirty);
+
+  const formInitialValues = useMemo(() => {
+    if (isUsingCustomInitialValues) {
+      sessionStorage.removeItem('rascunho-solicitacao-proap');
+      return initialValues;
+    }
+
+    const rascunhoSalvo = sessionStorage.getItem('rascunho-solicitacao-proap');
+
+    if (rascunhoSalvo) {
+      try {
+        return JSON.parse(rascunhoSalvo);
+      } catch (error) {
+        console.error("Erro ao ler o rascunho, restaurando padrão.", error);
+        sessionStorage.removeItem('rascunho-solicitacao-proap');
+      }
+    }
+
+    return initialValues;
+  }, []);
+
+  const handleFormSubmit = (values: FormikValues) => {
+    setIsDirty(false);
+    setGlobalDirty(false);
+    onSubmit(values);
+    sessionStorage.removeItem('rascunho-solicitacao-proap');
+  };
+
+  const handleCancel = useCallback(() => {
+    if (isDirty) {
+      setShowCancelDialog(true);
+    } else {
+      sessionStorage.removeItem('rascunho-solicitacao-proap');
+      navigate('/home');
+    }
+  }, [isDirty, navigate]);
+
+  const handleConfirmCancel = useCallback(() => {
+    setShowCancelDialog(false);
+    setIsDirty(false);
+    setGlobalDirty(false);
+    sessionStorage.removeItem('rascunho-solicitacao-proap');
+    navigate('/home');
+  }, [navigate, setGlobalDirty]);
+
+  const handleDirtyChange = useCallback((dirty: boolean) => {
+    const newDirty = dirty || isUsingCustomInitialValues;
+    setIsDirty(newDirty);
+    setGlobalDirty(newDirty);
+  }, [isUsingCustomInitialValues, setGlobalDirty]);
+
   const registerFormSteps: FormStep[] = useMemo(
     () => [
       {
@@ -91,15 +153,29 @@ export default function SolicitationFormContainer({
         {title}
       </Typography>
       <StepperForm
-        initialValues={initialValues as FormikValues}
-        onSubmit={onSubmit}
+        initialValues={formInitialValues as FormikValues}
+        onSubmit={handleFormSubmit}
+        onCancel={handleCancel}
+        onDirtyChange={handleDirtyChange}
         steps={registerFormSteps}
         validateOnChange={false}
+        enableReinitialize={true}
+        autoSaveKey="rascunho-solicitacao-proap"
         labels={
           labels || {
             submit: 'Enviar solicitação',
           }
         }
+      />
+
+      <ConfirmationDialog
+        open={showCancelDialog}
+        onClose={() => setShowCancelDialog(false)}
+        onConfirm={handleConfirmCancel}
+        title="Cancelar solicitação"
+        message="Tem certeza que deseja cancelar? Todos os dados preenchidos serão perdidos."
+        confirmLabel="Sim, cancelar"
+        cancelLabel="Continuar editando"
       />
     </>
   );

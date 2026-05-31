@@ -17,6 +17,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { formatNumberToBRL } from '../../../../helpers/formatter';
 import { SolicitationDetailsDialogProps } from '../../request-dialog/SolicitationDetailsDialog';
@@ -35,6 +36,7 @@ interface SolicitationCardProps {
   onReview: (id: number) => void;
   onView: (id: number) => void;
   onDelete: (id: number) => void;
+  onClone: (id: number) => void;
   onShowDetails: (props: SolicitationDetailsDialogProps) => void;
 }
 
@@ -48,6 +50,7 @@ const SolicitationCard: React.FC<SolicitationCardProps> = ({
   onReview,
   onView,
   onDelete,
+  onClone,
   onShowDetails,
 }) => {
   const {
@@ -100,6 +103,11 @@ const SolicitationCard: React.FC<SolicitationCardProps> = ({
   const handleReview = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click
     if (id !== undefined) onReview(id);
+  };
+
+  const handleClone = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (id !== undefined) onClone(id);
   };
 
   const handleDelete = () => {
@@ -234,6 +242,12 @@ const SolicitationCard: React.FC<SolicitationCardProps> = ({
               </IconButton>
             </Tooltip>
           )}
+
+          <Tooltip title="Clonar solicitação">
+            <IconButton size="small" onClick={handleClone}>
+              <ContentCopyIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
 
           <Tooltip title="Editar solicitação">
             <span>

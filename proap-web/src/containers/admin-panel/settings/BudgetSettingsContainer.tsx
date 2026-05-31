@@ -7,16 +7,37 @@ import {
 import { InfoOutlined } from '@mui/icons-material';
 import { Formik } from 'formik';
 import BudgetForm from '../../../components/custom/BudgetForm';
+import { useEffect, useState } from 'react';
+import { getBudgetByYear } from '../../../services/budgetService';
 
 interface BudgetSettingsContainerProps {
   handleBudgetSubmit: (values: BudgetFormValues) => Promise<void>;
   loading: boolean;
+  totalBudget: number;
 }
 
 export default function BudgetSettingsContainer({
   handleBudgetSubmit,
   loading,
+  totalBudget,
 }: BudgetSettingsContainerProps) {
+  const [initialValues, setInitialValues] = useState<BudgetFormValues>(INITIAL_FORM_VALUES);
+
+  useEffect(() => {
+    const currentYear = new Date().getFullYear();
+    getBudgetByYear(currentYear)
+      .then((data) => {
+        if (data) {
+          setInitialValues({ 
+            budget: totalBudget ?? 0, 
+            year: data.year ?? currentYear 
+          });
+        }
+      })
+      .catch(() => {
+      });
+  }, []);
+
   return (
     <Box
       sx={{
@@ -38,30 +59,28 @@ export default function BudgetSettingsContainer({
           }}
         >
           <Box sx={{ mb: 3 }}>
-            <Typography
-              variant="h6"
-              fontWeight="bold"
-              color="text.primary"
-              gutterBottom
-            >
+            <Typography variant="h6" fontWeight="bold" color="text.primary" gutterBottom>
               Configure o orçamento
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Defina o valor do orçamento anual para acompanhar os gastos e
-              solicitações aprovadas. Este valor será utilizado para calcular o
-              saldo disponível.
+              solicitações aprovadas.
             </Typography>
           </Box>
 
           <Formik
-            initialValues={INITIAL_FORM_VALUES}
+            initialValues={initialValues}
             validationSchema={budgetFormSchema}
             onSubmit={handleBudgetSubmit}
             enableReinitialize
           >
-            {(formikProps) => (
+            {() => (
               <>
-                <BudgetForm onSubmit={handleBudgetSubmit} loading={loading} />
+                <BudgetForm 
+                  onSubmit={handleBudgetSubmit} 
+                  loading={loading} 
+                  totalBudget={totalBudget}
+                />
 
                 <Box
                   sx={{
@@ -72,6 +91,7 @@ export default function BudgetSettingsContainer({
                     p: 2,
                     bgcolor: 'info.lighter',
                     borderRadius: 1,
+                    opacity: 0.9
                   }}
                 >
                   <Box sx={{ color: 'info.main', display: 'flex' }}>

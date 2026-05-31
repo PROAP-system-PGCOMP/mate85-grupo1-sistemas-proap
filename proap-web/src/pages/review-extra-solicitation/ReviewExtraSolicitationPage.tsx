@@ -62,7 +62,6 @@ export default function ReviewExtraSolicitationPage() {
   };
 
   const handleReviewSubmit = (values: any, status: number) => {
-    // Simplifica o usuário para evitar erros de desserialização no Java
     const safeUser = {
       id: extraRequest.user?.id,
       perfil: extraRequest.user?.perfil || { name: 'Solicitante' }
@@ -71,13 +70,16 @@ export default function ReviewExtraSolicitationPage() {
     const { createdAt, updatedAt, ...restOfRequest } = extraRequest;
 
     const payload = {
-      ...restOfRequest,
+      ...restOfRequest, 
       user: safeUser,
       situacao: status,
       observacao: values.parecer,
       numeroAta: values.numeroAta,
-      // Conversão crucial para evitar o Erro 400
+      
+      itemSolicitado: extraRequest.itemSolicitado, 
+
       dataAvaliacaoProap: formatToBackend(values.dataAvaliacaoProap),
+      
       valorAprovado: status === 1 ? (extraRequest.valorSolicitado || 0) : 0,
     };
 
@@ -88,7 +90,12 @@ export default function ReviewExtraSolicitationPage() {
       })
       .catch((error) => {
         console.error("Erro detalhado:", error.response?.data);
-        alert("Erro ao salvar. Verifique se os dados da ATA e Data são válidos.");
+        alert(
+          "Erro ao salvar. " + 
+          (error.response?.data?.itemSolicitado || 
+           error.response?.data?.message || 
+           "Verifique os campos obrigatórios.")
+        );
       });
   };
 
@@ -245,6 +252,7 @@ export default function ReviewExtraSolicitationPage() {
                         variant="contained" 
                         color="success" 
                         onClick={() => handleReviewSubmit(values, 1)}
+                        sx={{color: 'white'}}
                       >
                         Aprovar Solicitação
                       </Button>

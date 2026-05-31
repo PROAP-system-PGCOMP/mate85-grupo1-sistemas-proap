@@ -3,7 +3,7 @@ import api from './index';
 export interface SolicitationAdmin {
   id: number;
   year: number;
-  budget: number;
+  orcamentoAnual: number;
 }
 
 export interface AssistanceIdValueDTO {
@@ -37,7 +37,7 @@ export const setBudget = async (
 
 export const getBudgetByYear = async (
   year: number,
-): Promise<SolicitationAdmin> => {
+): Promise<BudgetSummaryDTO> => {
   const response = await api.get(`/admin/budget/view/${year}`);
   return response.data;
 };

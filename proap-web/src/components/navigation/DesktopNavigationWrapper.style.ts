@@ -38,9 +38,14 @@ export const ImgLogo = styled.img`
 
 export const DesktopNavigationChildrenWrapper = styled.div<DesktopNavigationChildrenWrapperProps>`
   min-height: 100vh;
-  width: 100%;
+  width: calc(100% - ${({ navigationWidth }) => navigationWidth}px);
+  
   margin-left: ${({ navigationWidth }) => navigationWidth}px;
+  
   background-color: #f5f5f5;
+  
+  overflow-x: hidden; 
+  box-sizing: border-box;
 `;
 
 export const DesktopNavigationChildrenInner = styled.div`

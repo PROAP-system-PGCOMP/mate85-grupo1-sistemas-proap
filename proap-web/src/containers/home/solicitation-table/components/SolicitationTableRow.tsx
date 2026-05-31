@@ -13,6 +13,7 @@ import {
 import { CheckCircle, Visibility, MoreVert } from '@mui/icons-material';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { formatNumberToBRL } from '../../../../helpers/formatter';
 import { SolicitationDetailsDialogProps } from '../../request-dialog/SolicitationDetailsDialog';
 import { StatusChip } from './index';
@@ -53,6 +54,7 @@ interface SolicitationTableRowProps extends SolicitationRowData {
   onReview: (id: number) => void;
   onView: (id: number) => void;
   onDelete: (id: number) => void;
+  onClone: (id: number) => void;
   onShowDetails: (props: SolicitationDetailsDialogProps) => void;
 }
 
@@ -88,6 +90,7 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
   onReview,
   onView,
   onDelete,
+  onClone,
   onShowDetails,
 }) => {
   // Menu state
@@ -96,7 +99,7 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
   
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation(); // Prevent row click when menu button is clicked
+    event.stopPropagation();
     setAnchorEl(event.currentTarget);
   };
 
@@ -110,7 +113,7 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
   };
 
   const handleEdit = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent row click
+    e.stopPropagation();
     if (id !== undefined) {
       onEdit(id);
       handleCloseMenu();
@@ -118,20 +121,25 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
   };
 
   const handleReview = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent row click
+    e.stopPropagation();
     if (id !== undefined) onReview(id);
   };
 
   const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent row click
+    e.stopPropagation();
     if (id !== undefined) {
       onDelete(id);
       handleCloseMenu();
     }
   };
 
+  const handleClone = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (id !== undefined) onClone(id);
+  };
+
   const handleShowDetailsClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent row click
+    e.stopPropagation();
     onShowDetails({
       nomeSolicitante: user.name,
       solicitanteDocente,
@@ -166,15 +174,15 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
       <TableCell align="center">
         <StatusChip status={situacao} />
       </TableCell>
-      <TableCell align="left">{formatNumberToBRL(valorTotal)}</TableCell>
-      <TableCell align="center">
+      <TableCell align="center" sx={{ whiteSpace: 'nowrap' }}>{formatNumberToBRL(valorTotal)}</TableCell>
+      <TableCell align="center" sx={{ whiteSpace: 'nowrap' }}>
         {valorAprovado === null ? '-' : formatNumberToBRL(valorAprovado)}
       </TableCell>
       <TableCell align="center">
         {dataAvaliacaoProap === null ? '-' : dataAvaliacaoProap}
       </TableCell>
       <TableCell align="center">
-        {numeroAta}
+        {numeroAta || '-'}
       </TableCell>
       <TableCell align="center" onClick={(e) => e.stopPropagation()}>
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}>
@@ -198,6 +206,12 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
               </IconButton>
             </Tooltip>
           )}
+
+          <Tooltip title="Clonar solicitação">
+            <IconButton size="small" onClick={handleClone}>
+              <ContentCopyIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
 
           <Tooltip title="Editar solicitação">
             <span>

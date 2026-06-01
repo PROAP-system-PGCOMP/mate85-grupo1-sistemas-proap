@@ -2,6 +2,7 @@ package br.ufba.proap.authentication.controller;
 
 import java.util.List;
 
+import br.ufba.proap.authentication.domain.dto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +21,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.ufba.proap.authentication.domain.User;
-import br.ufba.proap.authentication.domain.dto.ChangePasswordDTO;
-import br.ufba.proap.authentication.domain.dto.CreateUserDTO;
-import br.ufba.proap.authentication.domain.dto.StatusResponseDTO;
-import br.ufba.proap.authentication.domain.dto.UserResponseDTO;
-import br.ufba.proap.authentication.domain.dto.UserUpdateDTO;
 import br.ufba.proap.authentication.service.UserService;
 import br.ufba.proap.exception.DefaultProfileNotFoundException;
 import jakarta.validation.Valid;
@@ -154,4 +150,24 @@ public class UserController {
 		}
 	}
 
+    @PostMapping("/send-email-create-account")
+    public ResponseEntity<StatusResponseDTO> sendEmailCreateAccount(@RequestBody @Valid sendEmailCreateAccountDTO body) {
+        try {
+            User user = service.getLoggedUser();
+            if (user.getPerfil() == null || !user.getPerfil().hasPermission("ADMIN_ROLE")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(new StatusResponseDTO("Erro", "Você não tem permissão para enviar e-mail de criação de conta"));
+            }
+            service.sendCreateAccountLink(body.email());
+            return ResponseEntity.ok().body(new StatusResponseDTO("Sucesso", "E-mail enviado com sucesso!"));
+        } catch (ValidationException e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new StatusResponseDTO("Inválido", e.getMessage()));
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new StatusResponseDTO("Erro", "Erro interno no servidor"));
+        }
+    }
 }

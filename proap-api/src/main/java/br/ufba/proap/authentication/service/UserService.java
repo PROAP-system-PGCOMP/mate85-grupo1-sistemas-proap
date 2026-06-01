@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import br.ufba.proap.authentication.domain.dto.AdminUserRegistrationDTO;
+import br.ufba.proap.mailsender.event.LinkEnvioEvent;
 import br.ufba.proap.mailsender.event.PasswordResetTokenEvent;
 import br.ufba.proap.mailsender.event.UserRegisteredByAdminEvent;
 import org.springframework.context.annotation.Lazy;
@@ -224,5 +225,12 @@ public class UserService implements UserDetailsService {
         userRepository.save(newUser);
         String token = createdByAdmin.createCreatedByAdminToken(newUser.getEmail());
         eventPublisher.publishEvent(new UserRegisteredByAdminEvent(this, newUser.getEmail(), token));
+    }
+
+    public void sendCreateAccountLink(String email) {
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new ValidationException("Email já cadastrado");
+        }
+        eventPublisher.publishEvent(new LinkEnvioEvent(this, email));
     }
 }

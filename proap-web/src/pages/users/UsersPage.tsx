@@ -270,7 +270,7 @@ export default function UsersPage() {
                 onClick={() => handleRequestSort('profileName')}
 
               >
-                Perfil de Usuário
+                Perfil
               </TableSortLabel>
             </TableCell>
             <TableCell align="center">Ações</TableCell>

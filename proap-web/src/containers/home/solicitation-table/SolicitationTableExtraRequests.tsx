@@ -240,7 +240,6 @@ export default function SolicitationTableExtraRequests({
           </ToggleButtonGroup>
         </Box>
 
-        {/* BARRA DE FILTROS SINCRONIZADA - PADRÃO PROAP */}
         <Box sx={{ 
           display: 'flex', 
           flexDirection: isMobile ? 'column' : 'row', 

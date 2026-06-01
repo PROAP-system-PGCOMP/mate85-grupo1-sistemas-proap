@@ -2,6 +2,7 @@ package br.ufba.proap.mailsender;
 
 import java.util.Map;
 
+import br.ufba.proap.mailsender.event.LinkEnvioEvent;
 import br.ufba.proap.mailsender.event.UserRegisteredByAdminEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,9 @@ public class EmailNotificationListener {
 
     @Value("${mail.template.url.recoverPassword}")
     private String recoverUrl;
+
+    @Value("${mail.template.url.createAccount}")
+    private String createAccountUrl;
 
     @Autowired
     private EmailService emailService;
@@ -48,6 +52,17 @@ public class EmailNotificationListener {
                 templateName,
                 variables
         );
+    }
+
+    @EventListener
+    public void handleLinkEnvioEvent(LinkEnvioEvent event) {
+        log.info("Aqui o convite de acesso ao PROAP! {}", event.getEmail());
+        String templateName = "SendEmail";
+        Map<String, Object> variables = Map.of(
+                "email", event.getEmail(),
+                "url", createAccountUrl);
+
+        emailService.sendTemplateEmail(event.getEmail(), "Link de Acesso | PROAP", templateName, variables);
     }
 
 }

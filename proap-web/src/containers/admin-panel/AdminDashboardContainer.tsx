@@ -259,14 +259,6 @@ const AdminDashboardContainer = () => {
               iconPosition={isMobile ? 'top' : 'start'}
               {...a11yProps(APPROVED_REQUESTS_INDEX)}
             />
-            {!isCeapg && (
-              <Tab
-                icon={<Groups />}
-                label={isMobile ? '' : 'Avaliações CEAPG'}
-                iconPosition={isMobile ? 'top' : 'start'}
-                {...a11yProps(CEAPG_REQUESTS_INDEX)}
-              />
-            )}
             {isAdmin && (
               <Tab
                 icon={<Settings />}

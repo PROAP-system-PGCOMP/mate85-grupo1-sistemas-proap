@@ -407,7 +407,7 @@ export default function UsersPage() {
                 return (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <FilterAltIcon fontSize="small" sx={{ color: 'action.active' }} />
-                    <Typography variant="body2" sx={{ fontWeight: 500, color: 'text.primary' }}>
+                    <Typography variant="body2" sx={{ fontWeight: 400, color: 'text.secondary' }}>
                       {text}
                     </Typography>
                   </Box>

@@ -119,7 +119,14 @@ public class ExtraRequestController {
                     request.getSolicitacaoAuxilioOutrasFontes(),
                     request.getNomeSolicitacao(),
                     request.getNomeAgenciaFomento(),
-                    request.getValorSolicitadoAgenciaFormento()
+                    request.getValorSolicitadoAgenciaFormento(),
+                    request.getCreatedAt(),
+                    request.getSituacao(),
+                    request.getNumeroAta(),
+                    request.getDataAvaliacaoProap(),
+                    request.getValorAprovado(),
+                    request.getObservacao(),
+                    request.getAutomaticDecText()
             ));
         }
 

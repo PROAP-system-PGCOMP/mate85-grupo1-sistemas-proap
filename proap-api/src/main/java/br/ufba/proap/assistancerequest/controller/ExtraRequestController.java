@@ -111,6 +111,8 @@ public class ExtraRequestController {
         if (canViewAll || isOwner) {
             return ResponseEntity.ok(new ExtraRequestResponseDTO(
                     request.getId(),
+                    request.getUser().getName(),
+                    request.getUser().getEmail(),
                     request.getTitulo(),
                     request.getItemSolicitado(),
                     request.getJustificativa(),

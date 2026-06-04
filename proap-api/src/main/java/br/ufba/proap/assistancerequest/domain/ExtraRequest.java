@@ -52,10 +52,8 @@ public class ExtraRequest {
 	@Column(nullable = true)
 	private String valorSolicitadoAgenciaFormento;
 
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm")
 	private LocalDateTime createdAt;
 
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm")
 	private LocalDateTime updatedAt;
 
 	// 0 - Em revisao, 1 - Aceita, 2 - Nao Aceita
@@ -66,7 +64,6 @@ public class ExtraRequest {
 	private String numeroAta;
 
 	@Column(nullable = true)
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
 	private LocalDate dataAvaliacaoProap;
 
 	@Column(nullable = true, precision = 19, scale = 4)

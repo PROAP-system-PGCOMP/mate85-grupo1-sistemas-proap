@@ -42,9 +42,13 @@ public record ExtraRequestResponseDTO(
         String nomeSolicitacao,
         String nomeAgenciaFomento,
         String valorSolicitadoAgenciaFormento,
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm")
         LocalDateTime createdAt,
         int situacao,
         String numeroAta,
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm")
         LocalDate dataAvaliacaoProap,
         BigDecimal valorAprovado,
         String observacao,

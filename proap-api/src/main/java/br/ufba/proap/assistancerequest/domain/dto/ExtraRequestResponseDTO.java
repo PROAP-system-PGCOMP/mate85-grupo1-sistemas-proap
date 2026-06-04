@@ -1,5 +1,6 @@
 package br.ufba.proap.assistancerequest.domain.dto;
 
+import br.ufba.proap.assistancerequest.domain.ExtraRequest;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
@@ -49,6 +50,29 @@ public record ExtraRequestResponseDTO(
         String observacao,
         String automaticDecText
 ) {
+    public ExtraRequestResponseDTO(ExtraRequest extra) {
+        this(
+                extra.getId(),
+                extra.getUser().getName(),
+                extra.getUser().getEmail(),
+                extra.getTitulo(),
+                extra.getItemSolicitado(),
+                extra.getJustificativa(),
+                extra.getValorSolicitado(),
+                extra.getSolicitacaoApoio(),
+                extra.getSolicitacaoAuxilioOutrasFontes(),
+                extra.getNomeSolicitacao(),
+                extra.getNomeAgenciaFomento(),
+                extra.getValorSolicitadoAgenciaFormento(),
+                extra.getCreatedAt(),
+                extra.getSituacao(),
+                extra.getNumeroAta(),
+                extra.getDataAvaliacaoProap(),
+                extra.getValorAprovado(),
+                extra.getObservacao(),
+                extra.getAutomaticDecText()
+        );
+    }
 }
 
 

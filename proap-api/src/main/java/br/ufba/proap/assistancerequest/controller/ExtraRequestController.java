@@ -137,7 +137,7 @@ public class ExtraRequestController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<ExtraRequest> create(@Valid @RequestBody CreateExtraRequestDTO dto) {
+    public ResponseEntity<ExtraRequestResponseDTO> create(@Valid @RequestBody CreateExtraRequestDTO dto) {
         User currentUser = serviceUser.getLoggedUser();
 
         if (currentUser == null)
@@ -149,7 +149,9 @@ public class ExtraRequestController {
             extraRequest.setSituacao(0);
             extraRequest.setUser(currentUser);
 
-            return ResponseEntity.ok().body(service.save(extraRequest));
+            ExtraRequest savedExtra = service.save(extraRequest);
+
+            return ResponseEntity.ok(new ExtraRequestResponseDTO(savedExtra));
         } catch (Exception e) {
             logger.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -157,9 +159,10 @@ public class ExtraRequestController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<ExtraRequest> update(@RequestBody ExtraRequest extraRequest) {
+    public ResponseEntity<ExtraRequestResponseDTO> update(@RequestBody ExtraRequest extraRequest) {
         try {
-            return ResponseEntity.ok().body(service.save(extraRequest));
+            ExtraRequest savedExtra = service.save(extraRequest);
+            return ResponseEntity.ok(new ExtraRequestResponseDTO(savedExtra));
         } catch (Exception e) {
             logger.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();

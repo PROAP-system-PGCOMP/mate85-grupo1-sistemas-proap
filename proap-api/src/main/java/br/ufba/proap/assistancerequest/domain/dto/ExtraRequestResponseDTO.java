@@ -14,6 +14,12 @@ public record ExtraRequestResponseDTO(
         Long id,
 
         @NotBlank
+        String userName,
+
+        @NotBlank
+        String userEmail,
+
+        @NotBlank
         String titulo,
 
         @NotBlank(message = "O item solicitado é obrigatório")

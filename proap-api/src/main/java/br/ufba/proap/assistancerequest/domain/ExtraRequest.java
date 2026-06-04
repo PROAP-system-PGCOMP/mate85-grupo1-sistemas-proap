@@ -52,10 +52,10 @@ public class ExtraRequest {
 	@Column(nullable = true)
 	private String valorSolicitadoAgenciaFormento;
 
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm")
 	private LocalDateTime createdAt;
 
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm")
 	private LocalDateTime updatedAt;
 
 	// 0 - Em revisao, 1 - Aceita, 2 - Nao Aceita
@@ -151,29 +151,32 @@ public class ExtraRequest {
 		this.observacao = observacao;
 	}
 
-	public String getAutomaticDecText() {
-		return automaticDecText;
-	}
+    public String getAutomaticDecText() {
+        if (this.user == null || this.valorSolicitado == null) {
+            return "Dados insuficientes para gerar a decisão automática.";
+        }
 
-	public void setAutomaticDecText(String automaticDecText) {
-		String name = this.user.getName();
-		String valorSolicitado = this.valorSolicitado.toString();
-		String item = this.itemSolicitado;
-		String justificativa = this.justificativa;
-		String funcao = this.user.getPerfil().getName();
+        String name = this.user.getName();
+        String valorStr = this.valorSolicitado.toString();
+        String item = this.itemSolicitado != null ? this.itemSolicitado : "item não especificado";
+        String justif = this.justificativa != null ? this.justificativa : "sem justificativa";
 
-		if (this.situacao == 1) {
-			this.automaticDecText = "O " + funcao + " - " + name + " solicita apoio para compra de " + item
-					+ " com valor de R$" + valorSolicitado + " com a justificativa, " + justificativa +
-					"Após verificação da documentação enviada pelo discente, a comissão Proap entende que a solicitação está de acordo com a resolução PROAP vigente e recomenda sua aprovação.";
+        String funcao = (this.user.getPerfil() != null) ? this.user.getPerfil().getName() : "Usuário";
 
-		} else {
-			this.automaticDecText = "O " + funcao + " - " + name + " solicita apoio para compra de " + item
-					+ " com valor de R$" + valorSolicitado + " com a justificativa, " + justificativa +
-					"Após verificação da documentação enviada pelo discente, a comissão Proap entende que a solicitação não está de acordo com a resolução PROAP vigente e recomenda sua reprovação.";
+        if (this.situacao == 1) {
+            return "O " + funcao + " - " + name + " solicita apoio para compra de " + item
+                    + " com valor de R$" + valorStr + " com a justificativa, " + justif + ". " +
+                    "Após verificação da documentação enviada pelo discente, a comissão Proap entende que a solicitação está de acordo com a resolução PROAP vigente e recomenda sua aprovação.";
+        } else {
+            return "O " + funcao + " - " + name + " solicita apoio para compra de " + item
+                    + " com valor de R$" + valorStr + " com a justificativa, " + justif + ". " +
+                    "Após verificação da documentação enviada pelo discente, a comissão Proap entende que a solicitação não está de acordo com a resolução PROAP vigente e recomenda sua reprovação.";
+        }
+    }
 
-		}
-	}
+    public void setAutomaticDecText(String automaticDecText) {
+        this.automaticDecText = automaticDecText;
+    }
 
 	public Long getId() {
 		return id;

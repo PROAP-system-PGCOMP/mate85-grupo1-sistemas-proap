@@ -57,8 +57,8 @@ public record ExtraRequestResponseDTO(
     public ExtraRequestResponseDTO(ExtraRequest extra) {
         this(
                 extra.getId(),
-                extra.getUser().getName(),
-                extra.getUser().getEmail(),
+                extra.getUser() != null ? extra.getUser().getName() : "Usuário",
+                extra.getUser() != null ? extra.getUser().getEmail() : "",
                 extra.getTitulo(),
                 extra.getItemSolicitado(),
                 extra.getJustificativa(),
@@ -68,7 +68,7 @@ public record ExtraRequestResponseDTO(
                 extra.getNomeSolicitacao(),
                 extra.getNomeAgenciaFomento(),
                 extra.getValorSolicitadoAgenciaFormento(),
-                extra.getCreatedAt(),
+                extra.getCreatedAt() != null ? extra.getCreatedAt() : LocalDateTime.now(),
                 extra.getSituacao(),
                 extra.getNumeroAta(),
                 extra.getDataAvaliacaoProap(),

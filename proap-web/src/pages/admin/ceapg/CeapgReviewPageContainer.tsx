@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Box, Container, Typography, Card, CardContent } from '@mui/material';
-import { RateReview, AccountBalanceWallet, Savings } from '@mui/icons-material';
+import { RateReview, AccountBalanceWallet, Savings, Receipt, PriceCheck } from '@mui/icons-material';
 import { useSnackbar } from 'notistack'; 
 
 import useCeapgRequests from '../../../hooks/admin/useLoadCeapgRequests';
@@ -68,27 +68,50 @@ const CeapgReviewPageContainer = () => {
   const saldoReal = totalBudget - totalGasto;
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="xl" sx={{ py: 4 }}>
       
       <Box sx={{ 
         mb: 4, 
         display: 'flex', 
-        flexDirection: { xs: 'column', md: 'row' },
+        flexDirection: { xs: 'column', xl: 'row' }, 
         justifyContent: 'space-between', 
-        alignItems: { xs: 'flex-start', md: 'center' },
+        alignItems: { xs: 'flex-start', xl: 'center' },
         gap: 3
       }}>
         
         {/* TÍTULO */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
           <RateReview color="primary" sx={{ fontSize: 40 }} />
-          <Typography variant="h4" fontWeight="bold" color="primary">
+          <Typography variant="h4" fontWeight="bold" color="primary" sx={{ whiteSpace: 'nowrap' }}>
             Avaliações CEAPG
           </Typography>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
-          <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', bgcolor: 'primary.50', minWidth: '220px' }}>
+        {/* CARDS DE RESUMO */}
+        <Box sx={{ 
+          display: 'flex', 
+          gap: 2, 
+          flexDirection: { xs: 'column', lg: 'row' }, 
+          flexGrow: 1,
+          justifyContent: { xs: 'flex-start', xl: 'flex-end' },
+          width: { xs: '100%', xl: 'auto' }
+        }}>
+          
+          {/* CONSUMO PREVISTO (Azul Claro) */}
+          <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', bgcolor: 'info.50', minWidth: '180px', flex: 1 }}>
+            <CardContent sx={{ display: 'flex', alignItems: 'center', p: 1.5, '&:last-child': { pb: 1.5 } }}>
+              <Receipt sx={{ fontSize: 32, color: 'primary.main', mr: 1.5 }} />
+              <Box>
+                <Typography variant="caption" color="text.secondary" fontWeight="bold">CONSUMO PREVISTO</Typography>
+                <Typography variant="h6" color="primary.main" fontWeight="bold" sx={{ lineHeight: 1.2 }}>
+                  {formatNumberToBRL(totalSolicitado)}
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+
+          {/* SALDO PREVISTO (Azul Escuro / Primary) */}
+          <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', bgcolor: 'primary.50', minWidth: '180px', flex: 1 }}>
             <CardContent sx={{ display: 'flex', alignItems: 'center', p: 1.5, '&:last-child': { pb: 1.5 } }}>
               <AccountBalanceWallet sx={{ fontSize: 32, color: 'primary.main', mr: 1.5 }} />
               <Box>
@@ -100,7 +123,21 @@ const CeapgReviewPageContainer = () => {
             </CardContent>
           </Card>
 
-          <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', bgcolor: 'success.50', minWidth: '220px' }}>
+          {/* CONSUMO REAL (Verde Secundário) */}
+          <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', minWidth: '180px', flex: 1 }}>
+            <CardContent sx={{ display: 'flex', alignItems: 'center', p: 1.5, '&:last-child': { pb: 1.5 } }}>
+              <PriceCheck sx={{ fontSize: 32, color: 'success.main', mr: 1.5 }} />
+              <Box>
+                <Typography variant="caption" color="text.secondary" fontWeight="bold">CONSUMO REAL</Typography>
+                <Typography variant="h6" color="success.main" fontWeight="bold" sx={{ lineHeight: 1.2 }}>
+                  {formatNumberToBRL(totalGasto)}
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+
+          {/* SALDO REAL (Verde Padrão / Success) */}
+          <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', bgcolor: 'success.50', minWidth: '180px', flex: 1 }}>
             <CardContent sx={{ display: 'flex', alignItems: 'center', p: 1.5, '&:last-child': { pb: 1.5 } }}>
               <Savings sx={{ fontSize: 32, color: 'success.main', mr: 1.5 }} />
               <Box>
@@ -111,8 +148,8 @@ const CeapgReviewPageContainer = () => {
               </Box>
             </CardContent>
           </Card>
-        </Box>
 
+        </Box>
       </Box>
 
       <CeapgReviewRequests

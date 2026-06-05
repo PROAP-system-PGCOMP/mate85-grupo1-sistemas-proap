@@ -276,11 +276,10 @@ export default function SolicitationTableRequests() {
                 );
               }}
             >
-              {/* Opção de Limpar Filtro com ícone */}
               <MenuItem 
                 value="" 
                 sx={{ 
-                  color: 'default', // Cor de destaque para ação de limpar
+                  color: 'default', 
                   py: 1.5,
                   display: 'flex',
                   justifyContent: 'center',
@@ -288,7 +287,7 @@ export default function SolicitationTableRequests() {
                   gap: 1.5,
                   fontWeight: 500,
                   borderColor: 'divider',
-                  mb: 1 // Separa um pouco das opções de status
+                  mb: 1 
                 }}
               >
                 <FilterAltIcon fontSize="small" />

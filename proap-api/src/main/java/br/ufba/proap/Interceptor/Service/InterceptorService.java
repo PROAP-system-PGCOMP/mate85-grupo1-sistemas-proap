@@ -22,10 +22,16 @@ public class InterceptorService implements HandlerInterceptor {
                 .orElseThrow(() -> new RuntimeException("Configuração de Interceptação não encontrada"));
 
         LocalDateTime now = LocalDateTime.now();
-        if (now.isBefore(config.getStartDate()) || now.isAfter(config.getEndDate())) {
-            response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+        
+        // Verifica se a data não é nula ANTES de tentar comparar
+        boolean isBeforeStart = config.getStartDate() != null && now.isBefore(config.getStartDate());
+        boolean isAfterEnd = config.getEndDate() != null && now.isAfter(config.getEndDate());
+
+        if (isBeforeStart || isAfterEnd) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST); // Mudado para 400 para o Axios do front tratar mais fácil
+            response.setContentType("application/json"); // Retorna como JSON para o frontend entender
             response.setCharacterEncoding("UTF-8");
-            response.getWriter().write("O sistema está indisponível no momento. Por favor, tente novamente mais tarde.");
+            response.getWriter().write("{\"message\": \"Fora do prazo de submissão ou sistema indisponível.\"}");
             return false;
         }
 

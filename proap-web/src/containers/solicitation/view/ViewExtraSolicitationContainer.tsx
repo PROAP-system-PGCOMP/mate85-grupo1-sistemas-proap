@@ -5,8 +5,6 @@ import {
   Typography,
   Paper,
   Divider,
-  Chip,
-  Stack,
 } from '@mui/material';
 import { formatNumberToBRL } from '../../../helpers/formatter';
 import { StatusChip } from '../../../containers/home/solicitation-table/components';
@@ -21,9 +19,15 @@ interface ViewExtraSolicitationContainerProps {
 const ViewExtraSolicitationContainer: React.FC<
   ViewExtraSolicitationContainerProps
 > = ({ extraRequest }) => {
+  
+  // 1. FIX DO AXIOS: Garante que os dados sejam lidos corretamente
+  const requestData = extraRequest?.data || extraRequest || {};
+  
+  // 2. EXTRAINDO VARIÁVEIS: Usando os nomes reais do seu ExtraRequestResponseDTO
   const {
     id,
-    user,
+    userName,
+    userEmail,
     valorSolicitado,
     createdAt,
     situacao,
@@ -31,11 +35,14 @@ const ViewExtraSolicitationContainer: React.FC<
     automaticDecText,
     dataAvaliacaoProap,
     observacao,
-    descricao,
     justificativa,
-  } = extraRequest;
+    itemSolicitado,
+    titulo,
+    nomeSolicitacao,
+    nomeAgenciaFomento,
+  } = requestData;
 
-  // Renderiza um campo de informação
+  // 3. FIX DO INFOFIELD: Trata strings vazias para exibir o '-'
   const InfoField = ({
     label,
     value,
@@ -50,7 +57,7 @@ const ViewExtraSolicitationContainer: React.FC<
         {label}
       </Typography>
       <Typography variant="body1">
-        {value === null || value === undefined
+        {value === null || value === undefined || value === ''
           ? '-'
           : valueFormatter
             ? valueFormatter(value)
@@ -73,7 +80,7 @@ const ViewExtraSolicitationContainer: React.FC<
             <Typography variant="h5" fontWeight="medium">
               Solicitação #{id}
             </Typography>
-            <StatusChip status={situacao} />
+            <StatusChip status={situacao ?? 0} />
           </Box>
           <Divider sx={{ mb: 3 }} />
         </Grid>
@@ -84,8 +91,8 @@ const ViewExtraSolicitationContainer: React.FC<
             <Typography variant="h6" gutterBottom>
               Informações do Solicitante
             </Typography>
-            <InfoField label="Nome" value={user?.name} />
-            <InfoField label="E-mail" value={user?.email} />
+            <InfoField label="Nome" value={userName} />
+            <InfoField label="E-mail" value={userEmail} />
             <InfoField label="Data de Solicitação" value={createdAt} />
           </Paper>
         </Grid>
@@ -116,25 +123,16 @@ const ViewExtraSolicitationContainer: React.FC<
             <Typography variant="h6" gutterBottom>
               Detalhes da Solicitação
             </Typography>
-            <InfoField label="Descrição" value={descricao} />
+            <InfoField label="Nome da Solicitação / Título" value={nomeSolicitacao || titulo} />
+            <InfoField label="Item Solicitado" value={itemSolicitado} />
             <InfoField label="Justificativa" value={justificativa} />
+            {nomeAgenciaFomento && (
+              <InfoField label="Agência de Fomento (Outras Fontes)" value={nomeAgenciaFomento} />
+            )}
             <InfoField label="Observações" value={observacao} />
           </Paper>
         </Grid>
 
-        {/* Texto de aprovação/reprovação */}
-        {automaticDecText && (
-          <Grid item xs={12}>
-            <Paper sx={{ p: 3, borderRadius: 2 }}>
-              <Typography variant="h6" gutterBottom>
-                Parecer da Avaliação
-              </Typography>
-              <Typography variant="body1" whiteSpace="pre-line">
-                {automaticDecText}
-              </Typography>
-            </Paper>
-          </Grid>
-        )}
       </Grid>
     </Box>
   );

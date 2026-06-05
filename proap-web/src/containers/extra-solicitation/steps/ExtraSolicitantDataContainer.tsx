@@ -6,37 +6,47 @@ import {
   StyledIconButton,
   StyledTextField,
 } from '../../solicitation/SolicitationFormContainer.style';
-import { ExtraRequest } from '../../../types/requests-type/ExtraRequest';
 import { useAuth } from '../../../hooks';
 import { Info } from '@mui/icons-material';
 
 export default function ExtraSolicitantDataContainer() {
-  const { errors, touched, values } = useFormikContext<ExtraRequest>();
+  // Usei 'any' provisoriamente caso a interface ExtraRequest ainda 
+  // não tenha sido atualizada para refletir o novo Record do Java
+  const { errors, touched, values } = useFormikContext<any>();
 
   const { name, email } = useAuth();
+
+  // Busca do Formik, com fallback para os dados logados (useAuth)
+  const displayNome = values?.userName || values?.user?.name || name;
+  const displayEmail = values?.userEmail || values?.user?.email || email;
 
   return (     
     <Box display="flex" flexDirection="column" gap={2} pt={2} pb={2}>
 
       <StyledTextField
         label="Solicitante"
-        value={values.user.name != '' ? values.user.name : name}
+        value={displayNome}
         disabled
       />
       <StyledTextField
         label="E-mail"
-        value={values.user.email != '' ? values.user.email : email}
+        value={displayEmail}
         disabled
       />
+      
+      {/* Ajustado para 'titulo' em todo o campo. 
+        Certifique-se de que initialValues tenha a propriedade 'titulo' 
+      */}
       <Field
         as={StyledTextField}
         label="Solicitação"
         name="titulo"
-        error={Boolean(touched.nomeSolicitacao && errors.nomeSolicitacao)}
-        helperText={touched.nomeSolicitacao && errors.nomeSolicitacao}
+        error={Boolean(touched.titulo && errors.titulo)}
+        helperText={touched.titulo && errors.titulo}
         required
         style={{ padding: 'none' }}
       />
+      
       <Stack direction={'row'}>
         <Field
           as={StyledTextField}
@@ -60,6 +70,7 @@ export default function ExtraSolicitantDataContainer() {
           </StyledIconButton>
         </Tooltip>
       </Stack>
+      
       <Box sx={{ display: 'flex', flexDirection: 'column'}}>
         <Typography variant="h6" component="h2" sx={{ fontSize: '1rem', fontWeight: 'bold', color: 'text.secondary'}}>
           *Apenas solicitações que não sejam relacionadas à publicação científica.

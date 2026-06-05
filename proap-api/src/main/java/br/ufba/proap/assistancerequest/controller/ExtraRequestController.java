@@ -159,12 +159,27 @@ public class ExtraRequestController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<ExtraRequestResponseDTO> update(@RequestBody ExtraRequest extraRequest) {
+    public ResponseEntity<ExtraRequestResponseDTO> update(@RequestBody ExtraRequest extraRequestAtualizado) {
         try {
-            ExtraRequest savedExtra = service.save(extraRequest);
+            ExtraRequest existente = service.findById(extraRequestAtualizado.getId())
+                    .orElseThrow(() -> new RuntimeException("Solicitação não encontrada"));
+
+            existente.setTitulo(extraRequestAtualizado.getTitulo());
+            existente.setItemSolicitado(extraRequestAtualizado.getItemSolicitado());
+            existente.setJustificativa(extraRequestAtualizado.getJustificativa());
+            existente.setValorSolicitado(extraRequestAtualizado.getValorSolicitado());
+            existente.setSolicitacaoApoio(extraRequestAtualizado.getSolicitacaoApoio());
+            existente.setSolicitacaoAuxilioOutrasFontes(extraRequestAtualizado.getSolicitacaoAuxilioOutrasFontes());
+            existente.setNomeSolicitacao(extraRequestAtualizado.getNomeSolicitacao());
+            existente.setNomeAgenciaFomento(extraRequestAtualizado.getNomeAgenciaFomento());
+            existente.setValorSolicitadoAgenciaFormento(extraRequestAtualizado.getValorSolicitadoAgenciaFormento());
+
+            ExtraRequest savedExtra = service.save(existente);
+
             return ResponseEntity.ok(new ExtraRequestResponseDTO(savedExtra));
+
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error("Erro ao atualizar solicitação: ", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }

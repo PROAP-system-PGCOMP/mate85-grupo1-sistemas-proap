@@ -19,6 +19,9 @@ import { SolicitationDetailsDialogProps } from '../../request-dialog/Solicitatio
 import { StatusChip } from './index';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
 
+import { format, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+
 interface SolicitationRowData {
   id?: number;
   user?: {
@@ -57,6 +60,22 @@ interface SolicitationTableRowProps extends SolicitationRowData {
   onClone: (id: number) => void;
   onShowDetails: (props: SolicitationDetailsDialogProps) => void;
 }
+
+const safelyFormatDate = (dateString: string | null) => {
+  if (!dateString) return '-';
+  
+  // Se a data já vier formatada do backend (ex: "05/06/2026"), não faz nada para não dar erro no parseISO
+  // Nota: Isso assume que se vier com barra, não precisamos adicionar a hora,
+  // ou a hora já está embutida de outra forma que a API normal trata.
+  if (dateString.includes('/')) return dateString;
+
+  try {
+    // Transforma o ISO gigante em "dd/MM/yyyy HH:mm" (ex: 05/06/2026 15:30)
+    return format(parseISO(dateString), 'dd/MM/yyyy HH:mm', { locale: ptBR });
+  } catch (e) {
+    return dateString; // Em caso de falha, retorna o original (provavelmente o ISO feio, mas não quebra)
+  }
+};
 
 /**
  * Component for displaying a single solicitation in the table
@@ -169,7 +188,7 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
         },
       }}
     >
-      <TableCell align="left">{createdAt}</TableCell>
+      <TableCell align="left">{safelyFormatDate(createdAt)}</TableCell>
       <TableCell align="left">{user.name}</TableCell>
       <TableCell align="center">
         <StatusChip status={situacao} />
@@ -179,7 +198,7 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
         {valorAprovado === null ? '-' : formatNumberToBRL(valorAprovado)}
       </TableCell>
       <TableCell align="center">
-        {dataAvaliacaoProap === null ? '-' : dataAvaliacaoProap}
+        {safelyFormatDate(dataAvaliacaoProap)}
       </TableCell>
       <TableCell align="center">
         {numeroAta || '-'}

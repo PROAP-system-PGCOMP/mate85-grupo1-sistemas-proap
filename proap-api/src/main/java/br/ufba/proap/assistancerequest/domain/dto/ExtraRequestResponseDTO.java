@@ -48,7 +48,7 @@ public record ExtraRequestResponseDTO(
         int situacao,
         String numeroAta,
 
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
         LocalDate dataAvaliacaoProap,
         BigDecimal valorAprovado,
         String observacao,

@@ -14,7 +14,6 @@ import { ExpandMore } from '@mui/icons-material';
 import { SolicitationTableRow } from './index';
 import { SolicitationDetailsDialogProps } from '../../request-dialog/SolicitationDetailsDialog';
 
-// Componente de Header padronizado com a lógica de ordenação do PROAP
 interface TableCellHeaderProps {
   text: string;
   sortBy: any; 

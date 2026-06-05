@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Alert,
   Box,
@@ -12,7 +12,9 @@ import {
   TableHead,
   TableRow,
   Paper,
+  TableSortLabel,
 } from '@mui/material';
+import { ExpandMore } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { AssistanceIdValueDTO } from '../../services/budgetService';
 import { formatNumberToBRL } from '../../helpers/formatter';
@@ -31,6 +33,72 @@ interface ApprovedRequestsProps {
   onFilter: (startDate?: string, endDate?: string) => void;
 }
 
+type Order = 'asc' | 'desc';
+
+function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
+  if (b[orderBy] === null || b[orderBy] === undefined) return -1;
+  if (a[orderBy] === null || a[orderBy] === undefined) return 1;
+  if (b[orderBy] < a[orderBy]) return -1;
+  if (b[orderBy] > a[orderBy]) return 1;
+  return 0;
+}
+
+function getComparator<Key extends keyof any>(
+  order: Order,
+  orderBy: Key,
+): (a: { [key in Key]: any }, b: { [key in Key]: any }) => number {
+  return order === 'desc'
+    ? (a, b) => descendingComparator(a, b, orderBy)
+    : (a, b) => -descendingComparator(a, b, orderBy);
+}
+
+interface TableCellHeaderProps {
+  text: string;
+  sortBy: keyof AssistanceIdValueDTO;
+  orderBy: keyof AssistanceIdValueDTO;
+  order: Order;
+  onRequestSort: (property: keyof AssistanceIdValueDTO) => void;
+  align?: 'left' | 'center' | 'right';
+}
+
+const TableCellHeader: React.FC<TableCellHeaderProps> = ({
+  text,
+  sortBy,
+  orderBy,
+  order,
+  onRequestSort,
+  align = 'left',
+}) => {
+  const isSorted = orderBy === sortBy;
+
+  return (
+    <TableCell
+      align={align}
+      sortDirection={isSorted ? order : false}
+      sx={{
+        fontWeight: 'bold',
+        backgroundColor: 'grey.50',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      <TableSortLabel
+        active={isSorted}
+        direction={isSorted ? order : 'asc'}
+        onClick={() => onRequestSort(sortBy)}
+        IconComponent={ExpandMore} // <--- A setinha que você queria!
+        sx={{
+          flexDirection: align === 'center' ? 'row' : 'inherit',
+          '& .MuiTableSortLabel-icon': {
+            marginLeft: align === 'center' ? '4px' : 'inherit',
+          },
+        }}
+      >
+        {text}
+      </TableSortLabel>
+    </TableCell>
+  );
+};
+
 const ApprovedRequests: React.FC<ApprovedRequestsProps> = ({
   loading,
   totalRequests,
@@ -45,6 +113,9 @@ const ApprovedRequests: React.FC<ApprovedRequestsProps> = ({
 
   const [localStartDate, setLocalStartDate] = useState(startDate);
   const [localEndDate, setLocalEndDate] = useState(endDate);
+
+  const [order, setOrder] = useState<Order>('desc');
+  const [orderBy, setOrderBy] = useState<keyof AssistanceIdValueDTO>('createdAt');
 
   useEffect(() => {
     setLocalStartDate(startDate);
@@ -72,10 +143,19 @@ const ApprovedRequests: React.FC<ApprovedRequestsProps> = ({
     try {
       return format(parseISO(dateString), 'dd/MM/yyyy', { locale: ptBR });
     } catch (e) {
-      console.error('Error formatting date:', e);
       return 'Data inválida';
     }
   };
+
+  const handleRequestSort = (property: keyof AssistanceIdValueDTO) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+
+  const sortedRequests = useMemo(() => {
+    return [...totalRequests].sort(getComparator(order, orderBy));
+  }, [totalRequests, order, orderBy]);
 
   return (
     <>
@@ -139,16 +219,52 @@ const ApprovedRequests: React.FC<ApprovedRequestsProps> = ({
             <Table stickyHeader aria-label="tabela de solicitações aprovadas">
               <TableHead>
                 <TableRow>
-                  <TableCell><strong>ID</strong></TableCell>
-                  <TableCell><strong>Data de Criação</strong></TableCell>
-                  <TableCell><strong>Data de Aprovação</strong></TableCell>
-                  <TableCell><strong>Avaliador</strong></TableCell>
-                  <TableCell><strong>Status</strong></TableCell>
-                  <TableCell align="right"><strong>Valor</strong></TableCell>
+                  <TableCellHeader
+                    text="ID"
+                    sortBy="id"
+                    orderBy={orderBy}
+                    order={order}
+                    onRequestSort={handleRequestSort}
+                  />
+                  <TableCellHeader
+                    text="Data de Criação"
+                    sortBy="createdAt"
+                    orderBy={orderBy}
+                    order={order}
+                    onRequestSort={handleRequestSort}
+                  />
+                  <TableCellHeader
+                    text="Data de Aprovação"
+                    sortBy="dataAvaliacaoProap"
+                    orderBy={orderBy}
+                    order={order}
+                    onRequestSort={handleRequestSort}
+                  />
+                  <TableCellHeader
+                    text="Avaliador"
+                    sortBy="avaliadorProap"
+                    orderBy={orderBy}
+                    order={order}
+                    onRequestSort={handleRequestSort}
+                  />
+                  
+                  {/* Status não é ordenável, então mantemos a TableCell nativa */}
+                  <TableCell sx={{ fontWeight: 'bold', backgroundColor: 'grey.50' }}>
+                    Status
+                  </TableCell>
+
+                  <TableCellHeader
+                    text="Valor"
+                    sortBy="value"
+                    orderBy={orderBy}
+                    order={order}
+                    onRequestSort={handleRequestSort}
+                    align="right"
+                  />
                 </TableRow>
               </TableHead>
               <TableBody>
-                {totalRequests.map((request) => (
+                {sortedRequests.map((request) => (
                   <TableRow
                     key={request.id}
                     hover
@@ -167,7 +283,7 @@ const ApprovedRequests: React.FC<ApprovedRequestsProps> = ({
                         sx={{ fontWeight: 'medium', color: 'white' }}
                       />
                     </TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                    <TableCell align="right" sx={{ fontWeight: 'bold', color: 'black' }}>
                       {formatNumberToBRL(request.value)}
                     </TableCell>
                   </TableRow>

@@ -64,6 +64,7 @@ public class ExtraRequest {
 	private String numeroAta;
 
 	@Column(nullable = true)
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy", timezone = "America/Sao_Paulo")	
 	private LocalDate dataAvaliacaoProap;
 
 	@Column(nullable = true, precision = 19, scale = 4)

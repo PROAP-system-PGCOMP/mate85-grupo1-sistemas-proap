@@ -70,8 +70,7 @@ const a11yProps = (index: number) => {
 const AdminDashboardContainer = () => {
   const DASHBOARD_INDEX = 0;
   const APPROVED_REQUESTS_INDEX = 1;
-  const CEAPG_REQUESTS_INDEX = 2;
-  const SETTINGS_INDEX = 3;
+  const SETTINGS_INDEX = 2;
   const isCeapg = useHasPermission('CEAPG_ROLE');
   const isAdmin = useHasPermission('ADMIN_ROLE');
   const theme = useTheme();
@@ -114,10 +113,6 @@ const AdminDashboardContainer = () => {
 
   const doTabChange = (newValue: number) => {
     setTabValue(newValue);
-
-    if (newValue === CEAPG_REQUESTS_INDEX && ceapg.ceapgRequests.length === 0) {
-      ceapg.getCeapg();
-    }
 
     if (
       (newValue === APPROVED_REQUESTS_INDEX || newValue === DASHBOARD_INDEX) &&
@@ -259,6 +254,7 @@ const AdminDashboardContainer = () => {
               iconPosition={isMobile ? 'top' : 'start'}
               {...a11yProps(APPROVED_REQUESTS_INDEX)}
             />
+            
             {isAdmin && (
               <Tab
                 icon={<Settings />}
@@ -312,19 +308,6 @@ const AdminDashboardContainer = () => {
             />
           </TabPanel>
 
-          <TabPanel value={tabValue} index={CEAPG_REQUESTS_INDEX}>
-            <SectionHeader
-              icon={<Groups color="primary" />}
-              title="Avaliações CEAPG"
-            />
-            <CeapgReviewRequests
-              loading={ceapg.loading}
-              requests={ceapg.ceapgRequests}
-              onStartDateChange={() => {}}
-              onEndDateChange={() => {}}
-              onFilter={handleCeapgFilterApply}
-            />
-          </TabPanel>
 
           <TabPanel value={tabValue} index={SETTINGS_INDEX}>
             <SettingContainer

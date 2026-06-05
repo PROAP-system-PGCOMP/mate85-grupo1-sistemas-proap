@@ -13,17 +13,13 @@ interface ViewExtraSolicitationContainerProps {
   extraRequest: any;
 }
 
-/**
- * Container para visualização dos detalhes de uma solicitação de demanda extra
- */
+
 const ViewExtraSolicitationContainer: React.FC<
   ViewExtraSolicitationContainerProps
 > = ({ extraRequest }) => {
   
-  // 1. FIX DO AXIOS: Garante que os dados sejam lidos corretamente
   const requestData = extraRequest?.data || extraRequest || {};
   
-  // 2. EXTRAINDO VARIÁVEIS: Usando os nomes reais do seu ExtraRequestResponseDTO
   const {
     id,
     userName,
@@ -42,7 +38,6 @@ const ViewExtraSolicitationContainer: React.FC<
     nomeAgenciaFomento,
   } = requestData;
 
-  // 3. FIX DO INFOFIELD: Trata strings vazias para exibir o '-'
   const InfoField = ({
     label,
     value,

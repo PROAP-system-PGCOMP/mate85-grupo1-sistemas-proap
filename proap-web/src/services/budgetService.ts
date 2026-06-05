@@ -19,6 +19,10 @@ export interface BudgetSummaryDTO {
   totalBudget: number;
   usedBudget: number;
   remainingBudget: number;
+  totalCeapgBudget?: number;
+  usedCeapgBudget?: number;
+  remainingCeapgBudget?: number;
+  usedCeapgPercentage?: number;
 }
 
 export const setBudget = async (

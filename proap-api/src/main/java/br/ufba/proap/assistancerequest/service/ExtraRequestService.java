@@ -68,6 +68,8 @@ public class ExtraRequestService {
 	 * @param user      Filtrar por usuário
 	 * @return Lista de demandas extras que devem ser exibidas na página
 	 */
+
+    @Transactional(readOnly = true)
 	public ExtraRequestListFiltered find(
 			String sortBy,
 			boolean ascending,

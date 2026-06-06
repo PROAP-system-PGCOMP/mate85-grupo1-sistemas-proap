@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Component
 public class InterceptorService implements HandlerInterceptor {
@@ -18,20 +19,38 @@ public class InterceptorService implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
-        DataConfig config = interceptorRepository.findById(1L)
-                .orElseThrow(() -> new RuntimeException("Configuração de Interceptação não encontrada"));
+        Optional<DataConfig> configAux = interceptorRepository.findById(1L);
 
+        if (configAux.isEmpty()) {
+            return true;
+        }
+
+        DataConfig config = configAux.get();
         LocalDateTime now = LocalDateTime.now();
-        
-        // Verifica se a data não é nula ANTES de tentar comparar
-        boolean isBeforeStart = config.getStartDate() != null && now.isBefore(config.getStartDate());
-        boolean isAfterEnd = config.getEndDate() != null && now.isAfter(config.getEndDate());
 
-        if (isBeforeStart || isAfterEnd) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST); // Mudado para 400 para o Axios do front tratar mais fácil
-            response.setContentType("application/json"); // Retorna como JSON para o frontend entender
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write("{\"message\": \"Fora do prazo de submissão ou sistema indisponível.\"}");
+        boolean blockByStart = false;
+        boolean blockByEnd = false;
+
+        if (config.getStartDate() != null && now.isAfter(config.getStartDate())) {
+            blockByStart = true;
+        }
+
+        if (config.getStartDate() == null) {
+            blockByStart = true;
+        }
+
+        if (config.getEndDate() != null && now.isBefore(config.getEndDate())) {
+            blockByEnd = true;
+        }
+
+        if (config.getEndDate() == null) {
+            blockByEnd = true;
+        }
+
+        if (blockByStart && blockByEnd) {
+            response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"message\": \"O sistema está indisponível no momento. Por favor, tente novamente mais tarde.\"}");
             return false;
         }
 

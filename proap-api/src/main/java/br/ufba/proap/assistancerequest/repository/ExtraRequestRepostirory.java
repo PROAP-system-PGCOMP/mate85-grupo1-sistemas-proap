@@ -17,4 +17,10 @@ public interface ExtraRequestRepostirory extends JpaRepository<ExtraRequest, Lon
 
 	@Query(value = "SELECT COUNT(s) > 0 FROM proap_extra_request s WHERE s.user_id = :userId", nativeQuery = true)
 	Boolean userHasAnyExtraRequests(Long userId);
+
+    @Query("SELECT e FROM ExtraRequest e " +
+            "LEFT JOIN FETCH e.user u " +
+            "LEFT JOIN FETCH u.perfil " +
+            "ORDER BY e.createdAt DESC")
+    List<ExtraRequest> findAllWithUserAndPerfil();
 }

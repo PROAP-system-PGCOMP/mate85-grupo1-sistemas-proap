@@ -48,7 +48,7 @@ public class InterceptorService implements HandlerInterceptor {
         }
 
         if (blockByStart && blockByEnd) {
-            response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE); // Erro 503
+            response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
             response.setContentType("application/json;charset=UTF-8");
             response.getWriter().write("{\"message\": \"O sistema está indisponível no momento. Por favor, tente novamente mais tarde.\"}");
             return false;

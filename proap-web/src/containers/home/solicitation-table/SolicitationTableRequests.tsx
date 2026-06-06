@@ -7,7 +7,6 @@ import {
   MenuItem,
   Select,
   FormControl,
-  Chip,
   SelectChangeEvent,
   alpha,
   Tooltip,
@@ -16,24 +15,28 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Pagination from '@mui/material/Pagination';
 
-// Icons
 import ViewListIcon from '@mui/icons-material/ViewList';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
-import ClearIcon from '@mui/icons-material/Clear';
 
 import {
   AssistanceRequestPropToSort,
   getAssistanceRequests,
   removeAssistanceRequestById,
 } from '../../../services/assistanceRequestService';
+
+import {
+  getExtraAssistanceRequests,
+  deleteExtraAssistanceRequest,
+} from '../../../services/extraAssistanceRequestService';
+
 import { IRootState, useAppDispatch } from '../../../store';
 import { useAuth } from '../../../hooks';
 import usePrevious from '../../../helpers/usePrevious';
@@ -79,34 +82,41 @@ export default function SolicitationTableRequests() {
   const [currentPageAssistance, setCurrentPageAssistance] = useState(0);
 
   const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState(false);
-  const [solicitationToDelete, setSolicitationToDelete] = useState<number | null>(null);
+  const [solicitationToDelete, setSolicitationToDelete] = useState<{ id: number; tipo: string } | null>(null);
 
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
   const [detailsDialogData, setDetailsDialogData] = useState<SolicitationDetailsDialogProps>({
-      nomeSolicitante: '',
-      solicitanteDocente: false,
-      valorTotal: 0,
-      variacaoCambial: 0,
-      valorDiarias: 0,
-      nomeEvento: '',
-      tituloPublicacao: '',
-      isDolar: false,
-      qualisEvento: '',
-      cidade: '',
-      pais: '',
-      dataInicio: '',
-      dataFim: '',
-      situacao: 0,
-      observacoes: '',
-    });
+    nomeSolicitante: '',
+    solicitanteDocente: false,
+    valorTotal: 0,
+    variacaoCambial: 0,
+    valorDiarias: 0,
+    nomeEvento: '',
+    tituloPublicacao: '',
+    isDolar: false,
+    qualisEvento: '',
+    cidade: '',
+    pais: '',
+    dataInicio: '',
+    dataFim: '',
+    situacao: 0,
+    observacoes: '',
+  });
 
-  const { requests } = useSelector((state: IRootState) => state.assistanceRequestSlice);
+  const { requests: apoioRequests, extraRequests } = useSelector(
+    (state: IRootState) => state.assistanceRequestSlice
+  );
 
   const updateAssistanceRequestList = useCallback(
     (sortBy: AssistanceRequestPropToSort, ascending: boolean, size: number, page: number) => {
-      dispatch(getAssistanceRequests(sortBy, ascending, page, size)).then(
-        (requests) => setNumberPagesAssistance(Math.trunc(requests.payload.total / size) + 1)
-      );
+      dispatch(getAssistanceRequests(sortBy, ascending, page, size)).then((reqApoio: any) => {
+        const totalApoio = reqApoio?.payload?.total || 0;
+        
+        dispatch((getExtraAssistanceRequests as any)(sortBy, ascending, page, size)).then((reqExtra: any) => {
+          const totalExtra = reqExtra?.payload?.total || 0;
+          setNumberPagesAssistance(Math.trunc((totalApoio + totalExtra) / size) + 1);
+        });
+      });
     },
     [dispatch]
   );
@@ -138,20 +148,37 @@ export default function SolicitationTableRequests() {
   }, [numberPagesAssistance, prevNumberPagesAssistance, currentPageAssistance]);
 
   useEffect(() => {
-    updateAssistanceRequestList(
-      getSelectedProp(),
-      selectedPropToSortTable[getSelectedProp()] as boolean,
-      size,
-      currentPageAssistance
-    );
-  }, [currentPageAssistance, size, selectedPropToSortTable, updateAssistanceRequestList]);
+    updateAssistanceRequestListWithCurrentParameters();
+  }, [currentPageAssistance, size, selectedPropToSortTable]);
 
-  const filteredRequests = requests.list.filter((request) =>
-      (!searchQuery ||
-        request.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        request.tituloPublicacao?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        request.nomeEvento?.toLowerCase().includes(searchQuery.toLowerCase())) &&
-      (statusFilter === null || request.situacao === statusFilter)
+  const combinedRequests = useMemo(() => {
+    const assist = (apoioRequests?.list || []).map((r: any) => ({
+      ...r,
+      tipoSolicitacao: 'Apoio',
+    }));
+
+    const extra = (extraRequests?.list || []).map((r: any) => ({
+      ...r,
+      tipoSolicitacao: 'Extra',
+      // Normalizando os nomes das variáveis para o padrão da tabela
+      valorTotal: r.valorSolicitado || r.valorTotal,
+      tituloPublicacao: r.titulo || r.tituloPublicacao,
+      nomeEvento: r.itemSolicitado || r.nomeEvento,
+    }));
+
+    return [...assist, ...extra].sort((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dateB - dateA;
+    });
+  }, [apoioRequests, extraRequests]);
+
+  const filteredRequests = combinedRequests.filter((request) =>
+    (!searchQuery ||
+      request.user?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      request.tituloPublicacao?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      request.nomeEvento?.toLowerCase().includes(searchQuery.toLowerCase())) &&
+    (statusFilter === null || request.situacao === statusFilter)
   );
 
   const menuProps = {
@@ -160,22 +187,16 @@ export default function SolicitationTableRequests() {
         borderRadius: '4px',
         marginTop: '4px',
         boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-        '& .MuiList-root': {
-          padding: '4px', 
-        },
+        '& .MuiList-root': { padding: '4px' },
         '& .MuiMenuItem-root': {
-          borderRadius: '2px', 
-          minHeight: '48px',   
-          padding: '12px 16px', 
+          borderRadius: '2px',
+          minHeight: '48px',
+          padding: '12px 16px',
           transition: 'background-color 0.2s',
-          '&:hover': {
-            backgroundColor: 'rgba(0, 0, 0, 0.04)',
-          },
+          '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' },
           '&.Mui-selected': {
             backgroundColor: 'rgba(0, 0, 0, 0.08)',
-            '&:hover': {
-              backgroundColor: 'rgba(0, 0, 0, 0.12)',
-            },
+            '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.12)' },
           },
         },
       },
@@ -187,7 +208,7 @@ export default function SolicitationTableRequests() {
       <Box sx={{ mb: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Typography variant="h6" component="h2" fontWeight="bold" color="primary">
-            Solicitações de Apoio
+            Solicitações PROAP
           </Typography>
 
           <ToggleButtonGroup
@@ -201,14 +222,7 @@ export default function SolicitationTableRequests() {
           </ToggleButtonGroup>
         </Box>
 
-        <Box sx={{ 
-          display: 'flex', 
-          flexDirection: isMobile ? 'column' : 'row', 
-          gap: 2, 
-          alignItems: 'center', 
-          width: '100%',
-          mb: 0
-        }}>
+        <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 2, alignItems: 'center', width: '100%', mb: 0 }}>
           <FormControl sx={{ flexGrow: 1 }} size="small">
             <TextField
               margin="none"
@@ -225,12 +239,7 @@ export default function SolicitationTableRequests() {
                   </InputAdornment>
                 ),
               }}
-              sx={{ 
-                '& .MuiOutlinedInput-root': { 
-                  height: 47, 
-                  backgroundColor: 'white' 
-                } 
-              }}
+              sx={{ '& .MuiOutlinedInput-root': { height: 47, backgroundColor: 'white' } }}
             />
           </FormControl>
 
@@ -244,13 +253,13 @@ export default function SolicitationTableRequests() {
                 height: 47,
                 backgroundColor: getStatusAlphaColor(statusFilter),
                 '& .MuiSelect-select': {
-                height: '47px !important',
-                padding: '0 !important',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'start',
-                boxSizing: 'border-box',
-              },
+                  height: '47px !important',
+                  padding: '0 !important',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'start',
+                  boxSizing: 'border-box',
+                },
               }}
               renderValue={(selected) => {
                 if (String(selected) === '') {
@@ -262,35 +271,21 @@ export default function SolicitationTableRequests() {
                   );
                 }
                 return (
-                  <StatusChip 
-                    status={Number(selected)} 
-                    sx={{ 
-                      width: '100%', 
-                      height: '47px !important', 
-                      borderRadius: 0, 
+                  <StatusChip
+                    status={Number(selected)}
+                    sx={{
+                      width: '100%',
+                      height: '47px !important',
+                      borderRadius: 0,
                       border: 'none',
                       backgroundColor: 'transparent',
                       '& .MuiChip-label': { width: '100%', textAlign: 'center' }
-                    }} 
+                    }}
                   />
                 );
               }}
             >
-              {/* Opção de Limpar Filtro com ícone */}
-              <MenuItem 
-                value="" 
-                sx={{ 
-                  color: 'default', // Cor de destaque para ação de limpar
-                  py: 1.5,
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  gap: 1.5,
-                  fontWeight: 500,
-                  borderColor: 'divider',
-                  mb: 1 // Separa um pouco das opções de status
-                }}
-              >
+              <MenuItem value="" sx={{ color: 'default', py: 1.5, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1.5, fontWeight: 500, borderColor: 'divider', mb: 1 }}>
                 <FilterAltIcon fontSize="small" />
                 Limpar filtro
               </MenuItem>
@@ -315,11 +310,12 @@ export default function SolicitationTableRequests() {
           userCanViewAllRequests={userCanViewAllRequests}
           userCanReviewRequests={userCanReviewRequests}
           isCeapg={isCeapg}
-          onEdit={(id) => navigate(`/solicitation/edit/${id}`)}
-          onReview={(id) => navigate(`/solicitation/review/${id}`)}
-          onView={(id) => navigate(`/solicitation/view/${id}`)}
-          onDelete={(id) => { setSolicitationToDelete(id); setOpenDeleteConfirmation(true); }}
-          onClone={(id) => navigate(`/solicitation/create?cloneFrom=${id}`)}
+          // Redirecionamento Dinâmico (Tabela)
+          onEdit={(id, tipo) => navigate(tipo === 'Extra' ? `/extra-solicitation/edit/${id}` : `/solicitation/edit/${id}`)}
+          onReview={(id, tipo) => navigate(tipo === 'Extra' ? `/extra-solicitation/review/${id}` : `/solicitation/review/${id}`)}
+          onView={(id, tipo) => navigate(tipo === 'Extra' ? `/extra-solicitation/view/${id}` : `/solicitation/view/${id}`)}
+          onDelete={(id, tipo) => { setSolicitationToDelete({ id, tipo }); setOpenDeleteConfirmation(true); }}
+          onClone={(id, tipo) => navigate(tipo === 'Extra' ? `/extra-solicitation/create?cloneFrom=${id}` : `/solicitation/create?cloneFrom=${id}`)}
           onShowDetails={(props) => { setDetailsDialogData(props); setOpenDetailsDialog(true); }}
         />
       ) : (
@@ -330,11 +326,12 @@ export default function SolicitationTableRequests() {
           userCanViewAllRequests={userCanViewAllRequests}
           userCanReviewRequests={userCanReviewRequests}
           isCeapg={isCeapg}
-          onEdit={(id) => navigate(`/solicitation/edit/${id}`)}
-          onReview={(id) => navigate(`/solicitation/review/${id}`)}
-          onView={(id) => navigate(`/solicitation/view/${id}`)}
-          onDelete={(id) => { setSolicitationToDelete(id); setOpenDeleteConfirmation(true); }}
-          onClone={(id) => navigate(`/solicitation/create?cloneFrom=${id}`)}
+          // Redirecionamento Dinâmico (Cards)
+          onEdit={(id, tipo) => navigate(tipo === 'Extra' ? `/extra-solicitation/edit/${id}` : `/solicitation/edit/${id}`)}
+          onReview={(id, tipo) => navigate(tipo === 'Extra' ? `/extra-solicitation/review/${id}` : `/solicitation/review/${id}`)}
+          onView={(id, tipo) => navigate(tipo === 'Extra' ? `/extra-solicitation/view/${id}` : `/solicitation/view/${id}`)}
+          onDelete={(id, tipo) => { setSolicitationToDelete({ id, tipo }); setOpenDeleteConfirmation(true); }}
+          onClone={(id, tipo) => navigate(tipo === 'Extra' ? `/extra-solicitation/create?cloneFrom=${id}` : `/solicitation/create?cloneFrom=${id}`)}
           onShowDetails={(props) => { setDetailsDialogData(props); setOpenDetailsDialog(true); }}
         />
       )}
@@ -367,7 +364,7 @@ export default function SolicitationTableRequests() {
         />
 
         <Typography variant="body2" color="text.secondary">
-          Total: <strong>{requests.total}</strong> solicitações
+          Total: <strong>{(apoioRequests?.total || 0) + (extraRequests?.total || 0)}</strong> solicitações
         </Typography>
       </Box>
 
@@ -375,15 +372,22 @@ export default function SolicitationTableRequests() {
         open={openDeleteConfirmation}
         onClose={() => setOpenDeleteConfirmation(false)}
         onConfirm={() => {
-            if (solicitationToDelete) {
-                removeAssistanceRequestById(solicitationToDelete).then(() => {
-                    updateAssistanceRequestListWithCurrentParameters();
-                    toast.success('Solicitação removida');
-                }).catch(() => toast.error('Erro ao remover')).finally(() => setOpenDeleteConfirmation(false));
-            }
+          if (solicitationToDelete) {
+            const { id, tipo } = solicitationToDelete;
+            // Define a função de exclusão de acordo com o tipo
+            const removeFunction = tipo === 'Extra' ? deleteExtraAssistanceRequest : removeAssistanceRequestById;
+            
+            removeFunction(id)
+              .then(() => {
+                updateAssistanceRequestListWithCurrentParameters();
+                toast.success('Solicitação removida com sucesso');
+              })
+              .catch(() => toast.error('Erro ao remover'))
+              .finally(() => setOpenDeleteConfirmation(false));
+          }
         }}
         title="Remoção de solicitação"
-        message="Deseja realmente remover esta solicitação?"
+        message={`Deseja realmente remover esta solicitação de ${solicitationToDelete?.tipo === 'Extra' ? 'Demanda Extra' : 'Apoio'}?`}
       />
 
       <SolicitationDetailsDialog

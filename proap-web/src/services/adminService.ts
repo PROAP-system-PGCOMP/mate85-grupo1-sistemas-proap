@@ -26,13 +26,14 @@ export const getSystemConfiguration =
 export const updateSystemConfiguration = async (
   configuration: SystemConfiguration,
 ): Promise<SystemConfiguration> => {
-  const [configRes] = await Promise.all([
-    api.put('/admin/system-config', configuration),
-    api.put('/admin/system-config/period', {
-      startDate: configuration.startDate ? `${configuration.startDate}T00:00:00` : null,
-      endDate: configuration.endDate ? `${configuration.endDate}T23:59:59` : null,
-    })
-  ]);
+  const configRes = await api.put('/admin/system-config', configuration);
+
+  if (configuration.startDate && configuration.endDate) {
+    await api.put('/admin/system-config/period', {
+      startDate: `${configuration.startDate}T00:00:00`,
+      endDate: `${configuration.endDate}T23:59:59`,
+    });
+  }
 
   const updatedConfig = configRes.data;
 

@@ -19,7 +19,6 @@ import {
   Settings,
   Dashboard,
   FactCheck,
-  Groups,
   AdminPanelSettings,
 } from '@mui/icons-material';
 import { BudgetFormValues } from './BudgetFormSchema';
@@ -28,7 +27,6 @@ import Toast from '../../helpers/notification';
 import ApprovedRequests from './ApprovedRequestsContainer';
 import SectionHeader from '../../components/custom/SectionHeader';
 import BudgetOverview from './BudgetOverviewContainer';
-import CeapgReviewRequests from './ceapg/CeapgReviewRequests';
 import useHasPermission from '../../hooks/auth/useHasPermission';
 import SettingContainer from './settings/SettingsContainer';
 
@@ -70,9 +68,7 @@ const a11yProps = (index: number) => {
 const AdminDashboardContainer = () => {
   const DASHBOARD_INDEX = 0;
   const APPROVED_REQUESTS_INDEX = 1;
-  const CEAPG_REQUESTS_INDEX = 2;
-  const SETTINGS_INDEX = 3;
-  const isCeapg = useHasPermission('CEAPG_ROLE');
+  const SETTINGS_INDEX = 2;
   const isAdmin = useHasPermission('ADMIN_ROLE');
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -96,6 +92,7 @@ const AdminDashboardContainer = () => {
   useEffect(() => {
     budgetByYear.getBudget(selectedYear);
     solicitationRequests.getApprovedRequests(); 
+    ceapg.getCeapg();
   }, [selectedYear]);
 
   useEffect(() => {
@@ -114,10 +111,6 @@ const AdminDashboardContainer = () => {
 
   const doTabChange = (newValue: number) => {
     setTabValue(newValue);
-
-    if (newValue === CEAPG_REQUESTS_INDEX && ceapg.ceapgRequests.length === 0) {
-      ceapg.getCeapg();
-    }
 
     if (
       (newValue === APPROVED_REQUESTS_INDEX || newValue === DASHBOARD_INDEX) &&
@@ -183,13 +176,6 @@ const AdminDashboardContainer = () => {
     [solicitationRequests.getApprovedRequests],
   );
 
-  const handleCeapgFilterApply = useCallback(
-    (startDate?: string, endDate?: string) => {
-      ceapg.getCeapg(startDate, endDate);
-    },
-    [ceapg.getCeapg],
-  );
-
   const handleBudgetSubmit = async (values: BudgetFormValues) => {
     setLoading(true);
     try {
@@ -208,7 +194,20 @@ const AdminDashboardContainer = () => {
       historicalData.fetchHistoricalBudget();
     }
   };
-  console.log("DADOS DA API:", solicitationRequests.approvedRequests);
+
+  const totalCeapgCalculado = budgetByYear.budget?.totalBudget ?? 0;
+  
+  const ceapgList = Array.isArray(ceapg.ceapgRequests) ? ceapg.ceapgRequests : [];
+  
+  const usedCeapgCalculado = ceapgList
+    .filter((req: any) => !!req.avaliadorCeapg)
+    .reduce((acc: number, req: any) => acc + Number(req.custoFinalCeapg || req.valorAprovado || 0), 0);
+
+  const remainingCeapgCalculado = totalCeapgCalculado - usedCeapgCalculado;
+  const percentageCeapgCalculado = totalCeapgCalculado > 0 
+    ? Math.round((usedCeapgCalculado / totalCeapgCalculado) * 100) 
+    : 0;
+
   return (
     <Box sx={{ pb: 4 }}>
       <Box
@@ -259,6 +258,7 @@ const AdminDashboardContainer = () => {
               iconPosition={isMobile ? 'top' : 'start'}
               {...a11yProps(APPROVED_REQUESTS_INDEX)}
             />
+            
             {isAdmin && (
               <Tab
                 icon={<Settings />}
@@ -278,10 +278,19 @@ const AdminDashboardContainer = () => {
             />
             <BudgetOverview
               budgetLoading={budgetByYear.loading}
+              
+              // Valores originais (PROAP/Total)
               totalBudget={budgetByYear.budget?.totalBudget ?? 0}
               remainingBudget={budgetByYear.budget?.remainingBudget ?? 0}
               usedPercentage={budgetByYear.budget?.usedPercentage ?? 0}
               usedBudget={budgetByYear.budget?.usedBudget ?? 0}
+              
+              // Valores CEAPG Calculados
+              totalCeapgBudget={totalCeapgCalculado}
+              usedCeapgBudget={usedCeapgCalculado}
+              remainingCeapgBudget={remainingCeapgCalculado}
+              usedCeapgPercentage={percentageCeapgCalculado}
+              
               selectedYear={selectedYear}
               historicalData={historicalData.historicalBudget}
               availableYears={historicalData.availableYears}
@@ -309,20 +318,6 @@ const AdminDashboardContainer = () => {
               onStartDateChange={() => {}}
               onEndDateChange={() => {}}
               onFilter={handleApprovedRequestsFilterApply}
-            />
-          </TabPanel>
-
-          <TabPanel value={tabValue} index={CEAPG_REQUESTS_INDEX}>
-            <SectionHeader
-              icon={<Groups color="primary" />}
-              title="Avaliações CEAPG"
-            />
-            <CeapgReviewRequests
-              loading={ceapg.loading}
-              requests={ceapg.ceapgRequests}
-              onStartDateChange={() => {}}
-              onEndDateChange={() => {}}
-              onFilter={handleCeapgFilterApply}
             />
           </TabPanel>
 

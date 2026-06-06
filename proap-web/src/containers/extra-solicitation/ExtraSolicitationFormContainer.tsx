@@ -14,7 +14,7 @@ import {
 import { confirmationDataFormSchema } from '../solicitation/SolicitationFormSchema';
 
 interface ExtraSolicitationFormContainerProps {
-  initialValues: ExtraSolicitationFormValues;
+  initialValues: ExtraSolicitationFormValues & { id?: number | string };
   onSubmit: (values: FormikValues) => Promise<any>;
   labels?: object;
   title: string;
@@ -25,24 +25,33 @@ export default function ExtraSolicitationFormContainer(
 ) {
   const { title, initialValues, labels, onSubmit } = props;
 
+  const draftKey = initialValues.id 
+    ? `rascunho-edicao-extra-proap-${initialValues.id}` 
+    : 'rascunho-solicitacao-extra-proap';
+
   const formInitialValues = useMemo(() => {
-    const rascunhoSalvo = sessionStorage.getItem('rascunho-solicitacao-extra-proap');
+    const rascunhoSalvo = sessionStorage.getItem(draftKey);
     
     if (rascunhoSalvo) {
       try {
-        return JSON.parse(rascunhoSalvo);
+        const parsedRascunho = JSON.parse(rascunhoSalvo);
+        
+        return {
+          ...initialValues,
+          ...parsedRascunho
+        };
       } catch (error) {
         console.error("Erro ao ler o rascunho extra, restaurando padrão.", error);
-        sessionStorage.removeItem('rascunho-solicitacao-extra-proap');
+        sessionStorage.removeItem(draftKey);
       }
     }
     
     return initialValues;
-  }, []); 
+  }, [initialValues, draftKey]); 
 
   const handleFormSubmit = async (values: FormikValues) => {
     await onSubmit(values); 
-    sessionStorage.removeItem('rascunho-solicitacao-extra-proap'); 
+    sessionStorage.removeItem(draftKey); 
   };
 
   const extraSolicitationFormSteps: FormStep[] = useMemo(
@@ -77,7 +86,7 @@ export default function ExtraSolicitationFormContainer(
         steps={extraSolicitationFormSteps}
         validateOnChange={false}
         enableReinitialize={true}
-        autoSaveKey="rascunho-solicitacao-extra-proap"
+        autoSaveKey={draftKey} 
         labels={
           labels || {
             submit: 'Criar solicitação',

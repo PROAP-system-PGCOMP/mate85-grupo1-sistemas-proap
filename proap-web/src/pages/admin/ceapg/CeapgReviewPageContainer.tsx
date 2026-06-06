@@ -73,14 +73,14 @@ const CeapgReviewPageContainer = () => {
       <Box sx={{ 
         mb: 4, 
         display: 'flex', 
-        flexDirection: { xs: 'column', xl: 'row' }, 
+        flexDirection: { xs: 'column', xl: 'row' },
         justifyContent: 'space-between', 
         alignItems: { xs: 'flex-start', xl: 'center' },
         gap: 3
       }}>
         
         {/* TÍTULO */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <RateReview color="primary" sx={{ fontSize: 40 }} />
           <Typography variant="h4" fontWeight="bold" color="primary" sx={{ whiteSpace: 'nowrap' }}>
             Avaliações CEAPG
@@ -88,17 +88,10 @@ const CeapgReviewPageContainer = () => {
         </Box>
 
         {/* CARDS DE RESUMO */}
-        <Box sx={{ 
-          display: 'flex', 
-          gap: 2, 
-          flexDirection: { xs: 'column', lg: 'row' }, 
-          flexGrow: 1,
-          justifyContent: { xs: 'flex-start', xl: 'flex-end' },
-          width: { xs: '100%', xl: 'auto' }
-        }}>
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: { xs: 'flex-start', xl: 'flex-end' } }}>
           
           {/* CONSUMO PREVISTO (Azul Claro) */}
-          <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', bgcolor: 'info.50', minWidth: '180px', flex: 1 }}>
+          <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', bgcolor: 'info.50', minWidth: '200px', flex: 1 }}>
             <CardContent sx={{ display: 'flex', alignItems: 'center', p: 1.5, '&:last-child': { pb: 1.5 } }}>
               <Receipt sx={{ fontSize: 32, color: 'primary.main', mr: 1.5 }} />
               <Box>
@@ -111,7 +104,7 @@ const CeapgReviewPageContainer = () => {
           </Card>
 
           {/* SALDO PREVISTO (Azul Escuro / Primary) */}
-          <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', bgcolor: 'primary.50', minWidth: '180px', flex: 1 }}>
+          <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', bgcolor: 'primary.50', minWidth: '200px', flex: 1 }}>
             <CardContent sx={{ display: 'flex', alignItems: 'center', p: 1.5, '&:last-child': { pb: 1.5 } }}>
               <AccountBalanceWallet sx={{ fontSize: 32, color: 'primary.main', mr: 1.5 }} />
               <Box>
@@ -124,7 +117,7 @@ const CeapgReviewPageContainer = () => {
           </Card>
 
           {/* CONSUMO REAL (Verde Secundário) */}
-          <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', minWidth: '180px', flex: 1 }}>
+          <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', minWidth: '200px', flex: 1 }}>
             <CardContent sx={{ display: 'flex', alignItems: 'center', p: 1.5, '&:last-child': { pb: 1.5 } }}>
               <PriceCheck sx={{ fontSize: 32, color: 'success.main', mr: 1.5 }} />
               <Box>
@@ -137,7 +130,7 @@ const CeapgReviewPageContainer = () => {
           </Card>
 
           {/* SALDO REAL (Verde Padrão / Success) */}
-          <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', bgcolor: 'success.50', minWidth: '180px', flex: 1 }}>
+          <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', bgcolor: 'success.50', minWidth: '200px', flex: 1 }}>
             <CardContent sx={{ display: 'flex', alignItems: 'center', p: 1.5, '&:last-child': { pb: 1.5 } }}>
               <Savings sx={{ fontSize: 32, color: 'success.main', mr: 1.5 }} />
               <Box>

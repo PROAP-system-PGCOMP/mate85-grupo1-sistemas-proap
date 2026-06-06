@@ -6,11 +6,11 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TableSortLabel, // Importado da lógica original
+  TableSortLabel,
   Typography,
   Paper,
 } from '@mui/material';
-import { ExpandMore } from '@mui/icons-material'; // Ícone solicitado
+import { ExpandMore } from '@mui/icons-material';
 import { SolicitationTableRow } from './index';
 import { SolicitationDetailsDialogProps } from '../../request-dialog/SolicitationDetailsDialog';
 import { AssistanceRequestPropToSort } from '../../../../services/assistanceRequestService';
@@ -31,9 +31,7 @@ const TableCellHeader: React.FC<TableCellHeaderProps> = ({
   handleClickSortTable,
   align = 'left',
 }) => {
-  // Na sua lógica original, se a chave existe no Record, ela está sendo ordenada
   const isSorted = selectedPropToSortTable[sortBy] !== undefined;
-  // Se true = asc, se false = desc (baseado no seu span original)
   const orderDirection = selectedPropToSortTable[sortBy] ? 'asc' : 'desc';
 
   return (
@@ -54,7 +52,6 @@ const TableCellHeader: React.FC<TableCellHeaderProps> = ({
         sx={{
           flexDirection: align === 'center' ? 'row' : 'inherit',
           '& .MuiTableSortLabel-icon': {
-            // Garante que o ícone não desloque o texto se não estiver centralizado
             marginLeft: align === 'center' ? '4px' : 'inherit',
           }
         }}
@@ -74,11 +71,11 @@ interface SolicitationTableViewProps {
   userCanViewAllRequests: boolean;
   userCanReviewRequests: boolean;
   isCeapg: boolean;
-  onEdit: (id: number) => void;
-  onReview: (id: number) => void;
-  onView: (id: number) => void;
-  onDelete: (id: number) => void;
-  onClone: (id: number) => void;
+  onEdit: (id: number, tipo: string) => void;
+  onReview: (id: number, tipo: string) => void;
+  onView: (id: number, tipo: string) => void;
+  onDelete: (id: number, tipo: string) => void;
+  onClone: (id: number, tipo: string) => void;
   onShowDetails: (props: SolicitationDetailsDialogProps) => void;
 }
 
@@ -113,12 +110,20 @@ const SolicitationTableView: React.FC<SolicitationTableViewProps> = ({
       <Table aria-label="solicitations table">
         <TableHead>
           <TableRow>
+            <TableCell align="center" sx={{ fontWeight: 'bold', backgroundColor: 'grey.50' }}>
+              Tipo
+            </TableCell>
+
             <TableCellHeader
               text="Data de solicitação"
               sortBy="createdAt"
               selectedPropToSortTable={selectedPropToSortTable}
               handleClickSortTable={handleClickSortTable}
             />
+            <TableCell align="center" sx={{ fontWeight: 'bold', backgroundColor: 'grey.50' }}>
+              Vínculo
+            </TableCell>
+
             <TableCellHeader
               text="Solicitante"
               sortBy="user.name"
@@ -126,6 +131,7 @@ const SolicitationTableView: React.FC<SolicitationTableViewProps> = ({
               selectedPropToSortTable={selectedPropToSortTable}
               handleClickSortTable={handleClickSortTable}
             />
+            
             <TableCellHeader
               text="Status"
               sortBy="situacao"
@@ -170,18 +176,18 @@ const SolicitationTableView: React.FC<SolicitationTableViewProps> = ({
         <TableBody>
           {!filteredRequests.length ? (
             <TableRow>
-              <TableCell colSpan={8}>
+              <TableCell colSpan={10}>
                 <Typography align="center" color="text.secondary" sx={{ py: 4 }}>
                   {searchQuery
                     ? 'Nenhuma solicitação encontrada para a busca realizada.'
-                    : 'Nenhuma solicitação de auxílio encontrada.'}
+                    : 'Nenhuma solicitação encontrada.'}
                 </Typography>
               </TableCell>
             </TableRow>
           ) : (
             filteredRequests.map((solicitation) => (
               <SolicitationTableRow
-                key={solicitation.id}
+                key={`${solicitation.tipoSolicitacao}-${solicitation.id}`}
                 {...solicitation}
                 currentUserEmail={currentUserEmail}
                 userCanViewAllRequests={userCanViewAllRequests}

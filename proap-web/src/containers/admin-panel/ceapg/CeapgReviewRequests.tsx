@@ -226,15 +226,15 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
                     handleClickSortTable={handleSortClick}
                   />
                   <TableCellHeader
-                    text="Valor aprovado pelo revisor"
-                    sortBy="valorAprovado"
+                    text="Valor aprovado em reunião"
+                    sortBy="custoFinalCeapg"
                     align="center"
                     selectedPropToSortTable={activeSortRecord}
                     handleClickSortTable={handleSortClick}
                   />
                   <TableCellHeader
-                    text="Valor aprovado em reunião"
-                    sortBy="custoFinalCeapg"
+                    text="Valor aprovado pelo CEAPG"
+                    sortBy="valorAprovado"
                     align="center"
                     selectedPropToSortTable={activeSortRecord}
                     handleClickSortTable={handleSortClick}
@@ -281,14 +281,16 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
                       <TableCell>#{request.id}</TableCell>
 
                       <TableCell align="center" sx={{ fontWeight: 'normal' }}>
-                        {formatNumberToBRL(request.valorAprovado)}
-                      </TableCell>
-
-                      <TableCell align="center" sx={{ fontWeight: 'normal' }}>
                         {isCompleted
                           ? formatNumberToBRL(request.custoFinalCeapg || request.valorAprovado)
                           : '-'}
                       </TableCell>
+
+                      <TableCell align="center" sx={{ fontWeight: 'normal' }}>
+                        {formatNumberToBRL(request.valorAprovado)}
+                      </TableCell>
+
+                      
 
                       <TableCell align="center">
                         {isCompleted

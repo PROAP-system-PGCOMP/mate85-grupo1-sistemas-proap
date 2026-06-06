@@ -1,21 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Alert,
   Box,
-  Card,
-  CardContent,
   CircularProgress,
   Typography,
   Chip,
-  Tooltip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  TableSortLabel,
 } from '@mui/material';
+import { ExpandMore } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { AssistanceIdValueDTO } from '../../services/budgetService';
 import { formatNumberToBRL } from '../../helpers/formatter';
 import DateRangeFilter from '../../components/custom/DateRangeFilter';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { CalendarToday, CheckCircle, Person } from '@mui/icons-material';
 
 interface ApprovedRequestsProps {
   loading: boolean;
@@ -27,6 +32,72 @@ interface ApprovedRequestsProps {
   onEndDateChange: (date: string) => void;
   onFilter: (startDate?: string, endDate?: string) => void;
 }
+
+type Order = 'asc' | 'desc';
+
+function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
+  if (b[orderBy] === null || b[orderBy] === undefined) return -1;
+  if (a[orderBy] === null || a[orderBy] === undefined) return 1;
+  if (b[orderBy] < a[orderBy]) return -1;
+  if (b[orderBy] > a[orderBy]) return 1;
+  return 0;
+}
+
+function getComparator<Key extends keyof any>(
+  order: Order,
+  orderBy: Key,
+): (a: { [key in Key]: any }, b: { [key in Key]: any }) => number {
+  return order === 'desc'
+    ? (a, b) => descendingComparator(a, b, orderBy)
+    : (a, b) => -descendingComparator(a, b, orderBy);
+}
+
+interface TableCellHeaderProps {
+  text: string;
+  sortBy: keyof AssistanceIdValueDTO;
+  orderBy: keyof AssistanceIdValueDTO;
+  order: Order;
+  onRequestSort: (property: keyof AssistanceIdValueDTO) => void;
+  align?: 'left' | 'center' | 'right';
+}
+
+const TableCellHeader: React.FC<TableCellHeaderProps> = ({
+  text,
+  sortBy,
+  orderBy,
+  order,
+  onRequestSort,
+  align = 'left',
+}) => {
+  const isSorted = orderBy === sortBy;
+
+  return (
+    <TableCell
+      align={align}
+      sortDirection={isSorted ? order : false}
+      sx={{
+        fontWeight: 'bold',
+        backgroundColor: 'grey.50',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      <TableSortLabel
+        active={isSorted}
+        direction={isSorted ? order : 'asc'}
+        onClick={() => onRequestSort(sortBy)}
+        IconComponent={ExpandMore} // <--- A setinha que você queria!
+        sx={{
+          flexDirection: align === 'center' ? 'row' : 'inherit',
+          '& .MuiTableSortLabel-icon': {
+            marginLeft: align === 'center' ? '4px' : 'inherit',
+          },
+        }}
+      >
+        {text}
+      </TableSortLabel>
+    </TableCell>
+  );
+};
 
 const ApprovedRequests: React.FC<ApprovedRequestsProps> = ({
   loading,
@@ -42,6 +113,9 @@ const ApprovedRequests: React.FC<ApprovedRequestsProps> = ({
 
   const [localStartDate, setLocalStartDate] = useState(startDate);
   const [localEndDate, setLocalEndDate] = useState(endDate);
+
+  const [order, setOrder] = useState<Order>('desc');
+  const [orderBy, setOrderBy] = useState<keyof AssistanceIdValueDTO>('createdAt');
 
   useEffect(() => {
     setLocalStartDate(startDate);
@@ -69,10 +143,19 @@ const ApprovedRequests: React.FC<ApprovedRequestsProps> = ({
     try {
       return format(parseISO(dateString), 'dd/MM/yyyy', { locale: ptBR });
     } catch (e) {
-      console.error('Error formatting date:', e);
       return 'Data inválida';
     }
   };
+
+  const handleRequestSort = (property: keyof AssistanceIdValueDTO) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+
+  const sortedRequests = useMemo(() => {
+    return [...totalRequests].sort(getComparator(order, orderBy));
+  }, [totalRequests, order, orderBy]);
 
   return (
     <>
@@ -124,133 +207,90 @@ const ApprovedRequests: React.FC<ApprovedRequestsProps> = ({
             </Typography>
           </Box>
 
-          <Box sx={{ maxHeight: '600px', overflowY: 'auto', pr: 1 }}>
-            {totalRequests.map((request) => (
-              <Card
-                key={request.id}
-                sx={{
-                  mb: 1.5,
-                  transition: 'all 0.2s ease',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  boxShadow: 'none',
-                  '&:hover': {
-                    borderColor: 'primary.main',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                    cursor: 'pointer',
-                  },
-                }}
-                onClick={() => handleViewSolicitation(request.id)}
-              >
-                <CardContent sx={{ p: 2 }}>
-                  <Box
-                    sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+          <TableContainer 
+            component={Paper} 
+            sx={{ 
+              maxHeight: '600px', 
+              boxShadow: 'none', 
+              border: '1px solid', 
+              borderColor: 'divider' 
+            }}
+          >
+            <Table stickyHeader aria-label="tabela de solicitações aprovadas">
+              <TableHead>
+                <TableRow>
+                  <TableCellHeader
+                    text="ID"
+                    sortBy="id"
+                    orderBy={orderBy}
+                    order={order}
+                    onRequestSort={handleRequestSort}
+                  />
+                  <TableCellHeader
+                    text="Data de Criação"
+                    sortBy="createdAt"
+                    orderBy={orderBy}
+                    order={order}
+                    onRequestSort={handleRequestSort}
+                  />
+                  <TableCellHeader
+                    text="Data de Aprovação"
+                    sortBy="dataAvaliacaoProap"
+                    orderBy={orderBy}
+                    order={order}
+                    onRequestSort={handleRequestSort}
+                  />
+                  <TableCellHeader
+                    text="Avaliador"
+                    sortBy="avaliadorProap"
+                    orderBy={orderBy}
+                    order={order}
+                    onRequestSort={handleRequestSort}
+                  />
+                  
+                  {/* Status não é ordenável, então mantemos a TableCell nativa */}
+                  <TableCell sx={{ fontWeight: 'bold', backgroundColor: 'grey.50' }}>
+                    Status
+                  </TableCell>
+
+                  <TableCellHeader
+                    text="Valor"
+                    sortBy="value"
+                    orderBy={orderBy}
+                    order={order}
+                    onRequestSort={handleRequestSort}
+                    align="right"
+                  />
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {sortedRequests.map((request) => (
+                  <TableRow
+                    key={request.id}
+                    hover
+                    onClick={() => handleViewSolicitation(request.id)}
+                    sx={{ cursor: 'pointer' }}
                   >
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <Typography
-                        variant="subtitle1"
-                        fontWeight="medium"
-                        sx={{
-                          color: 'primary.main',
-                          textDecoration: 'none',
-                          '&:hover': {
-                            textDecoration: 'underline',
-                          },
-                        }}
-                      >
-                        Solicitação #{request.id}
-                      </Typography>
+                    <TableCell>#{request.id}</TableCell>
+                    <TableCell>{formatDate(request.createdAt)}</TableCell>
+                    <TableCell>{formatDate(request.dataAvaliacaoProap)}</TableCell>
+                    <TableCell>{request.avaliadorProap || '-'}</TableCell>
+                    <TableCell>
                       <Chip
-                        icon={<CheckCircle fontSize="small" />}
                         label="Aprovada"
                         color="success"
                         size="small"
                         sx={{ fontWeight: 'medium', color: 'white' }}
                       />
-                    </Box>
-
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        flexDirection: { xs: 'column', sm: 'row' },
-                        gap: 2,
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 1,
-                          flexBasis: { sm: '50%' },
-                        }}
-                      >
-                        <CalendarToday fontSize="small" color="action" />
-                        <Tooltip title="Data de criação" arrow>
-                          <Typography variant="body2" color="text.secondary">
-                            Criada em: {formatDate(request.createdAt)}
-                          </Typography>
-                        </Tooltip>
-                      </Box>
-
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 1,
-                          flexBasis: { sm: '50%' },
-                        }}
-                      >
-                        <CheckCircle fontSize="small" color="success" />
-                        <Tooltip title="Data de aprovação" arrow>
-                          <Typography variant="body2" color="text.secondary">
-                            Aprovada em:{' '}
-                            {formatDate(request.dataAvaliacaoProap)}
-                          </Typography>
-                        </Tooltip>
-                      </Box>
-                    </Box>
-
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                        flexBasis: { sm: '50%' },
-                      }}
-                    >
-                      <Person fontSize="small" color="action" />
-                      <Typography variant="body2" color="text.secondary">
-                        Aprovada por: {request.avaliadorProap}
-                      </Typography>
-                    </Box>
-
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                        mt: 0.5,
-                      }}
-                    >
-                      <Typography
-                        variant="body1"
-                        fontWeight="bold"
-                        color="primary"
-                      >
-                        {formatNumberToBRL(request.value)}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
+                    </TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold', color: 'black' }}>
+                      {formatNumberToBRL(request.value)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Box>
       )}
     </>

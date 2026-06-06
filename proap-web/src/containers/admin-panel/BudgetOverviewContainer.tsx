@@ -39,7 +39,6 @@ import { formatNumberToBRL } from '../../helpers/formatter';
 import StatCard from '../../components/custom/StatCard';
 import { BudgetSummaryDTO } from '../../services/budgetService';
 
-
 interface TableCellHeaderProps {
   text: string;
   sortBy: string;
@@ -113,7 +112,6 @@ function CustomTabPanel(props: TabPanelProps) {
   );
 }
 
-
 export interface SolicitacaoDTO {
   id?: string;
   nomeDocente: string;
@@ -133,6 +131,12 @@ interface BudgetOverviewProps {
   yearsLoading: boolean;
   onYearChange: (event: React.ChangeEvent<{ value: unknown }>) => void;
   solicitacoes?: SolicitacaoDTO[];
+  
+  // Novas propriedades adicionadas para os valores do CEAPG
+  totalCeapgBudget?: number;
+  usedCeapgBudget?: number;
+  remainingCeapgBudget?: number;
+  usedCeapgPercentage?: number;
 }
 
 interface DocenteAcumulado {
@@ -159,6 +163,12 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
   yearsLoading,
   onYearChange,
   solicitacoes = [],
+  
+  // Valores padrão para o CEAPG caso ainda não sejam passados pelo componente pai
+  totalCeapgBudget = 0,
+  usedCeapgBudget = 0,
+  remainingCeapgBudget = 0,
+  usedCeapgPercentage = 0,
 }) => {
   const theme = useTheme();
 
@@ -235,6 +245,7 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
     { name: 'Restante', value: Number(remainingBudget), color: theme.palette.success.main },
   ] : [];
 
+  
   return (
     <>
       <FormControl fullWidth sx={{ mb: 3 }}>
@@ -253,7 +264,7 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
 
       {budgetLoading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}><CircularProgress /></Box>
-      ) : Number(totalBudget) === 0 ? (
+      ) : Number(totalBudget) === 0 && Number(totalCeapgBudget) === 0 ? (
         <Alert severity="info" sx={{ mb: 2 }}>Nenhum orçamento definido para o ano {selectedYear}.</Alert>
       ) : (
         <Box>
@@ -272,8 +283,14 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
           </Box>
 
           <CustomTabPanel value={activeTab} index={0}>
-            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3, mb: 4, alignItems: 'stretch' }}>
-              <Box sx={{ flex: '7 1 0%', display: 'flex', flexDirection: 'column' }}>
+            
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3, mb: 4 }}>
+              
+              {/* Coluna 1: PROAP/Total */}
+              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <Typography variant="subtitle1" fontWeight="bold" color="text.secondary" sx={{ mb: 1, pl: 1 }}>
+                  Orçamento PROAP
+                </Typography>
                 <Stack spacing={2}>
                   <StatCard title="Orçamento Total" value={formatNumberToBRL(Number(totalBudget))} icon={<Square />} color="primary.main" />
                   <StatCard title="Utilizado" value={formatNumberToBRL(Number(usedBudget))} secondaryText={`${usedPercentage}% do orçamento total`} icon={<Square />} color="warning.main" />
@@ -281,26 +298,40 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
                 </Stack>
               </Box>
 
-              <Box sx={{ flex: '5 1 0%', display: 'flex' }}>
-                <Paper elevation={0} sx={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 3, borderRadius: 2, border: `1px solid ${theme.palette.divider}` }}>
-                  <Box sx={{ position: 'relative', width: '100%', height: '100%', maxHeight: '210px' }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie data={pieChartData} cx="50%" cy="50%" innerRadius={75} outerRadius={100} paddingAngle={5} dataKey="value" startAngle={90} endAngle={-270} nameKey="name">
-                          {pieChartData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
-                        </Pie>
-                        <RechartTooltip formatter={(value: number) => [formatNumberToBRL(value), 'Valor']} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <Box sx={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                      <Typography variant="caption" color="text.secondary">Total</Typography>
-                      <Typography variant="h6" color="text.primary" fontWeight="bold" sx={{ wordBreak: 'break-word', textAlign: 'center' }}>{formatNumberToBRL(Number(totalBudget))}</Typography>
-                    </Box>
-                  </Box>
-                </Paper>
+              {/* Coluna 2: Valores CEAPG*/}
+              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <Typography variant="subtitle1" fontWeight="bold" color="text.secondary" sx={{ mb: 1, pl: 1 }}>
+                  Orçamento CEAPG
+                </Typography>
+                <Stack spacing={2}>
+                  <StatCard title="Orçamento Total CEAPG" value={formatNumberToBRL(Number(totalCeapgBudget))} icon={<Square />} color="primary.main" />
+                  <StatCard title="Utilizado CEAPG" value={formatNumberToBRL(Number(usedCeapgBudget))} secondaryText={`${usedCeapgPercentage}% do orçamento CEAPG`} icon={<Square />} color="warning.main" />
+                  <StatCard title="Restante CEAPG" value={formatNumberToBRL(Number(remainingCeapgBudget))} secondaryText={`${100 - usedCeapgPercentage}% do orçamento CEAPG restante`} icon={<Square />} color="success.main" />
+                </Stack>
               </Box>
             </Box>
 
+            {/*GRÁFICO DE PIZZA*/}
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 5 }}>
+              <Paper elevation={0} sx={{ width: '100%', maxWidth: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 3, borderRadius: 2, border: `1px solid ${theme.palette.divider}` }}>
+                <Box sx={{ position: 'relative', width: '100%', height: '100%', minHeight: '260px' }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={pieChartData} cx="50%" cy="50%" innerRadius={80} outerRadius={110} paddingAngle={5} dataKey="value" startAngle={90} endAngle={-270} nameKey="name">
+                        {pieChartData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
+                      </Pie>
+                      <RechartTooltip formatter={(value: number) => [formatNumberToBRL(value), 'Valor']} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <Box sx={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                    <Typography variant="caption" color="text.secondary">Total PROAP</Typography>
+                    <Typography variant="h6" color="text.primary" fontWeight="bold" sx={{ wordBreak: 'break-word', textAlign: 'center' }}>{formatNumberToBRL(Number(totalBudget))}</Typography>
+                  </Box>
+                </Box>
+              </Paper>
+            </Box>
+
+            {/* --- GRÁFICO DE BARRAS DE HISTÓRICO --- */}
             {chartData.length > 0 && (
               <Box sx={{ mt: 5 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>

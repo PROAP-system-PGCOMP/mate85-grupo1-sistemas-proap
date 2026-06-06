@@ -27,6 +27,7 @@ services:
       - SPRING_MAIL_PASSWORD=${MAIL_PASSWORD}
       - MAIL_FROM=${MAIL_FROM}
       - MAIL_FROM_ALIAS=${MAIL_FROM_ALIAS:-Sistema PROAP}
+      - MAIL_TEMPLATE_URL_CREATEACCOUNT=http://localhost:3000/criar-conta
       - RECOVER_PASSWORD_URL=http://localhost:5173/recover-password
     ports:
       - "8080:8080"

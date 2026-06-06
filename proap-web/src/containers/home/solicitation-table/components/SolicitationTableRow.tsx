@@ -9,6 +9,7 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
+  Chip, // <-- Adicionado para a tag visual
 } from '@mui/material';
 import { CheckCircle, Visibility, MoreVert } from '@mui/icons-material';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
@@ -46,6 +47,8 @@ interface SolicitationRowData {
   dataInicio?: string;
   dataFim?: string;
   observacao?: string;
+  // --- Novo campo adicionado ---
+  tipoSolicitacao?: 'Apoio' | 'Extra';
 }
 
 interface SolicitationTableRowProps extends SolicitationRowData {
@@ -53,27 +56,24 @@ interface SolicitationTableRowProps extends SolicitationRowData {
   userCanViewAllRequests: boolean;
   userCanReviewRequests: boolean;
   isCeapg: boolean;
-  onEdit: (id: number) => void;
-  onReview: (id: number) => void;
-  onView: (id: number) => void;
-  onDelete: (id: number) => void;
-  onClone: (id: number) => void;
+  // --- Atualizamos as funções para receberem o tipo também ---
+  onEdit: (id: number, tipo: string) => void;
+  onReview: (id: number, tipo: string) => void;
+  onView: (id: number, tipo: string) => void;
+  onDelete: (id: number, tipo: string) => void;
+  onClone: (id: number, tipo: string) => void;
   onShowDetails: (props: SolicitationDetailsDialogProps) => void;
 }
 
 const safelyFormatDate = (dateString: string | null) => {
   if (!dateString) return '-';
   
-  // Se a data já vier formatada do backend (ex: "05/06/2026"), não faz nada para não dar erro no parseISO
-  // Nota: Isso assume que se vier com barra, não precisamos adicionar a hora,
-  // ou a hora já está embutida de outra forma que a API normal trata.
   if (dateString.includes('/')) return dateString;
 
   try {
-    // Transforma o ISO gigante em "dd/MM/yyyy HH:mm" (ex: 05/06/2026 15:30)
     return format(parseISO(dateString), 'dd/MM/yyyy HH:mm', { locale: ptBR });
   } catch (e) {
-    return dateString; // Em caso de falha, retorna o original (provavelmente o ISO feio, mas não quebra)
+    return dateString;
   }
 };
 
@@ -101,6 +101,7 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
   dataInicio = '',
   dataFim = '',
   observacao = '',
+  tipoSolicitacao = 'Apoio', // <-- Valor padrão
   currentUserEmail,
   userCanViewAllRequests,
   userCanReviewRequests,
@@ -126,35 +127,35 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
     setAnchorEl(null);
   };
 
-  // Handle row click to navigate to view page
+  // --- Agora passamos o tipoSolicitacao para os callbacks ---
   const handleRowClick = () => {
-    if (id !== undefined) onView(id);
+    if (id !== undefined) onView(id, tipoSolicitacao);
   };
 
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (id !== undefined) {
-      onEdit(id);
+      onEdit(id, tipoSolicitacao);
       handleCloseMenu();
     }
   };
 
   const handleReview = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (id !== undefined) onReview(id);
+    if (id !== undefined) onReview(id, tipoSolicitacao);
   };
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (id !== undefined) {
-      onDelete(id);
+      onDelete(id, tipoSolicitacao);
       handleCloseMenu();
     }
   };
 
   const handleClone = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (id !== undefined) onClone(id);
+    if (id !== undefined) onClone(id, tipoSolicitacao);
   };
 
   const handleShowDetailsClick = (e: React.MouseEvent) => {
@@ -188,7 +189,23 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
         },
       }}
     >
+      {/* --- Nova Coluna do Tipo --- */}
+      <TableCell align="center">
+        {tipoSolicitacao === 'Extra' ? (
+          <Chip label="Demanda Extra" size="small" variant="outlined" sx={{ color: '#d81b60', borderColor: '#d81b60' }} />
+        ) : (
+          <Chip label="Publicação" color="primary" size="small" variant="outlined" />
+        )}
+      </TableCell>
+
       <TableCell align="left">{safelyFormatDate(createdAt)}</TableCell>
+      <TableCell align="center">
+        {solicitanteDocente ? (
+          <Chip label="Docente" size="small" sx={{ bgcolor: '#e1f5fe', color: '#0288d1', fontWeight: 500 }} />
+        ) : (
+          <Chip label="Discente" size="small" sx={{ bgcolor: '#efebe9', color: '#5d4037', fontWeight: 500 }} />
+        )}
+      </TableCell>
       <TableCell align="left">{user.name}</TableCell>
       <TableCell align="center">
         <StatusChip status={situacao} />

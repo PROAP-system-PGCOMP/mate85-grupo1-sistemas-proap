@@ -10,11 +10,11 @@ interface SolicitationGridViewProps {
   userCanViewAllRequests: boolean;
   userCanReviewRequests: boolean;
   isCeapg: boolean;
-  onEdit: (id: number) => void;
-  onReview: (id: number) => void;
-  onView: (id: number) => void;
-  onDelete: (id: number) => void;
-  onClone: (id: number) => void;
+  onEdit: (id: number, tipo: string) => void;
+  onReview: (id: number, tipo: string) => void;
+  onView: (id: number, tipo: string) => void;
+  onDelete: (id: number, tipo: string) => void;
+  onClone: (id: number, tipo: string) => void;
   onShowDetails: (props: SolicitationDetailsDialogProps) => void;
 }
 
@@ -39,13 +39,13 @@ const SolicitationGridView: React.FC<SolicitationGridViewProps> = ({
           <Typography color="text.secondary">
             {searchQuery
               ? 'Nenhuma solicitação encontrada para a busca realizada.'
-              : 'Nenhuma solicitação de auxílio encontrada.'}
+              : 'Nenhuma solicitação encontrada.'}
           </Typography>
         </Box>
       ) : (
         <Grid container spacing={2}>
           {filteredRequests.map((solicitation) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={solicitation.id}>
+            <Grid item xs={12} sm={6} md={4} lg={3} key={`${solicitation.tipoSolicitacao}-${solicitation.id}`}>
               <SolicitationCard
                 solicitation={solicitation}
                 currentUserEmail={currentUserEmail}

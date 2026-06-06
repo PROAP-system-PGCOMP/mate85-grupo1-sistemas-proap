@@ -6,25 +6,31 @@ import {
   Box,
   Divider,
   IconButton,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
   alpha,
   Tooltip,
+  Chip, 
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { formatNumberToBRL } from '../../../../helpers/formatter';
 import { SolicitationDetailsDialogProps } from '../../request-dialog/SolicitationDetailsDialog';
 import { StatusChip } from './index';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
 
+import { format, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
+const safelyFormatDate = (dateString: string | null) => {
+  if (!dateString) return '-';
+  if (dateString.includes('/')) return dateString;
+  try {
+    return format(parseISO(dateString), 'dd/MM/yyyy HH:mm', { locale: ptBR });
+  } catch (e) {
+    return dateString;
+  }
+};
 
 interface SolicitationCardProps {
   solicitation: any;
@@ -32,11 +38,11 @@ interface SolicitationCardProps {
   userCanViewAllRequests: boolean;
   userCanReviewRequests: boolean;
   isCeapg: boolean;
-  onEdit: (id: number) => void;
-  onReview: (id: number) => void;
-  onView: (id: number) => void;
-  onDelete: (id: number) => void;
-  onClone: (id: number) => void;
+  onEdit: (id: number, tipo: string) => void;
+  onReview: (id: number, tipo: string) => void;
+  onView: (id: number, tipo: string) => void;
+  onDelete: (id: number, tipo: string) => void;
+  onClone: (id: number, tipo: string) => void;
   onShowDetails: (props: SolicitationDetailsDialogProps) => void;
 }
 
@@ -73,54 +79,47 @@ const SolicitationCard: React.FC<SolicitationCardProps> = ({
     dataInicio,
     dataFim,
     observacao,
+    tipoSolicitacao = 'Apoio', 
   } = solicitation;
 
-  // Menu state
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-
-  const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation(); // Prevent card click when menu button is clicked
-    setAnchorEl(event.currentTarget);
-  };
 
   const handleCloseMenu = () => {
     setAnchorEl(null);
   };
 
-  // Handle card click to navigate to view page
   const handleCardClick = () => {
-    if (id !== undefined) onView(id);
+    if (id !== undefined) onView(id, tipoSolicitacao);
   };
 
   const handleEdit = () => {
     if (id !== undefined) {
-      onEdit(id);
+      onEdit(id, tipoSolicitacao);
       handleCloseMenu();
     }
   };
 
   const handleReview = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click
-    if (id !== undefined) onReview(id);
+    e.stopPropagation();
+    if (id !== undefined) onReview(id, tipoSolicitacao);
   };
 
   const handleClone = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (id !== undefined) onClone(id);
+    if (id !== undefined) onClone(id, tipoSolicitacao);
   };
 
   const handleDelete = () => {
     if (id !== undefined) {
-      onDelete(id);
+      onDelete(id, tipoSolicitacao);
       handleCloseMenu();
     }
   };
 
   const handleShowDetails = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click
+    e.stopPropagation();
     onShowDetails({
-      nomeSolicitante: user.name,
+      nomeSolicitante: user?.name,
       solicitanteDocente,
       valorTotal,
       valorDiarias: valorDiaria,
@@ -154,31 +153,35 @@ const SolicitationCard: React.FC<SolicitationCardProps> = ({
       onClick={handleCardClick}
     >
       <CardContent sx={{ flexGrow: 1, p: 2 }}>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="flex-start"
-          mb={1}
-        >
-          <Box>
-            <Typography
-              variant="subtitle1"
-              fontWeight="medium"
-              component="div"
-              sx={{ maxWidth: '18ch' }}
-              gutterBottom
-            >
-              {user.name}
-            </Typography>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              component="div"
-            >
-              Solicitado em: {createdAt}
-            </Typography>
-          </Box>
+        
+        {/* --- Topo do Card com as Tags --- */}
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
+          {tipoSolicitacao === 'Extra' ? (
+            <Chip label="Demanda Extra" size="small" variant="outlined" sx={{ color: '#d81b60', borderColor: '#d81b60', height: 24 }} />
+          ) : (
+            <Chip label="Apoio" color="primary" size="small" variant="outlined" sx={{ height: 24 }} />
+          )}
           <StatusChip status={situacao} />
+        </Box>
+
+        <Box mb={1}>
+          <Typography
+            variant="subtitle1"
+            fontWeight="medium"
+            component="div"
+            sx={{
+               overflow: 'hidden',
+               textOverflow: 'ellipsis',
+               display: '-webkit-box',
+               WebkitLineClamp: 2,
+               WebkitBoxOrient: 'vertical',
+            }}
+          >
+            {user?.name}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" component="div">
+            Solicitado em: {safelyFormatDate(createdAt)}
+          </Typography>
         </Box>
 
         <Divider sx={{ my: 1.5 }} />
@@ -206,7 +209,7 @@ const SolicitationCard: React.FC<SolicitationCardProps> = ({
               Data de avaliação
             </Typography>
             <Typography variant="body1" align="right">
-              {dataAvaliacaoProap === null ? '-' : dataAvaliacaoProap}
+              {safelyFormatDate(dataAvaliacaoProap)}
             </Typography>
           </Box>
         </Box>
@@ -219,17 +222,12 @@ const SolicitationCard: React.FC<SolicitationCardProps> = ({
           p: 1,
           backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.05),
         }}
-        onClick={(e) => e.stopPropagation()} // Prevent card click when clicking action buttons
+        onClick={(e) => e.stopPropagation()}
       >
         <Box sx={{ display: 'flex', gap: 1 }}>
-          {/* Primary Actions - Always visible */}
           {userCanViewAllRequests && (
             <Tooltip title="Ver resumo da Solicitação">
-              <IconButton
-                size="small"
-                color="default"
-                onClick={handleShowDetails}
-              >
+              <IconButton size="small" color="default" onClick={handleShowDetails}>
                 <VisibilityIcon fontSize="small" />
               </IconButton>
             </Tooltip>
@@ -254,12 +252,7 @@ const SolicitationCard: React.FC<SolicitationCardProps> = ({
               <IconButton
                 size="small"
                 onClick={handleEdit}
-                disabled={
-                  !(
-                    (situacao == 0 && currentUserEmail === user.email) ||
-                    userCanReviewRequests
-                  )
-                }
+                disabled={!((situacao === 0 && currentUserEmail === user?.email) || userCanReviewRequests)}
               >
                 <ModeEditIcon fontSize="small" />
               </IconButton>
@@ -271,12 +264,7 @@ const SolicitationCard: React.FC<SolicitationCardProps> = ({
               <IconButton
                 size="small"
                 onClick={handleDelete}
-                disabled={
-                  !(
-                    (situacao == 0 && currentUserEmail === user.email) ||
-                    userCanReviewRequests
-                  )
-                }
+                disabled={!((situacao === 0 && currentUserEmail === user?.email) || userCanReviewRequests)}
               >
                 <DeleteIcon fontSize="small" />
               </IconButton>

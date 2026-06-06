@@ -52,8 +52,10 @@ public class ExtraRequest {
 	@Column(nullable = true)
 	private String valorSolicitadoAgenciaFormento;
 
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm", timezone = "America/Sao_Paulo")
 	private LocalDateTime createdAt;
 
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm", timezone = "America/Sao_Paulo")
 	private LocalDateTime updatedAt;
 
 	// 0 - Em revisao, 1 - Aceita, 2 - Nao Aceita

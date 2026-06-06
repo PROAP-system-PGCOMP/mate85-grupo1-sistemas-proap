@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Component
 public class InterceptorService implements HandlerInterceptor {
@@ -18,14 +19,20 @@ public class InterceptorService implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
-        DataConfig config = interceptorRepository.findById(1L)
-                .orElseThrow(() -> new RuntimeException("Configuração de Interceptação não encontrada"));
+        Optional<DataConfig> configAux = interceptorRepository.findById(1L);
+
+        if (configAux.isEmpty()) {
+            return true;
+        }
+
+        DataConfig config = configAux.get();
+
 
         LocalDateTime now = LocalDateTime.now();
         if (now.isBefore(config.getStartDate()) || now.isAfter(config.getEndDate())) {
             response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write("O sistema está indisponível no momento. Por favor, tente novamente mais tarde.");
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"message\": \"O sistema está indisponível no momento. Por favor, tente novamente mais tarde.\"}");
             return false;
         }
 

@@ -26,11 +26,29 @@ public class InterceptorService implements HandlerInterceptor {
         }
 
         DataConfig config = configAux.get();
-
-
         LocalDateTime now = LocalDateTime.now();
-        if (now.isBefore(config.getStartDate()) || now.isAfter(config.getEndDate())) {
-            response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+
+        boolean blockByStart = false;
+        boolean blockByEnd = false;
+
+        if (config.getStartDate() != null && now.isAfter(config.getStartDate())) {
+            blockByStart = true;
+        }
+
+        if (config.getStartDate() == null) {
+            blockByStart = true;
+        }
+
+        if (config.getEndDate() != null && now.isBefore(config.getEndDate())) {
+            blockByEnd = true;
+        }
+
+        if (config.getEndDate() == null) {
+            blockByEnd = true;
+        }
+
+        if (blockByStart && blockByEnd) {
+            response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE); // Erro 503
             response.setContentType("application/json;charset=UTF-8");
             response.getWriter().write("{\"message\": \"O sistema está indisponível no momento. Por favor, tente novamente mais tarde.\"}");
             return false;

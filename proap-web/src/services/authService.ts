@@ -13,6 +13,11 @@ export const registerUser =
     });
   };
 
+export const sendInviteByEmail = async (email: string) => {
+  const response = await api.post('/user/send-email-create-account', { email }); 
+  return response.data;
+};
+
 export const signIn =
   (values: LoginFormValues) => async (dispatch: AppDispatch) => {
     return await api

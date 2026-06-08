@@ -25,7 +25,8 @@ import ViewListIcon from '@mui/icons-material/ViewList';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
-import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import LayersIcon from '@mui/icons-material/Layers'; // <-- Ícone para o Tipo
+
 import {
   AssistanceRequestPropToSort,
   getAssistanceRequests,
@@ -67,8 +68,8 @@ export default function SolicitationTableRequests() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<number | null>(null);
   
-  // --- ADIÇÃO: Estado do filtro de ano, iniciando com o ano vigente ---
-  const [yearFilter, setYearFilter] = useState<number | ''>(new Date().getFullYear());
+  // --- ADIÇÃO: Estado do filtro de Tipo de Solicitação ---
+  const [typeFilter, setTypeFilter] = useState<string>('');
 
   const statusOptions = [
     { value: 0, text: 'Pendente' },
@@ -175,45 +176,15 @@ export default function SolicitationTableRequests() {
     });
   }, [apoioRequests, extraRequests]);
 
-const getYearFromDate = (dateString?: string) => {
-    if (!dateString) return new Date().getFullYear();
-    
-    // Formato BR (ex: 06/06/2026 04:05)
-    if (dateString.includes('/')) {
-      const parts = dateString.split('/');
-      if (parts.length >= 3) {
-        return parseInt(parts[2].substring(0, 4), 10);
-      }
-    }
-    
-    // Formato ISO (ex: 2026-06-06T04:05:00)
-    if (dateString.includes('-')) {
-      return parseInt(dateString.substring(0, 4), 10);
-    }
-    
-    return new Date().getFullYear();
-  };
-
-  // --- ADIÇÃO: Mapeia os anos únicos existentes na lista combinada ---
-  const availableYears = useMemo(() => {
-    const years = combinedRequests.map(req => getYearFromDate(req.createdAt));
-    
-    // Garante que o ano atual sempre esteja nas opções (evita o select iniciar vazio)
-    years.push(new Date().getFullYear());
-    
-    return Array.from(new Set(years)).sort((a, b) => b - a); // Ordena do mais recente para o mais antigo
-  }, [combinedRequests]);
-
-  // --- ADIÇÃO: Filtro atualizado considerando o ano ---
+  // --- ADIÇÃO: Filtro atualizado para considerar o Tipo de Solicitação ---
   const filteredRequests = combinedRequests.filter((request) => {
-    const reqYear = getYearFromDate(request.createdAt);
     return (
       (!searchQuery ||
         request.user?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         request.tituloPublicacao?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         request.nomeEvento?.toLowerCase().includes(searchQuery.toLowerCase())) &&
       (statusFilter === null || request.situacao === statusFilter) &&
-      (yearFilter === '' || reqYear === yearFilter)
+      (typeFilter === '' || request.tipoSolicitacao === typeFilter)
     );
   });
 
@@ -279,28 +250,28 @@ const getYearFromDate = (dateString?: string) => {
             />
           </FormControl>
 
-          {/* --- ADIÇÃO: Select dinâmico para o Ano --- */}
-          <FormControl sx={{ minWidth: isMobile ? '100%' : '140px' }} size="small">
+          {/* --- ADIÇÃO: Select para o Tipo de Solicitação --- */}
+          <FormControl sx={{ minWidth: isMobile ? '100%' : '170px' }} size="small">
             <Select
               displayEmpty
-              value={yearFilter}
-              onChange={(e) => setYearFilter(e.target.value as number | '')}
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
               MenuProps={menuProps}
               sx={{ height: 47, backgroundColor: 'white' }}
             >
-              {/* ITEM ATUALIZADO: Ampulheta + Texto Cinza */}
               <MenuItem value="" sx={{ color: 'gray' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, color: 'text.secondary' }}>
-                  <HourglassEmptyIcon fontSize="small" />
-                  Todos os anos
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, color: 'text.secondary' }}>
+                  <LayersIcon fontSize="small" />
+                  Todos os tipos
                 </Box>
               </MenuItem>
               
-              {availableYears.map(year => (
-                <MenuItem key={year} value={year} sx={{ display: 'flex', justifyContent: 'center', fontWeight: 500 }}>
-                  {year}
-                </MenuItem>
-              ))}
+              <MenuItem value="Apoio" sx={{ display: 'flex', justifyContent: 'center', fontWeight: 500 }}>
+                Publicação
+              </MenuItem>
+              <MenuItem value="Extra" sx={{ display: 'flex', justifyContent: 'center', fontWeight: 500 }}>
+                Demanda Extra
+              </MenuItem>
             </Select>
           </FormControl>
 
@@ -423,7 +394,7 @@ const getYearFromDate = (dateString?: string) => {
         />
 
         <Typography variant="body2" color="text.secondary">
-          Total: <strong>{(apoioRequests?.total || 0) + (extraRequests?.total || 0)}</strong> solicitações
+          Total: <strong>{filteredRequests.length}</strong> solicitações visíveis
         </Typography>
       </Box>
 

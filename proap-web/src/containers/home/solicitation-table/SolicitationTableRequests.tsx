@@ -25,7 +25,7 @@ import ViewListIcon from '@mui/icons-material/ViewList';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
-import LayersIcon from '@mui/icons-material/Layers'; // <-- Ícone para o Tipo
+import LayersIcon from '@mui/icons-material/Layers'; 
 
 import {
   AssistanceRequestPropToSort,
@@ -68,7 +68,6 @@ export default function SolicitationTableRequests() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<number | null>(null);
   
-  // --- ADIÇÃO: Estado do filtro de Tipo de Solicitação ---
   const [typeFilter, setTypeFilter] = useState<string>('');
 
   const statusOptions = [
@@ -176,7 +175,6 @@ export default function SolicitationTableRequests() {
     });
   }, [apoioRequests, extraRequests]);
 
-  // --- ADIÇÃO: Filtro atualizado para considerar o Tipo de Solicitação ---
   const filteredRequests = combinedRequests.filter((request) => {
     return (
       (!searchQuery ||

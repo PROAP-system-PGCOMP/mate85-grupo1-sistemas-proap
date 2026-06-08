@@ -40,7 +40,7 @@ export default function AtaTemplateDialog({ open, onClose, solicitationData }: A
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        Template de Ata CEAPG
+        Parecer da solicitação
         <IconButton onClick={onClose} size="small">
           <Close />
         </IconButton>

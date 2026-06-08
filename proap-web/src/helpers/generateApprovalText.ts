@@ -4,10 +4,6 @@ export const generateApprovalText = (req: any): string => {
   const formatCurrency = (val: number = 0) =>
     `R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-  // ====================================================================
-  // 1. LÓGICA PARA DEMANDA EXTRA
-  // Se existir 'itemSolicitado', sabemos que é uma solicitação Extra
-  // ====================================================================
   if ('itemSolicitado' in req) {
     const name = req.user?.name || '';
     const valor = formatCurrency(req.valorSolicitado || 0);
@@ -28,9 +24,6 @@ export const generateApprovalText = (req: any): string => {
     return extraText;
   }
 
-  // ====================================================================
-  // 2. LÓGICA PARA SOLICITAÇÃO PADRÃO
-  // ====================================================================
   const isDocente = req.solicitanteDocente;
   const type = isDocente ? 'docente' : 'discente';
   const name = isDocente ? req.nomeDocente : req.nomeDiscente || req.user?.name || '';
@@ -47,28 +40,44 @@ export const generateApprovalText = (req: any): string => {
 
   const cotacao = req.cotacaoMoeda || 1;
 
-  let inscricaoText = '';
-  if (req.isDolar) {
-    const valBRL = (req.valorInscricao || 0) * cotacao;
-    inscricaoText = `US$ ${(req.valorInscricao || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })} = aproximadamente ${formatCurrency(valBRL)}`;
-  } else {
-    inscricaoText = formatCurrency(req.valorInscricao);
+  const apoiosSolicitados: string[] = [];
+
+  if (req.valorInscricao > 0) {
+    let inscricaoText = '';
+    if (req.isDolar) {
+      const valBRL = req.valorInscricao * cotacao;
+      inscricaoText = `US$ ${req.valorInscricao.toLocaleString('en-US', { minimumFractionDigits: 2 })} = aproximadamente ${formatCurrency(valBRL)}`;
+    } else {
+      inscricaoText = formatCurrency(req.valorInscricao);
+    }
+    apoiosSolicitados.push(`apoio de inscrição (${inscricaoText})`);
   }
 
-  let diariasText = '';
-  if (req.isDolar) {
-    const valBRLDiaria = (req.valorDiaria || 0) * cotacao;
-    const totalBRLDiarias = valBRLDiaria * (req.quantidadeDiariasSolicitadas || 0);
-    diariasText = `${req.quantidadeDiariasSolicitadas} x US$ ${(req.valorDiaria || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })} = aproximadamente ${formatCurrency(totalBRLDiarias)}`;
-  } else {
-    const totalBRLDiarias = (req.valorDiaria || 0) * (req.quantidadeDiariasSolicitadas || 0);
-    diariasText = `${req.quantidadeDiariasSolicitadas} x ${formatCurrency(req.valorDiaria)} = aproximadamente ${formatCurrency(totalBRLDiarias)}`;
+  if (req.quantidadeDiariasSolicitadas > 0) {
+    let diariasText = '';
+    if (req.isDolar) {
+      const valBRLDiaria = (req.valorDiaria || 0) * cotacao;
+      const totalBRLDiarias = valBRLDiaria * req.quantidadeDiariasSolicitadas;
+      diariasText = `${req.quantidadeDiariasSolicitadas} x US$ ${(req.valorDiaria || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })} = aproximadamente ${formatCurrency(totalBRLDiarias)}`;
+    } else {
+      const totalBRLDiarias = (req.valorDiaria || 0) * req.quantidadeDiariasSolicitadas;
+      diariasText = `${req.quantidadeDiariasSolicitadas} x ${formatCurrency(req.valorDiaria)} = aproximadamente ${formatCurrency(totalBRLDiarias)}`;
+    }
+    apoiosSolicitados.push(`${req.quantidadeDiariasSolicitadas} diárias (${diariasText})`);
   }
 
-  let text = `O/A ${type} ${name} solicita apoio de inscrição (${inscricaoText}) e ${req.quantidadeDiariasSolicitadas} diárias (${diariasText}) para apresentação de trabalho oral (título: ${req.tituloPublicacao}) no ${req.nomeEvento}, Qualis ${req.qualis}, a ser realizado em ${req.cidade}, ${req.pais}, no período de ${formatDate(req.dataInicio)} a ${formatDate(req.dataFim)}.`;
+  if (apoiosSolicitados.length === 0) {
+    apoiosSolicitados.push('apoio financeiro');
+  }
 
-  if (isDocente) {
-    const passagemBRL = req.isDolar ? (req.valorPassagem || 0) * cotacao : (req.valorPassagem || 0);
+  const textoApoios = apoiosSolicitados.join(' e ');
+  
+  const textoQualis = req.qualis ? `, Qualis ${req.qualis}` : '';
+
+  let text = `O/A ${type} ${name} solicita ${textoApoios} para apresentação de trabalho oral (título: ${req.tituloPublicacao}) no ${req.nomeEvento}${textoQualis}, a ser realizado em ${req.cidade}, ${req.pais}, no período de ${formatDate(req.dataInicio)} a ${formatDate(req.dataFim)}.`;
+
+  if (isDocente && req.valorPassagem > 0) {
+    const passagemBRL = req.isDolar ? req.valorPassagem * cotacao : req.valorPassagem;
     text += ` O valor aproximado da passagem aérea será aproximadamente ${formatCurrency(passagemBRL)}.`;
   }
 

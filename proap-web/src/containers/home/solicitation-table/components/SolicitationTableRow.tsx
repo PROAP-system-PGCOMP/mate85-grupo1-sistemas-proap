@@ -9,17 +9,19 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
-  Chip, // <-- Adicionado para a tag visual
+  Chip,
 } from '@mui/material';
 import { CheckCircle, Visibility, MoreVert } from '@mui/icons-material';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import FactCheckIcon from '@mui/icons-material/FactCheck';
+// --- ADIÇÃO 1: IMPORTAR O ÍCONE DO LIVRO ---
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+
 import { formatNumberToBRL } from '../../../../helpers/formatter';
 import { SolicitationDetailsDialogProps } from '../../request-dialog/SolicitationDetailsDialog';
 import { StatusChip } from './index';
-import FactCheckIcon from '@mui/icons-material/FactCheck';
-
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -47,7 +49,6 @@ interface SolicitationRowData {
   dataInicio?: string;
   dataFim?: string;
   observacao?: string;
-  // --- Novo campo adicionado ---
   tipoSolicitacao?: 'Apoio' | 'Extra';
 }
 
@@ -56,7 +57,8 @@ interface SolicitationTableRowProps extends SolicitationRowData {
   userCanViewAllRequests: boolean;
   userCanReviewRequests: boolean;
   isCeapg: boolean;
-  // --- Atualizamos as funções para receberem o tipo também ---
+  row?: any; 
+  onOpenAtaDialog?: (row: any) => void;
   onEdit: (id: number, tipo: string) => void;
   onReview: (id: number, tipo: string) => void;
   onView: (id: number, tipo: string) => void;
@@ -67,9 +69,7 @@ interface SolicitationTableRowProps extends SolicitationRowData {
 
 const safelyFormatDate = (dateString: string | null) => {
   if (!dateString) return '-';
-  
   if (dateString.includes('/')) return dateString;
-
   try {
     return format(parseISO(dateString), 'dd/MM/yyyy HH:mm', { locale: ptBR });
   } catch (e) {
@@ -77,9 +77,6 @@ const safelyFormatDate = (dateString: string | null) => {
   }
 };
 
-/**
- * Component for displaying a single solicitation in the table
- */
 const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
   id,
   user = { name: '', email: '' },
@@ -101,11 +98,13 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
   dataInicio = '',
   dataFim = '',
   observacao = '',
-  tipoSolicitacao = 'Apoio', // <-- Valor padrão
+  tipoSolicitacao = 'Apoio',
   currentUserEmail,
   userCanViewAllRequests,
   userCanReviewRequests,
   isCeapg,
+  row,               
+  onOpenAtaDialog,   
   onEdit,
   onReview,
   onView,
@@ -113,21 +112,12 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
   onClone,
   onShowDetails,
 }) => {
-  // Menu state
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-  
-
-  const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation();
-    setAnchorEl(event.currentTarget);
-  };
 
   const handleCloseMenu = () => {
     setAnchorEl(null);
   };
 
-  // --- Agora passamos o tipoSolicitacao para os callbacks ---
   const handleRowClick = () => {
     if (id !== undefined) onView(id, tipoSolicitacao);
   };
@@ -179,6 +169,18 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
     });
   };
 
+  // --- ADIÇÃO 3: FUNÇÃO PARA ABRIR O MODAL DE ATA ---
+  const handleOpenAta = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onOpenAtaDialog) {
+      onOpenAtaDialog(row || {
+        id, user, valorTotal, situacao, valorAprovado, solicitanteDocente, 
+        tituloPublicacao, valorDiaria, cotacaoMoeda, nomeEvento, isDolar, 
+        qualis, cidade, pais, dataInicio, dataFim
+      });
+    }
+  };
+
   return (
     <TableRow
       onClick={handleRowClick}
@@ -189,7 +191,6 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
         },
       }}
     >
-      {/* --- Nova Coluna do Tipo --- */}
       <TableCell align="center">
         {tipoSolicitacao === 'Extra' ? (
           <Chip label="Demanda Extra" size="small" variant="outlined" sx={{ color: '#d81b60', borderColor: '#d81b60' }} />
@@ -214,23 +215,24 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
       <TableCell align="center" sx={{ whiteSpace: 'nowrap' }}>
         {valorAprovado === null ? '-' : formatNumberToBRL(valorAprovado)}
       </TableCell>
-      <TableCell align="center">
-        {safelyFormatDate(dataAvaliacaoProap)}
-      </TableCell>
-      <TableCell align="center">
-        {numeroAta || '-'}
-      </TableCell>
+      <TableCell align="center">{safelyFormatDate(dataAvaliacaoProap)}</TableCell>
+      <TableCell align="center">{numeroAta || '-'}</TableCell>
+
       <TableCell align="center" onClick={(e) => e.stopPropagation()}>
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}>
-          {/* Primary Actions - Always visible */}
+          
           {userCanViewAllRequests && (
             <Tooltip title="Ver resumo da Solicitação">
-              <IconButton
-                size="small"
-                color="default"
-                onClick={handleShowDetailsClick}
-              >
+              <IconButton size="small" color="default" onClick={handleShowDetailsClick}>
                 <Visibility fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+
+          {(isCeapg || userCanReviewRequests) && (situacao === 1 || situacao === 2 || situacao === 3) && (
+            <Tooltip title="Gerar texto para Ata">
+              <IconButton size="small" color="default" onClick={handleOpenAta}>
+                <MenuBookIcon fontSize="small" />
               </IconButton>
             </Tooltip>
           )}
@@ -254,12 +256,7 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
               <IconButton
                 size="small"
                 onClick={handleEdit}
-                disabled={
-                  !(
-                    (situacao == 0 && currentUserEmail === user.email) ||
-                    userCanReviewRequests
-                  )
-                }
+                disabled={!((situacao == 0 && currentUserEmail === user.email) || userCanReviewRequests)}
               >
                 <ModeEditIcon fontSize="small" />
               </IconButton>
@@ -271,12 +268,7 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
               <IconButton
                 size="small"
                 onClick={handleDelete}
-                disabled={
-                  !(
-                    (situacao == 0 && currentUserEmail === user.email) ||
-                    userCanReviewRequests
-                  )
-                }
+                disabled={!((situacao == 0 && currentUserEmail === user.email) || userCanReviewRequests)}
               >
                 <DeleteIcon fontSize="small" />
               </IconButton>

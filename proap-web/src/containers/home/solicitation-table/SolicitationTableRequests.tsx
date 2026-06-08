@@ -25,7 +25,7 @@ import ViewListIcon from '@mui/icons-material/ViewList';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
-
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import {
   AssistanceRequestPropToSort,
   getAssistanceRequests,
@@ -66,6 +66,9 @@ export default function SolicitationTableRequests() {
   const [viewMode, setViewMode] = useViewModePreference(currentUser.email);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<number | null>(null);
+  
+  // --- ADIÇÃO: Estado do filtro de ano, iniciando com o ano vigente ---
+  const [yearFilter, setYearFilter] = useState<number | ''>(new Date().getFullYear());
 
   const statusOptions = [
     { value: 0, text: 'Pendente' },
@@ -160,7 +163,6 @@ export default function SolicitationTableRequests() {
     const extra = (extraRequests?.list || []).map((r: any) => ({
       ...r,
       tipoSolicitacao: 'Extra',
-      // Normalizando os nomes das variáveis para o padrão da tabela
       valorTotal: r.valorSolicitado || r.valorTotal,
       tituloPublicacao: r.titulo || r.tituloPublicacao,
       nomeEvento: r.itemSolicitado || r.nomeEvento,
@@ -173,13 +175,47 @@ export default function SolicitationTableRequests() {
     });
   }, [apoioRequests, extraRequests]);
 
-  const filteredRequests = combinedRequests.filter((request) =>
-    (!searchQuery ||
-      request.user?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      request.tituloPublicacao?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      request.nomeEvento?.toLowerCase().includes(searchQuery.toLowerCase())) &&
-    (statusFilter === null || request.situacao === statusFilter)
-  );
+const getYearFromDate = (dateString?: string) => {
+    if (!dateString) return new Date().getFullYear();
+    
+    // Formato BR (ex: 06/06/2026 04:05)
+    if (dateString.includes('/')) {
+      const parts = dateString.split('/');
+      if (parts.length >= 3) {
+        return parseInt(parts[2].substring(0, 4), 10);
+      }
+    }
+    
+    // Formato ISO (ex: 2026-06-06T04:05:00)
+    if (dateString.includes('-')) {
+      return parseInt(dateString.substring(0, 4), 10);
+    }
+    
+    return new Date().getFullYear();
+  };
+
+  // --- ADIÇÃO: Mapeia os anos únicos existentes na lista combinada ---
+  const availableYears = useMemo(() => {
+    const years = combinedRequests.map(req => getYearFromDate(req.createdAt));
+    
+    // Garante que o ano atual sempre esteja nas opções (evita o select iniciar vazio)
+    years.push(new Date().getFullYear());
+    
+    return Array.from(new Set(years)).sort((a, b) => b - a); // Ordena do mais recente para o mais antigo
+  }, [combinedRequests]);
+
+  // --- ADIÇÃO: Filtro atualizado considerando o ano ---
+  const filteredRequests = combinedRequests.filter((request) => {
+    const reqYear = getYearFromDate(request.createdAt);
+    return (
+      (!searchQuery ||
+        request.user?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        request.tituloPublicacao?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        request.nomeEvento?.toLowerCase().includes(searchQuery.toLowerCase())) &&
+      (statusFilter === null || request.situacao === statusFilter) &&
+      (yearFilter === '' || reqYear === yearFilter)
+    );
+  });
 
   const menuProps = {
     PaperProps: {
@@ -241,6 +277,31 @@ export default function SolicitationTableRequests() {
               }}
               sx={{ '& .MuiOutlinedInput-root': { height: 47, backgroundColor: 'white' } }}
             />
+          </FormControl>
+
+          {/* --- ADIÇÃO: Select dinâmico para o Ano --- */}
+          <FormControl sx={{ minWidth: isMobile ? '100%' : '140px' }} size="small">
+            <Select
+              displayEmpty
+              value={yearFilter}
+              onChange={(e) => setYearFilter(e.target.value as number | '')}
+              MenuProps={menuProps}
+              sx={{ height: 47, backgroundColor: 'white' }}
+            >
+              {/* ITEM ATUALIZADO: Ampulheta + Texto Cinza */}
+              <MenuItem value="" sx={{ color: 'gray' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, color: 'text.secondary' }}>
+                  <HourglassEmptyIcon fontSize="small" />
+                  Todos os anos
+                </Box>
+              </MenuItem>
+              
+              {availableYears.map(year => (
+                <MenuItem key={year} value={year} sx={{ display: 'flex', justifyContent: 'center', fontWeight: 500 }}>
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
           </FormControl>
 
           <FormControl sx={{ minWidth: isMobile ? '100%' : '220px' }} size="small">
@@ -310,7 +371,6 @@ export default function SolicitationTableRequests() {
           userCanViewAllRequests={userCanViewAllRequests}
           userCanReviewRequests={userCanReviewRequests}
           isCeapg={isCeapg}
-          // Redirecionamento Dinâmico (Tabela)
           onEdit={(id, tipo) => navigate(tipo === 'Extra' ? `/extra-solicitation/edit/${id}` : `/solicitation/edit/${id}`)}
           onReview={(id, tipo) => navigate(tipo === 'Extra' ? `/extra-solicitation/review/${id}` : `/solicitation/review/${id}`)}
           onView={(id, tipo) => navigate(tipo === 'Extra' ? `/extra-solicitation/view/${id}` : `/solicitation/view/${id}`)}
@@ -326,7 +386,6 @@ export default function SolicitationTableRequests() {
           userCanViewAllRequests={userCanViewAllRequests}
           userCanReviewRequests={userCanReviewRequests}
           isCeapg={isCeapg}
-          // Redirecionamento Dinâmico (Cards)
           onEdit={(id, tipo) => navigate(tipo === 'Extra' ? `/extra-solicitation/edit/${id}` : `/solicitation/edit/${id}`)}
           onReview={(id, tipo) => navigate(tipo === 'Extra' ? `/extra-solicitation/review/${id}` : `/solicitation/review/${id}`)}
           onView={(id, tipo) => navigate(tipo === 'Extra' ? `/extra-solicitation/view/${id}` : `/solicitation/view/${id}`)}
@@ -374,7 +433,6 @@ export default function SolicitationTableRequests() {
         onConfirm={() => {
           if (solicitationToDelete) {
             const { id, tipo } = solicitationToDelete;
-            // Define a função de exclusão de acordo com o tipo
             const removeFunction = tipo === 'Extra' ? deleteExtraAssistanceRequest : removeAssistanceRequestById;
             
             removeFunction(id)

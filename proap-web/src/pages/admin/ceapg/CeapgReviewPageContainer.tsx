@@ -96,7 +96,7 @@ const CeapgReviewPageContainer = () => {
               <Receipt sx={{ fontSize: 32, color: 'primary.main', mr: 1.5 }} />
               <Box>
                 <Typography variant="caption" color="text.secondary" fontWeight="bold">CONSUMO PREVISTO</Typography>
-                <Typography variant="h6" color="primary.main" fontWeight="bold" sx={{ lineHeight: 1.2 }}>
+                <Typography variant="h6" color="primary.main" fontWeight="bold" sx={{ lineHeight: 1.2, whiteSpace: 'nowrap' }}>
                   {formatNumberToBRL(totalSolicitado)}
                 </Typography>
               </Box>
@@ -109,7 +109,7 @@ const CeapgReviewPageContainer = () => {
               <AccountBalanceWallet sx={{ fontSize: 32, color: 'primary.main', mr: 1.5 }} />
               <Box>
                 <Typography variant="caption" color="text.secondary" fontWeight="bold">SALDO PREVISTO</Typography>
-                <Typography variant="h6" color="primary.main" fontWeight="bold" sx={{ lineHeight: 1.2 }}>
+                <Typography variant="h6" color="primary.main" fontWeight="bold" sx={{ lineHeight: 1.2, whiteSpace: 'nowrap' }}>
                   {formatNumberToBRL(saldoPrevisto)}
                 </Typography>
               </Box>
@@ -122,7 +122,7 @@ const CeapgReviewPageContainer = () => {
               <PriceCheck sx={{ fontSize: 32, color: 'success.main', mr: 1.5 }} />
               <Box>
                 <Typography variant="caption" color="text.secondary" fontWeight="bold">CONSUMO REAL</Typography>
-                <Typography variant="h6" color="success.main" fontWeight="bold" sx={{ lineHeight: 1.2 }}>
+                <Typography variant="h6" color="success.main" fontWeight="bold" sx={{ lineHeight: 1.2, whiteSpace: 'nowrap' }}>
                   {formatNumberToBRL(totalGasto)}
                 </Typography>
               </Box>
@@ -135,7 +135,7 @@ const CeapgReviewPageContainer = () => {
               <Savings sx={{ fontSize: 32, color: 'success.main', mr: 1.5 }} />
               <Box>
                 <Typography variant="caption" color="text.secondary" fontWeight="bold">SALDO REAL</Typography>
-                <Typography variant="h6" color="success.main" fontWeight="bold" sx={{ lineHeight: 1.2 }}>
+                <Typography variant="h6" color="success.main" fontWeight="bold" sx={{ lineHeight: 1.2, whiteSpace: 'nowrap' }}>
                   {formatNumberToBRL(saldoReal)}
                 </Typography>
               </Box>

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Box, Container, Typography, Card, CardContent } from '@mui/material';
+import { Box, Container, Typography, Card, CardContent, Grid } from '@mui/material';
 import { RateReview, AccountBalanceWallet, Savings, Receipt, PriceCheck } from '@mui/icons-material';
 import { useSnackbar } from 'notistack'; 
 
@@ -89,7 +89,6 @@ const CeapgReviewPageContainer = () => {
 
         {/* CARDS DE RESUMO */}
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: { xs: 'flex-start', xl: 'flex-end' } }}>
-          
           {/* CONSUMO PREVISTO (Azul Claro) */}
           <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', bgcolor: 'info.50', minWidth: '200px', flex: 1 }}>
             <CardContent sx={{ display: 'flex', alignItems: 'center', p: 1.5, '&:last-child': { pb: 1.5 } }}>
@@ -102,7 +101,6 @@ const CeapgReviewPageContainer = () => {
               </Box>
             </CardContent>
           </Card>
-
           {/* SALDO PREVISTO (Azul Escuro / Primary) */}
           <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', bgcolor: 'primary.50', minWidth: '200px', flex: 1 }}>
             <CardContent sx={{ display: 'flex', alignItems: 'center', p: 1.5, '&:last-child': { pb: 1.5 } }}>
@@ -130,9 +128,9 @@ const CeapgReviewPageContainer = () => {
           </Card>
 
           {/* SALDO REAL (Verde Padrão / Success) */}
-          <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', bgcolor: 'success.50', minWidth: '200px', flex: 1 }}>
-            <CardContent sx={{ display: 'flex', alignItems: 'center', p: 1.5, '&:last-child': { pb: 1.5 } }}>
-              <Savings sx={{ fontSize: 32, color: 'success.main', mr: 1.5 }} />
+            <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', bgcolor: 'success.50', minWidth: '200px', flex: 1 }}>
+              <CardContent sx={{ display: 'flex', alignItems: 'center', p: 1.5, '&:last-child': { pb: 1.5 } }}>
+                <Savings sx={{ fontSize: 32, color: 'success.main', mr: 1.5 }} />
               <Box>
                 <Typography variant="caption" color="text.secondary" fontWeight="bold">SALDO REAL</Typography>
                 <Typography variant="h6" color="success.main" fontWeight="bold" sx={{ lineHeight: 1.2, whiteSpace: 'nowrap' }}>
@@ -141,7 +139,6 @@ const CeapgReviewPageContainer = () => {
               </Box>
             </CardContent>
           </Card>
-
         </Box>
       </Box>
 

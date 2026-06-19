@@ -102,28 +102,29 @@ const CeapgReviewPageContainer = () => {
             </CardContent>
           </Card>
           {/* SALDO PREVISTO (Azul Escuro / Primary) */}
-            <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', bgcolor: 'primary.50', minWidth: '200px', flex: 1 }}>
-              <CardContent sx={{ display: 'flex', alignItems: 'center', p: 1.5, '&:last-child': { pb: 1.5 } }}>
-                <AccountBalanceWallet sx={{ fontSize: 32, color: 'primary.main', mr: 1.5 }} />
-                <Box>
-                  <Typography variant="caption" color="text.secondary" fontWeight="bold">SALDO PREVISTO</Typography>
-                  <Typography variant="h6" color="primary.main" fontWeight="bold" sx={{ lineHeight: 1.2, whiteSpace: 'nowrap' }}>
-                    {formatNumberToBRL(saldoPrevisto)}
-                  </Typography>
-                </Box>
-              </CardContent>
-            </Card>
+          <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', bgcolor: 'primary.50', minWidth: '200px', flex: 1 }}>
+            <CardContent sx={{ display: 'flex', alignItems: 'center', p: 1.5, '&:last-child': { pb: 1.5 } }}>
+              <AccountBalanceWallet sx={{ fontSize: 32, color: 'primary.main', mr: 1.5 }} />
+              <Box>
+                <Typography variant="caption" color="text.secondary" fontWeight="bold">SALDO PREVISTO</Typography>
+                <Typography variant="h6" color="primary.main" fontWeight="bold" sx={{ lineHeight: 1.2, whiteSpace: 'nowrap' }}>
+                  {formatNumberToBRL(saldoPrevisto)}
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+
           {/* CONSUMO REAL (Verde Secundário) */}
-            <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', minWidth: '200px', flex: 1 }}>
-              <CardContent sx={{ display: 'flex', alignItems: 'center', p: 1.5, '&:last-child': { pb: 1.5 } }}>
-                <PriceCheck sx={{ fontSize: 32, color: 'success.main', mr: 1.5 }} />
-                <Box>
-                  <Typography variant="caption" color="text.secondary" fontWeight="bold">CONSUMO REAL</Typography>
-                  <Typography variant="h6" color="success.main" fontWeight="bold" sx={{ lineHeight: 1.2, whiteSpace: 'nowrap' }}>
-                    {formatNumberToBRL(totalGasto)}
-                  </Typography>
-                </Box>
-              </CardContent>
+          <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', minWidth: '200px', flex: 1 }}>
+            <CardContent sx={{ display: 'flex', alignItems: 'center', p: 1.5, '&:last-child': { pb: 1.5 } }}>
+              <PriceCheck sx={{ fontSize: 32, color: 'success.main', mr: 1.5 }} />
+              <Box>
+                <Typography variant="caption" color="text.secondary" fontWeight="bold">CONSUMO REAL</Typography>
+                <Typography variant="h6" color="success.main" fontWeight="bold" sx={{ lineHeight: 1.2, whiteSpace: 'nowrap' }}>
+                  {formatNumberToBRL(totalGasto)}
+                </Typography>
+              </Box>
+            </CardContent>
           </Card>
 
           {/* SALDO REAL (Verde Padrão / Success) */}

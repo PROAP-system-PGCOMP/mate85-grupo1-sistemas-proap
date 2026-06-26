@@ -178,7 +178,12 @@ export default function UserRegisterPage() {
                     <Grid container spacing={3}>
                       {/* Reaproveita Nome, CPF e Matrícula */}
                       <Grid item xs={12}>
-                        <PersonalDataFormContainer />
+                        <PersonalDataFormContainer 
+                          titleText="Preencha os dados do novo usuário"
+                          namePlaceholder="Digite o nome completo do usuário"
+                          cpfPlaceholder="Informe o CPF do usuário"
+                          registrationPlaceholder="Digite a matrícula ou SIAPE do usuário"
+                        />
                       </Grid>
 
                       <Grid item xs={12}>
@@ -189,6 +194,7 @@ export default function UserRegisterPage() {
                               fullWidth
                               required
                               label="E-mail"
+                              placeholder="Digite o endereço de e-mail do usuário"
                               error={Boolean(touched.email && errors.email)}
                               helperText={touched.email && errors.email}
                               InputProps={{
@@ -209,6 +215,7 @@ export default function UserRegisterPage() {
                           required
                           name="phone"
                           label="Telefone"
+                          placeholder="Informe o número com DDD"
                           value={values.phone}
                           error={Boolean(touched.phone && errors.phone)}
                           helperText={(touched.phone && errors.phone) || 'Digite seu número com DDD'}
@@ -237,6 +244,7 @@ export default function UserRegisterPage() {
                               fullWidth
                               required
                               label="Perfil do Usuário"
+                              placeholder="Informe o tipo de perfil do usuário"
                               error={Boolean(touched.profileId && errors.profileId)}
                               helperText={(touched.profileId && errors.profileId) as string}
                               InputProps={{

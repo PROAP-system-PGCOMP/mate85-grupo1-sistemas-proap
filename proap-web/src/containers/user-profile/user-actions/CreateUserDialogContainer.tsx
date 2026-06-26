@@ -108,6 +108,7 @@ export default function CreateUserDialogContainer({ open, onClose, onSuccess }: 
                         fullWidth
                         required
                         label="E-mail"
+                        placeholder="Digite seu endereço de e-mail"
                         error={Boolean(touched.email && errors.email)}
                         helperText={touched.email && errors.email}
                         InputProps={{

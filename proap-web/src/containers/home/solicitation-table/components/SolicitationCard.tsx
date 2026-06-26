@@ -155,9 +155,9 @@ const SolicitationCard: React.FC<SolicitationCardProps> = ({
       <CardContent sx={{ flexGrow: 1, p: 2 }}>
         
         {/* --- Topo do Card com as Tags --- */}
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5} gap={1.5}>
           {tipoSolicitacao === 'Extra' ? (
-            <Chip label="Demanda Extra" size="small" variant="outlined" sx={{ color: '#d81b60', borderColor: '#d81b60', height: 24 }} />
+            <Chip label="Demanda Extra" size="small" variant="outlined" sx={{ color: '#d81b60', borderColor: '#d81b60', height: 24}} />
           ) : (
             <Chip label="Apoio" color="primary" size="small" variant="outlined" sx={{ height: 24 }} />
           )}

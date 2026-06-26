@@ -11,15 +11,25 @@ import {
 import { CpfInputMask } from '../input-masks/CpfInputMask';
 import { Person, Badge, AccountBox } from '@mui/icons-material';
 
-export default function PersonalDataFormContainer() {
+// 1. Criamos a interface para as props opcionais
+interface PersonalDataFormContainerProps {
+  titleText?: string;
+  namePlaceholder?: string;
+  cpfPlaceholder?: string;
+  registrationPlaceholder?: string;
+}
+
+export default function PersonalDataFormContainer({
+  // 2. Definimos os textos antigos como valores padrão (fallback)
+  titleText = "Preencha seus dados pessoais para cadastro no sistema",
+  namePlaceholder = "Digite seu nome completo",
+  cpfPlaceholder = "Ex: 000.000.000-00",
+  registrationPlaceholder = "Digite sua matrícula ou SIAPE",
+}: PersonalDataFormContainerProps) {
   const { errors, touched, setFieldValue, values } =
     useFormikContext<RegisterFormValues>();
 
   const [cpfWihoutMask, setCpfWihoutMask] = useState(values.cpf);
-
-  // useEffect(() => {
-  //   console.log(values.cpf);
-  // }, [values]);
 
   const handleInputCpfChange = (event: any) => {
     const cpfWihoutMask = event.target.value.replace(/[\-\.\_]/g, '');
@@ -29,9 +39,12 @@ export default function PersonalDataFormContainer() {
 
   return (
     <Box>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Preencha seus dados pessoais para cadastro no sistema
-      </Typography>
+      {/* 3. Renderizamos o título dinâmico */}
+      {titleText && (
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          {titleText}
+        </Typography>
+      )}
 
       <Grid container spacing={2}>
         <Grid item xs={12}>
@@ -41,7 +54,7 @@ export default function PersonalDataFormContainer() {
                 {...field}
                 fullWidth
                 label="Nome Completo"
-                placeholder="Digite seu nome completo"
+                placeholder={namePlaceholder} // Placeholder dinâmico
                 variant="outlined"
                 required
                 error={Boolean(touched.name && errors.name)}
@@ -64,7 +77,7 @@ export default function PersonalDataFormContainer() {
             label="CPF"
             name="cpf"
             required
-            placeholder="Ex: 000.000.000-00"
+            placeholder={cpfPlaceholder} // Placeholder dinâmico
             error={Boolean(touched.cpf && errors.cpf)}
             helperText={touched.cpf && errors.cpf}
             onChange={handleInputCpfChange}
@@ -87,7 +100,7 @@ export default function PersonalDataFormContainer() {
                 {...field}
                 fullWidth
                 label="Matrícula / SIAPE"
-                placeholder="Digite sua matrícula ou SIAPE"
+                placeholder={registrationPlaceholder} // Placeholder dinâmico
                 variant="outlined"
                 required
                 error={Boolean(touched.registration && errors.registration)}

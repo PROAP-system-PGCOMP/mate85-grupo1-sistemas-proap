@@ -113,9 +113,12 @@ function CustomTabPanel(props: TabPanelProps) {
 }
 
 export interface SolicitacaoDTO {
-  id?: string;
+  id?: string | number;
   nomeDocente: string;
-  valorSolicitado: number;
+  valorSolicitado?: number;
+  valorAprovado?: number;
+  custoFinalCeapg?: number;
+  avaliadorCeapg?: string;
   status?: string;
 }
 
@@ -132,7 +135,6 @@ interface BudgetOverviewProps {
   onYearChange: (event: React.ChangeEvent<{ value: unknown }>) => void;
   solicitacoes?: SolicitacaoDTO[];
   
-  // Novas propriedades adicionadas para os valores do CEAPG
   totalCeapgBudget?: number;
   usedCeapgBudget?: number;
   remainingCeapgBudget?: number;
@@ -164,7 +166,6 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
   onYearChange,
   solicitacoes = [],
   
-  // Valores padrão para o CEAPG caso ainda não sejam passados pelo componente pai
   totalCeapgBudget = 0,
   usedCeapgBudget = 0,
   remainingCeapgBudget = 0,
@@ -192,19 +193,37 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
     setActiveTab(newValue);
   };
 
+  
+  // 1. Tenta calcular os valores através do array de solicitações
+  const calculadoSolicitado = solicitacoes.reduce((acc: number, req: SolicitacaoDTO) => acc + Number(req.valorAprovado || req.valorSolicitado || 0), 0);
+  
+  const calculadoGasto = solicitacoes
+    .filter((req: SolicitacaoDTO) => !!req.avaliadorCeapg)
+    .reduce((acc: number, req: SolicitacaoDTO) => acc + Number(req.custoFinalCeapg || req.valorAprovado || 0), 0);
+
+  // 2. Define os valores finais (se o cálculo for > 0 usa-o, senão usa as props do backend)
+  const consumoPrevisto = calculadoSolicitado > 0 ? calculadoSolicitado : usedBudget;
+  const consumoReal = calculadoGasto > 0 ? calculadoGasto : usedCeapgBudget;
+
+  const saldoPrevisto = totalBudget - consumoPrevisto;
+  const saldoReal = totalBudget - consumoReal;
+
+  // 3. Percentagens para os cartões
+  const percentualPrevisto = totalBudget > 0 ? Math.round((consumoPrevisto / totalBudget) * 100) : 0;
+  const percentualReal = totalBudget > 0 ? Math.round((consumoReal / totalBudget) * 100) : 0;
+
+
   const dadosAcumuladosDocentes = useMemo(() => {
     if (!solicitacoes || solicitacoes.length === 0) return [];
 
     const agrupamento = solicitacoes.reduce((acumulador: Record<string, number>, sol) => {
       const nome = sol.nomeDocente;
-      const valor = Number(sol.valorSolicitado) || 0;
+      const valor = !!sol.avaliadorCeapg 
+        ? Number(sol.custoFinalCeapg || sol.valorAprovado || 0)
+        : Number(sol.valorAprovado || 0);
 
       if (!nome) return acumulador;
-
-      if (!acumulador[nome]) {
-        acumulador[nome] = 0;
-      }
-
+      if (!acumulador[nome]) acumulador[nome] = 0;
       acumulador[nome] += valor;
       return acumulador;
     }, {});
@@ -233,6 +252,7 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
     });
   }, [solicitacoes, localSortConfig.key, localSortConfig.asc]);
 
+  // DADOS DOS GRÁFICOS
   const chartData = historicalData.map((item) => ({
     year: item.year.toString(),
     'Orçamento Total': item.totalBudget,
@@ -240,12 +260,24 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
     Restante: item.remainingBudget,
   }));
 
-  const pieChartData = totalBudget > 0 ? [
+  // 1. Gráfico PROAP Original
+  const pieChartDataProap = totalBudget > 0 ? [
     { name: 'Utilizado', value: Number(usedBudget), color: theme.palette.warning.main },
     { name: 'Restante', value: Number(remainingBudget), color: theme.palette.success.main },
   ] : [];
 
-  
+  // 2. Gráfico Previsto 
+  const pieChartDataPrevisto = totalBudget > 0 ? [
+    { name: 'Consumo Previsto', value: Number(consumoPrevisto), color: theme.palette.primary.main },
+    { name: 'Saldo Previsto', value: Number(saldoPrevisto > 0 ? saldoPrevisto : 0), color: '#e0e0e0' },
+  ] : [];
+
+  // 3. Gráfico Real
+  const pieChartDataReal = totalBudget > 0 ? [
+    { name: 'Consumo Real', value: Number(consumoReal), color: theme.palette.success.main },
+    { name: 'Saldo Real', value: Number(saldoReal > 0 ? saldoReal : 0), color: '#e0e0e0' },
+  ] : [];
+
   return (
     <>
       <FormControl fullWidth sx={{ mb: 3 }}>
@@ -293,8 +325,8 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
                 </Typography>
                 <Stack spacing={2}>
                   <StatCard title="Orçamento Total" value={formatNumberToBRL(Number(totalBudget))} icon={<Square />} color="primary.main" />
-                  <StatCard title="Utilizado" value={formatNumberToBRL(Number(usedBudget))} secondaryText={`${usedPercentage}% do orçamento total`} icon={<Square />} color="warning.main" />
-                  <StatCard title="Restante" value={formatNumberToBRL(Number(remainingBudget))} secondaryText={`${100 - usedPercentage}% do orçamento total restante`} icon={<Square />} color="success.main" />
+                  <StatCard title="Utilizado" value={formatNumberToBRL(Number(consumoPrevisto))} secondaryText={`${percentualPrevisto}% do orçamento total`} icon={<Square />} color="warning.main" />
+                  <StatCard title="Restante" value={formatNumberToBRL(Number(saldoPrevisto))} secondaryText={`${100 - percentualPrevisto}% do orçamento total restante`} icon={<Square />} color="success.main" />
                 </Stack>
               </Box>
 
@@ -304,31 +336,101 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
                   Orçamento CEAPG
                 </Typography>
                 <Stack spacing={2}>
-                  <StatCard title="Orçamento Total CEAPG" value={formatNumberToBRL(Number(totalCeapgBudget))} icon={<Square />} color="primary.main" />
-                  <StatCard title="Utilizado CEAPG" value={formatNumberToBRL(Number(usedCeapgBudget))} secondaryText={`${usedCeapgPercentage}% do orçamento CEAPG`} icon={<Square />} color="warning.main" />
-                  <StatCard title="Restante CEAPG" value={formatNumberToBRL(Number(remainingCeapgBudget))} secondaryText={`${100 - usedCeapgPercentage}% do orçamento CEAPG restante`} icon={<Square />} color="success.main" />
+                  <StatCard title="Orçamento Total CEAPG" value={formatNumberToBRL(Number(totalBudget))} icon={<Square />} color="primary.main" />
+                  <StatCard title="Utilizado CEAPG" value={formatNumberToBRL(Number(consumoReal))} secondaryText={`${percentualReal}% do orçamento CEAPG`} icon={<Square />} color="warning.main" />
+                  <StatCard title="Restante CEAPG" value={formatNumberToBRL(Number(saldoReal))} secondaryText={`${100 - percentualReal}% do orçamento CEAPG restante`} icon={<Square />} color="success.main" />
                 </Stack>
               </Box>
             </Box>
 
-            {/*GRÁFICO DE PIZZA*/}
-            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 5 }}>
-              <Paper elevation={0} sx={{ width: '100%', maxWidth: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 3, borderRadius: 2, border: `1px solid ${theme.palette.divider}` }}>
-                <Box sx={{ position: 'relative', width: '100%', height: '100%', minHeight: '260px' }}>
+            {/* GRÁFICOS DE PIZZA LADO A LADO */}
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3, mb: 5 }}>
+              
+              {/* Gráfico 1: TOTAL Proap */}
+              <Paper elevation={0} sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', p: 3, borderRadius: 2, border: `1px solid ${theme.palette.divider}` }}>
+                <Typography variant="subtitle2" fontWeight="bold" color="text.secondary" sx={{ mb: 2 }}>Distribuição Total PROAP</Typography>
+                <Box sx={{ position: 'relative', width: '100%', height: '100%', minHeight: '220px' }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                      <Pie data={pieChartData} cx="50%" cy="50%" innerRadius={80} outerRadius={110} paddingAngle={5} dataKey="value" startAngle={90} endAngle={-270} nameKey="name">
-                        {pieChartData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
+                      <Pie 
+                        data={pieChartDataProap} 
+                        cx="50%" cy="50%" 
+                        innerRadius={70} outerRadius={95} 
+                        paddingAngle={3} stroke="#fff" strokeWidth={2}
+                        dataKey="value" startAngle={90} endAngle={-270} nameKey="name"
+                      >
+                        {pieChartDataProap.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
                       </Pie>
                       <RechartTooltip formatter={(value: number) => [formatNumberToBRL(value), 'Valor']} />
                     </PieChart>
                   </ResponsiveContainer>
-                  <Box sx={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                  <Box sx={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
                     <Typography variant="caption" color="text.secondary">Total PROAP</Typography>
-                    <Typography variant="h6" color="text.primary" fontWeight="bold" sx={{ wordBreak: 'break-word', textAlign: 'center' }}>{formatNumberToBRL(Number(totalBudget))}</Typography>
+                    <Typography variant="subtitle1" color="text.primary" fontWeight="bold" sx={{ wordBreak: 'break-word', textAlign: 'center' }}>{formatNumberToBRL(Number(totalBudget))}</Typography>
                   </Box>
                 </Box>
               </Paper>
+
+              {/* Gráfico 2: TOTAL Previsto */}
+              <Paper elevation={0} sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', p: 3, borderRadius: 2, border: `1px solid ${theme.palette.divider}` }}>
+                <Typography variant="subtitle2" fontWeight="bold" color="text.secondary" sx={{ mb: 2 }}>Orçamento Previsto</Typography>
+                <Box sx={{ position: 'relative', width: '100%', height: '100%', minHeight: '220px' }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie 
+                        data={pieChartDataPrevisto} 
+                        cx="50%" cy="50%" 
+                        innerRadius={70} outerRadius={95} 
+                        paddingAngle={3} stroke="#fff" strokeWidth={2} 
+                        dataKey="value" startAngle={90} endAngle={-270} nameKey="name"
+                      >
+                        {pieChartDataPrevisto.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
+                      </Pie>
+                      <RechartTooltip formatter={(value: number) => [formatNumberToBRL(value), 'Valor']} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <Box sx={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', px: 1, pointerEvents: 'none' }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1 }}>Consumo Previsto</Typography>
+                    <Typography variant="subtitle1" color="primary.main" fontWeight="bold" sx={{ textAlign: 'center', mt: 0.25, mb: 0.25, fontSize: '1.05rem' }}>
+                      {formatNumberToBRL(Number(consumoPrevisto))}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.72rem', opacity: 0.85 }}>
+                      de {formatNumberToBRL(Number(totalBudget))}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Paper>
+
+              {/* Gráfico 3: TOTAL Real */}
+              <Paper elevation={0} sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', p: 3, borderRadius: 2, border: `1px solid ${theme.palette.divider}` }}>
+                <Typography variant="subtitle2" fontWeight="bold" color="text.secondary" sx={{ mb: 2 }}>Orçamento Real</Typography>
+                <Box sx={{ position: 'relative', width: '100%', height: '100%', minHeight: '220px' }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie 
+                        data={pieChartDataReal} 
+                        cx="50%" cy="50%" 
+                        innerRadius={70} outerRadius={95} 
+                        paddingAngle={3} stroke="#fff" strokeWidth={2} 
+                        dataKey="value" startAngle={90} endAngle={-270} nameKey="name"
+                      >
+                        {pieChartDataReal.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
+                      </Pie>
+                      <RechartTooltip formatter={(value: number) => [formatNumberToBRL(value), 'Valor']} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <Box sx={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', px: 1, pointerEvents: 'none' }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1 }}>Consumo Real</Typography>
+                    <Typography variant="subtitle1" color="success.main" fontWeight="bold" sx={{ textAlign: 'center', mt: 0.25, mb: 0.25, fontSize: '1.05rem' }}>
+                      {formatNumberToBRL(Number(consumoReal))}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.72rem', opacity: 0.85 }}>
+                      de {formatNumberToBRL(Number(totalBudget))}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Paper>
+
             </Box>
 
             {/* --- GRÁFICO DE BARRAS DE HISTÓRICO --- */}

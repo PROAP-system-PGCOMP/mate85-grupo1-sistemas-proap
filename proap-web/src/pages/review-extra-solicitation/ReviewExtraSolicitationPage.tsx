@@ -14,6 +14,7 @@ import {
   useMediaQuery,
 } from '@mui/material';
 import { Formik, Form, Field } from 'formik';
+import Toast from '../../helpers/notification';
 import { Edit, Delete, Restore } from '@mui/icons-material';
 import {
   getExtraAssistanceRequestById,
@@ -85,17 +86,11 @@ export default function ReviewExtraSolicitationPage() {
 
     reviewExtraAssistanceRequest(payload)
       .then(() => {
-        alert("Sucesso! O formulário foi salvo.");
+        Toast.success('Solicitação avaliada com sucesso!');
         navigate('/home');
       })
-      .catch((error) => {
-        console.error("Erro detalhado:", error.response?.data);
-        alert(
-          "Erro ao salvar. " + 
-          (error.response?.data?.itemSolicitado || 
-           error.response?.data?.message || 
-           "Verifique os campos obrigatórios.")
-        );
+      .catch((error) => {      
+          Toast.error(error.response.data.message);
       });
   };
 

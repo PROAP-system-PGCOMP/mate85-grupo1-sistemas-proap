@@ -113,7 +113,6 @@ export const financialDetailFormSchema = Yup.object({
   }),
 });
 export const confirmationDataFormSchema = Yup.object({
-  // justificativa: Yup.string(),
   aceiteFinal: Yup.boolean()
     .nullable()
     .required('É necessário aceitar os termos para continuar')
@@ -123,12 +122,38 @@ export const confirmationDataFormSchema = Yup.object({
 export const reviewDataFormSchema = Yup.object({
   situacao: Yup.number()
     .required('Campo obrigatório')
-    .oneOf([1, 2], 'Situação deve ser Aprovado ou Reprovado'),
+    .oneOf([0, 1, 2], 'Situação deve ser Aprovado, Reprovado ou Pendente'),
+  
   dataAvaliacaoProap: Yup.string().required('Campo obrigatório'),
-  numeroAta: Yup.number().required('Campo obrigatório'),
-  numeroDiariasAprovadas: Yup.number().required('Campo obrigatório'),
+
+  numeroAta: Yup.number()
+    .nullable() 
+    .transform((value, originalValue) => (String(originalValue).trim() === '' ? null : value))
+    .when('situacao', {
+      is: (situacao : number) => situacao !== 0, 
+      then: (schema) => schema.required('Campo obrigatório'),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+
+  numeroDiariasAprovadas: Yup.number()
+    .nullable()
+    .transform((value, originalValue) => (String(originalValue).trim() === '' ? null : value))
+    .when('situacao', {
+      is: (situacao: number) => situacao !== 0,
+      then: (schema) => schema.required('Campo obrigatório'),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+
+  valorAprovado: Yup.number()
+    .nullable()
+    .transform((value, originalValue) => (String(originalValue).trim() === '' ? null : value))
+    .when('situacao', {
+      is: (situacao: number) => situacao !== 0 && situacao !== 2,
+      then: (schema) => schema.required('Campo obrigatório'),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+
   observacao: Yup.string().notRequired(),
-  valorAprovado: Yup.number().required('Campo obrigatório'),
 });
 
 export const ceapgDataFormSchema = Yup.object({

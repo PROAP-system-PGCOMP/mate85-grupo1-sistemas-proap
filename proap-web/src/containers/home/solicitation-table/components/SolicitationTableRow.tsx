@@ -16,7 +16,6 @@ import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
-// --- ADIÇÃO 1: IMPORTAR O ÍCONE DO LIVRO ---
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 
 import { formatNumberToBRL } from '../../../../helpers/formatter';

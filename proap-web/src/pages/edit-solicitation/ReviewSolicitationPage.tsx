@@ -90,9 +90,7 @@ export default function ReviewSolicitationPage() {
               }}
               isCeapg={isCeapg}
               title="Avaliar solicitação de auxílio"
-              labels={{
-                submit: 'Finalizar análise',
-              }}
+              hideSubmit={true}
             />
           }
         </>

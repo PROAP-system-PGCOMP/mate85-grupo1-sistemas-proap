@@ -3,16 +3,9 @@ import { useMemo } from 'react';
 import { Typography } from '@mui/material';
 import { FormikValues } from 'formik';
 
-import SolicitantDataFormContainer from './create/SolicitationDataFormContainer';
-import FinancingDataFormContainer from './create/EventDetailFormContainer';
-import EventDataFormContainer from './create/FinancialDetailFormContainer';
 import ReviewDataFormContainer from './review/ReviewDataFormContainer';
 
 import {
-  financialDetailFormSchema,
-  eventDetailFormSchema,
-  INITIAL_FORM_VALUES,
-  solicitantionDataFormSchema,
   reviewDataFormSchema,
   SolicitationFormValues,
   INITIAL_REVIEW_FORM_VALUES,
@@ -35,6 +28,7 @@ interface SolicitationFormContainerProps {
     submit?: string;
     next?: string;
   };
+  hideSubmit?: boolean;
 }
 
 const defaultProps: SolicitationFormContainerProps = {
@@ -45,6 +39,7 @@ const defaultProps: SolicitationFormContainerProps = {
     submit: 'Editar solicitação',
   },
   onSubmit: () => {},
+  hideSubmit: false,
 };
 
 export default function AdminSolicitationFormContainer({
@@ -53,6 +48,7 @@ export default function AdminSolicitationFormContainer({
   labels = defaultProps.labels,
   onSubmit = defaultProps.onSubmit,
   isCeapg = defaultProps.isCeapg,
+  hideSubmit = defaultProps.hideSubmit,
 }: SolicitationFormContainerProps) {
   const ceapgFormSteps: FormStep[] = useMemo(
     () => [
@@ -72,6 +68,7 @@ export default function AdminSolicitationFormContainer({
     ],
     [],
   );
+  
   const proapComissionFormSteps: FormStep[] = useMemo(
     () => [
       {
@@ -107,6 +104,7 @@ export default function AdminSolicitationFormContainer({
             submit: 'Editar solicitação',
           }
         }
+        hideSubmit={hideSubmit}
       />
     </>
   );

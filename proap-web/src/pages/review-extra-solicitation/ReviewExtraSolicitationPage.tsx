@@ -12,10 +12,11 @@ import {
   LinearProgress,
   useTheme,
   useMediaQuery,
+  Tooltip,
 } from '@mui/material';
 import { Formik, Form, Field } from 'formik';
 import Toast from '../../helpers/notification';
-import { Edit, Delete, Restore } from '@mui/icons-material';
+import { Edit, Delete, Restore, CheckCircle, Cancel, Undo, ArrowBack } from '@mui/icons-material';
 import {
   getExtraAssistanceRequestById,
   reviewExtraAssistanceRequest
@@ -232,26 +233,65 @@ export default function ReviewExtraSolicitationPage() {
                   </Grid>
 
                   <Grid item xs={12}>
-                    <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ mt: 2 }}>
-                      <Button variant="outlined" onClick={() => navigate(-1)}>Voltar</Button>
+                    <Box sx={{ display: 'flex', gap: 2, flexDirection: isMobile ? 'column' : 'row', justifyContent: 'flex-end', mt: 2 }}>
                       
-                      <Button 
-                        variant="contained" 
-                        color="error" 
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        onClick={() => navigate(-1)}
+                        startIcon={<ArrowBack />}
+                        sx={{ 
+                          borderRadius: '12px', 
+                          py: 1.5, 
+                          fontWeight: 'bold',
+                          borderWidth: 1
+                        }}
+                      >
+                        Anterior
+                      </Button>
+
+                      <Tooltip title="Remove a decisão atual e permite salvar como pendente">
+                        <Button
+                          variant='contained'
+                          color="warning"
+                          size="small"
+                          disabled={extraRequest?.situacao === 0}
+                          onClick={() => handleReviewSubmit(values, 0)}
+                          startIcon={<Undo />}
+                          sx={{
+                            borderRadius: '12px',
+                            py: 1.5,
+                            borderColor: 'warning.main',
+                          }}
+                        >
+                          Remover Avaliação
+                        </Button>
+                      </Tooltip>
+
+                      <Button
+                        variant='contained'
+                        color="error"
+                        size="small"
                         onClick={() => handleReviewSubmit(values, 2)}
+                        startIcon={<Cancel />}
+                        sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold' }}
                       >
                         Reprovar
                       </Button>
-                      
-                      <Button 
-                        variant="contained" 
-                        color="success" 
+
+                      <Button
+                        variant='contained'
+                        color="success"
+                        size="small"
                         onClick={() => handleReviewSubmit(values, 1)}
-                        sx={{color: 'white'}}
+                        startIcon={<CheckCircle />}
+                        sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', color: 'white' }}
                       >
                         Aprovar Solicitação
                       </Button>
-                    </Stack>
+
+                    </Box>
                   </Grid>
                 </Grid>
               </Paper>

@@ -248,7 +248,6 @@ export default function SolicitationTableRequests() {
             />
           </FormControl>
 
-          {/* --- ADIÇÃO: Select para o Tipo de Solicitação --- */}
           <FormControl sx={{ minWidth: isMobile ? '100%' : '170px' }} size="small">
             <Select
               displayEmpty

@@ -62,9 +62,7 @@ import useDollarRate from '../../../hooks/useDollarRate';
 import Toast from '../../../helpers/notification';
 import React from 'react';
 
-// ----------------------------------------------------------------------
-// COMPONENTE DE MÁSCARA - FORA DO COMPONENTE PRINCIPAL PARA NÃO PERDER FOCO
-// ----------------------------------------------------------------------
+
 const NumericFormatCustom = React.forwardRef<NumericFormatProps, any>(
   function NumericFormatCustom(props, ref) {
     const { onChange, name, ...other } = props;
@@ -77,15 +75,13 @@ const NumericFormatCustom = React.forwardRef<NumericFormatProps, any>(
           onChange({
             target: {
               name: name,
-              // MÁGICA AQUI: Usamos floatValue para enviar um NÚMERO REAL para o Formik
-              // Isso evita que o useCalculeTotal some strings e adicione casas decimais malucas
               value: values.floatValue === undefined ? '' : values.floatValue,
             },
           });
         }}
         thousandSeparator="."
         decimalSeparator=","
-        decimalScale={2} // Trava ESTRITAMENTE em 2 casas decimais (bloqueia o 230,000000)
+        decimalScale={2}
         allowNegative={false}
       />
     );

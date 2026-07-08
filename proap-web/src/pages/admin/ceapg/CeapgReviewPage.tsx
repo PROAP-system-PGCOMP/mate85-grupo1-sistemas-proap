@@ -338,18 +338,15 @@ const CeapgReviewPage = () => {
             Avançar
           </Button>
         ) : (
-          /* ALTERADO AQUI: Controlando o estado do botão final com o loading do hook */
-          <Button
+            <Button  
             variant="contained"
             color="success"
             onClick={handleFinalize}
-            disabled={isEvaluating}
-            size="large"
-            disableElevation
-            sx={{ fontWeight: 600, px: 4, color: '#fff' }}
-          >
-            {isEvaluating ? 'Salvando...' : 'Finalizar Análise'}
-          </Button>
+            disabled={isEvaluating} 
+            size="large"  
+            disableElevation  
+            sx={{ fontWeight: 600, px: 4, color: '#fff' }}  >  {isEvaluating ? 'Salvando...' : 'Finalizar Análise'}  
+            </Button>  
         )}
       </Box>
     </Container>

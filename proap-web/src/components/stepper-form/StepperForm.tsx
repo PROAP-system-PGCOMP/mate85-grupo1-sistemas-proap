@@ -22,7 +22,7 @@ import { AnySchema } from 'yup';
 import { StepperCircularProgress } from './StepperForm.style';
 
 export interface FormStep {
-  component: React.FC;
+  component: React.FC<any>;
   schema?: AnySchema;
   label: string;
 }
@@ -30,6 +30,7 @@ export interface FormStep {
 export interface StepperFormProps<T> extends FormikConfig<T> {
   steps: FormStep[];
   activeStep?: number;
+  hideSubmit?: boolean;
   autoSaveKey?: string;
   onCancel?: () => void;
   onDirtyChange?: (isDirty: boolean) => void;
@@ -77,6 +78,7 @@ export default function StepperForm({
   autoSaveKey,
   onCancel,
   onDirtyChange,
+  hideSubmit = false,
   labels = {
     previous: 'Anterior',
     submit: 'Enviar',
@@ -173,55 +175,63 @@ export default function StepperForm({
             {steps.map(
               ({ component: FormComponent }, index) =>
                 index === activeStep && (
-                  <FormComponent key={`form-wrapper-${index}`} />
+                  <FormComponent 
+                    key={`form-wrapper-${index}`} 
+                    onBack={handleClickPreviousStep}
+                  />
+                  
                 ),
             )}
-            <Box
-              sx={{
-                display: 'flex',
-                marginTop: 2,
-                flexDirection: isMobile ? 'column' : 'row',
-                gap: isMobile ? 2 : 1,
-                justifyContent: 'space-between',
-              }}
-            >
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                {onCancel && (
+            {!(isLastStep && hideSubmit) && (
+              <Box
+                sx={{
+                  display: 'flex',
+                  marginTop: 2,
+                  flexDirection: isMobile ? 'column' : 'row',
+                  gap: isMobile ? 2 : 1,
+                  justifyContent: 'space-between',
+                }}
+              >
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  {onCancel && (
+                    <Button
+                      onClick={onCancel}
+                      variant="outlined"
+                      color="error"
+                      type="button"
+                      fullWidth={isMobile}
+                    >
+                      {componentLabels.cancel}
+                    </Button>
+                  )}
+                  {activeStep > 0 && (
+                    <Button
+                      onClick={handleClickPreviousStep}
+                      disabled={isSubmitting || activeStep === 0}
+                      variant="outlined"
+                      type="button"
+                      fullWidth={isMobile}
+                    >
+                      {componentLabels.previous}
+                    </Button>
+                  )}
+                </Box>
+                {!(isLastStep && hideSubmit) && (
                   <Button
-                    onClick={onCancel}
-                    variant="outlined"
-                    color="error"
-                    type="button"
+                    variant="contained"
+                    type="submit"
+                    form="stepper-form"
+                    disabled={isSubmitting}
                     fullWidth={isMobile}
                   >
-                    {componentLabels.cancel}
-                  </Button>
-                )}
-                {activeStep > 0 && (
-                  <Button
-                    onClick={handleClickPreviousStep}
-                    disabled={isSubmitting || activeStep === 0}
-                    variant="outlined"
-                    type="button"
-                    fullWidth={isMobile}
-                  >
-                    {componentLabels.previous}
+                    {isSubmitting && (
+                      <StepperCircularProgress color="info" size={25} />
+                    )}
+                    {!isLastStep ? componentLabels.next : componentLabels.submit}
                   </Button>
                 )}
               </Box>
-              <Button
-                variant="contained"
-                type="submit"
-                form="stepper-form"
-                disabled={isSubmitting}
-                fullWidth={isMobile}
-              >
-                {isSubmitting && (
-                  <StepperCircularProgress color="info" size={25} />
-                )}
-                {!isLastStep ? componentLabels.next : componentLabels.submit}
-              </Button>
-            </Box>
+            )}
           </Form>
         )}
       </Formik>

@@ -13,7 +13,6 @@ import {
   Button,
   useTheme,
   useMediaQuery,
-  alpha,
 } from '@mui/material';
 import {
   StyledData,
@@ -32,8 +31,13 @@ import {
 import { SolicitationFormValues } from '../SolicitationFormSchema';
 import { useBudgetPercentage } from '../../../hooks/budget/useBudgetPercentage';
 
-export default function ReviewDataFormContainer() {
-  const { values, errors, touched, setFieldValue, submitForm } =
+interface ReviewDataFormContainerProps {
+  onBack?: () => void;
+}
+
+export default function ReviewDataFormContainer({ onBack }: ReviewDataFormContainerProps) {
+  // 1. Adicionamos o setValues aqui
+  const { values, errors, touched, setFieldValue, setValues, submitForm } =
     useFormikContext<SolicitationFormValues>();
   const [isEditingDate, setIsEditingDate] = useState(false);
   const theme = useTheme();
@@ -63,16 +67,23 @@ export default function ReviewDataFormContainer() {
     setIsEditingDate(false);
   };
 
-  
-  const handleRemoveEvaluation = async () => {
-    setFieldValue('situacao', 0);
+  const handleRemoveEvaluation = () => {
+    setValues({
+      ...values,
+      situacao: 0,
+      valorAprovado: '' as any, 
+      numeroDiariasAprovadas: 0,
+      numeroAta: '' as any,     
+      observacao: ''
+    });
     
-    setFieldValue('valorAprovado', '');
-    setFieldValue('numeroDiariasAprovadas', 0);
-    setFieldValue('numeroAta', '');
-    setFieldValue('observacao', '');
+    setTimeout(() => submitForm(), 50);
+  };
 
-  
+  const handleDecisionSelect = (value: number) => {
+    setFieldValue('situacao', value);
+    
+    setTimeout(() => submitForm(), 50);
   };
 
   const formatDisplayDate = (dateString?: string) => {
@@ -80,10 +91,7 @@ export default function ReviewDataFormContainer() {
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR');
   };
-
-  const handleDecisionSelect = (value: number) => {
-    setFieldValue('situacao', value);
-  };
+  
 
   return (
     <Box sx={{ p: 2 }}>
@@ -203,36 +211,27 @@ export default function ReviewDataFormContainer() {
         <Field as={StyledTextField} fullWidth label="Observação" name="observacao" multiline rows={3} />
       </Box>
 
-      <Box sx={{ mt: 4, pt: 3, borderTop: '1px solid', borderColor: 'divider' }}>
-        <StyledFormLabel required sx={{ mb: 2 }}>Decisão da Avaliação PROAP</StyledFormLabel>
-        <Box sx={{ display: 'flex', gap: 2, flexDirection: isMobile ? 'column' : 'row' }}>
-          <Button
-            variant={values.situacao === 1 ? 'contained' : 'outlined'}
-            color="success"
-            fullWidth
-            onClick={() => handleDecisionSelect(1)}
-            startIcon={<CheckCircle />}
-            sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', color: 'white' }}
-          >
-            Aprovar
-          </Button>
-
-          <Button
-            variant={values.situacao === 2 ? 'contained' : 'outlined'}
-            color="error"
-            fullWidth
-            onClick={() => handleDecisionSelect(2)}
-            startIcon={<Cancel />}
-            sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold' }}
-          >
-            Reprovar
-          </Button>
-
-          <Tooltip title="Remove a decisão atual e permite salvar como pendente">
+      <Box sx={{ mt: 4, pt: 3, borderTop: '1px solid', borderColor: 'divider', display: 'flex', flexDirection: "column", justifyContent: "end" }}>
+        <Box sx={{ display: 'flex', justifyContent: isMobile ? 'center' : 'flex-end', mb: 2 }}>
+          <StyledFormLabel required>Decisão da Avaliação PROAP</StyledFormLabel>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 2, flexDirection: isMobile ? 'column' : 'row', justifyContent: "end"}}>
+          {onBack && (
             <Button
               variant="outlined"
+              color="primary"
+              size="small"
+              onClick={onBack}
+              sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', borderWidth: 1 }}
+            >
+              Anterior
+            </Button>
+          )}
+          <Tooltip title="Remove a decisão atual e permite salvar como pendente">
+            <Button
+              variant='contained'
               color="warning"
-              fullWidth
+              size="small"
               disabled={values.situacao === 0}
               onClick={handleRemoveEvaluation}
               startIcon={<Undo />}
@@ -240,17 +239,37 @@ export default function ReviewDataFormContainer() {
                 borderRadius: '12px',
                 py: 1.5,
                 borderColor: 'warning.main',
-                '&:hover': {
-                  backgroundColor: alpha(theme.palette.warning.main, 0.08),
-                },
               }}
             >
               Remover Avaliação
             </Button>
           </Tooltip>
+
+          <Button
+            variant='contained'
+            color="error"
+            size="small"
+            onClick={() => handleDecisionSelect(2)}
+            startIcon={<Cancel />}
+            sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold' }}
+          >
+            Reprovar
+          </Button>
+
+          <Button
+            variant='contained'
+            color="success"
+            size="small"
+            onClick={() => handleDecisionSelect(1)}
+            startIcon={<CheckCircle />}
+            sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', color: 'white' }}
+          >
+            Aprovar solicitação
+          </Button>
+
         </Box>
         {touched.situacao && errors.situacao && (
-          <FormHelperText error sx={{ mt: 1 }}>{errors.situacao}</FormHelperText>
+          <FormHelperText error sx={{ mt: 1, textAlign: isMobile ? 'center' : 'right' }}>{errors.situacao as string}</FormHelperText>
         )}
       </Box>
     </Box>

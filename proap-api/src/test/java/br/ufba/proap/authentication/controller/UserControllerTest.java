@@ -319,7 +319,7 @@ class UserControllerTest {
                         .param("profileId", "2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("Sucesso"))
-                .andExpect(jsonPath("$.message").value("Perfil updated com sucesso!"));
+                .andExpect(jsonPath("$.message").value("Perfil atualizado com sucesso!"));
 
         verify(userService).updateProfile(eq(TEST_EMAIL), eq(2L));
     }

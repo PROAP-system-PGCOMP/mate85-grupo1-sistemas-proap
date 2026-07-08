@@ -55,7 +55,7 @@ class UserControllerTest {
 	private Permission adminRolePermission;
 
 	private static final String TEST_NAME = "Test User";
-	private static final String TEST_EMAIL = "test@example.com";
+	private static final String TEST_EMAIL = "test@ufba.br";
 	private static final String TEST_PASSWORD = "password123";
 	private static final String TEST_CPF = "12345678900";
 	private static final String TEST_PHONE = "71999887766";
@@ -106,7 +106,7 @@ class UserControllerTest {
 
 		adminUser = new User();
 		adminUser.setName("Admin User");
-		adminUser.setEmail("admin@example.com");
+		adminUser.setEmail("admin@ufba.br");
 		adminUser.setPassword(TEST_PASSWORD);
 		adminUser.setCpf("00000000000");
 		adminUser.setPhone("71999995555");

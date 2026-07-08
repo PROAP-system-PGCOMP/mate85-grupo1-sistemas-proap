@@ -18,7 +18,12 @@ export const personalDataFormSchema = Yup.object({
         return cpfValue != undefined && cpf.isValid(cpfValue);
       },
     ),
-  registration: Yup.number().required('Campo obrigatório'),
+  registration: Yup.string()
+  .required('Campo obrigatório')
+  .matches(
+    /^\d+$/, 
+    'Insira uma matrícula num formato válido (apenas números)'
+  ),
 });
 
 export const contactDataFormSchema = Yup.object({

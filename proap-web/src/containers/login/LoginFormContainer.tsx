@@ -119,7 +119,7 @@ export default function LoginFormContainer() {
                   <TextField
                     {...field}
                     label="E-mail"
-                    placeholder="Digite seu e-mail"
+                    placeholder="Digite seu e-mail institucional"
                     variant="outlined"
                     fullWidth
                     autoComplete="email"

@@ -1,6 +1,9 @@
 import * as Yup from 'yup';
 import { AssistanceRequest } from '../../types';
 
+const minDate = new Date('1900-01-01');
+const maxDate = new Date('2099-12-31');
+
 export const solicitantionDataFormSchema = Yup.object({
   tituloPublicacao: Yup.string()
     .required('Campo obrigatório')
@@ -45,9 +48,29 @@ export const solicitantDetailFormSchema = Yup.object({
 export const eventDetailFormSchema = Yup.object({
   nomeEvento: Yup.string().required('Campo obrigatório'),
   eventoInternacional: Yup.boolean().required('Campo obrigatório'),
-  dataInicio: Yup.string().required('Campo obrigatório'),
+  dataInicio: Yup.string()
+    .required('Campo obrigatório')
+    .test(
+      'ano-valido-inicio',
+      'Insira um ano válido',
+      function (value) {
+        if (!value) return true; 
+        const year = new Date(value).getFullYear();
+        return year >= 1900 && year <= 2099;
+      }
+    ),
+
   dataFim: Yup.string()
     .required('Campo obrigatório')
+    .test(
+      'ano-valido-fim',
+      'Insira um ano válido',
+      function (value) {
+        if (!value) return true; 
+        const year = new Date(value).getFullYear();
+        return year >= 1900 && year <= 2099;
+      }
+    )
     .test(
       'dataFim-maior-que-dataInicio',
       'Data de término deve ser maior ou igual a data de início',

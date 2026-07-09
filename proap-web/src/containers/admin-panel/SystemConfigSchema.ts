@@ -1,5 +1,8 @@
 import * as Yup from 'yup';
 
+const minDate = new Date('1900-01-01');
+const maxDate = new Date('2099-12-31');
+
 export const systemConfigSchema = Yup.object().shape({
   id: Yup.string().required('ID é obrigatório'),
   qualis: Yup.array().of(Yup.string().required()),
@@ -17,17 +20,19 @@ export const systemConfigSchema = Yup.object().shape({
   
   startDate: Yup.date()
     .nullable()
-    .notRequired(),
+    .notRequired()
+    .min(minDate, 'Insira um ano válido')
+    .max(maxDate, 'Insira um ano válido'),
     
   endDate: Yup.date()
     .nullable()
+    .max(maxDate, 'Insira um ano válido')
     .when(['startDate'], {
       is: (startDate: any) => !!startDate,
       then: (schema) => 
         schema
           .min(Yup.ref('startDate'), 'Data de fim deve ser após a data de início')
           .notRequired(),
-      // Se não, fica livre
       otherwise: (schema) => schema.nullable().notRequired(),
     }),
     

@@ -1,6 +1,20 @@
 import * as Yup from 'yup';
 import { AssistanceRequest } from '../../types';
 
+const minDate = new Date('1900-01-01');
+const maxDate = new Date('2099-12-31');
+const validacaoNome = Yup.string()
+  .required('Campo obrigatório')
+  .test(
+    'sem-espacos-falsos',
+    'O campo não pode conter apenas espaços',
+    (value) => !!value && value.trim().length > 0
+  )
+  .min(3, 'O nome deve ter no mínimo 3 caracteres')
+  .matches(
+    /^[a-zA-ZÀ-ÿ\s]+$/, 
+    'O nome não pode conter números ou caracteres especiais'
+  );
 export const solicitantionDataFormSchema = Yup.object({
   tituloPublicacao: Yup.string()
     .required('Campo obrigatório')
@@ -22,10 +36,10 @@ export const solicitantionDataFormSchema = Yup.object({
 
 export const solicitantDetailFormSchema = Yup.object({
   solicitanteDocente: Yup.boolean().required('Campo obrigatório'),
-  nomeDocente: Yup.string().required('Campo obrigatório'),
+  nomeDocente: validacaoNome,
   nomeDiscente: Yup.string().when('solicitanteDocente', {
     is: false,
-    then: () => Yup.string().required('Campo obrigatório'),
+    then: () => validacaoNome,
     otherwise: () => Yup.string().notRequired(),
   }),
   discenteNoPrazoDoCurso: Yup.boolean().when('solicitanteDocente', {
@@ -45,9 +59,29 @@ export const solicitantDetailFormSchema = Yup.object({
 export const eventDetailFormSchema = Yup.object({
   nomeEvento: Yup.string().required('Campo obrigatório'),
   eventoInternacional: Yup.boolean().required('Campo obrigatório'),
-  dataInicio: Yup.string().required('Campo obrigatório'),
+  dataInicio: Yup.string()
+    .required('Campo obrigatório')
+    .test(
+      'ano-valido-inicio',
+      'Insira um ano válido',
+      function (value) {
+        if (!value) return true; 
+        const year = new Date(value).getFullYear();
+        return year >= 1900 && year <= 2099;
+      }
+    ),
+
   dataFim: Yup.string()
     .required('Campo obrigatório')
+    .test(
+      'ano-valido-fim',
+      'Insira um ano válido',
+      function (value) {
+        if (!value) return true; 
+        const year = new Date(value).getFullYear();
+        return year >= 1900 && year <= 2099;
+      }
+    )
     .test(
       'dataFim-maior-que-dataInicio',
       'Data de término deve ser maior ou igual a data de início',

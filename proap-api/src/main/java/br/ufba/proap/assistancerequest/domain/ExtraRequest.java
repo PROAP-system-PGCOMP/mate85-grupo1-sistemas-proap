@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -26,14 +27,13 @@ public class ExtraRequest {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	// Dados do solicitante
 	@ManyToOne
 	private User user;
 
-	@Column(nullable = false, columnDefinition = "VARCHAR(255) DEFAULT 'Sem título'")
-	private String titulo;
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String titulo = "Sem título";
 
-	private String itemSolicitado;
+    private String itemSolicitado;
 
 	@Column(columnDefinition = "text")
 	private String justificativa;

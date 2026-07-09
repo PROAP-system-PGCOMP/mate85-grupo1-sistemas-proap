@@ -48,7 +48,7 @@ public class AssistanceRequest {
 	@ManyToOne
 	private User user;
 
-	@Column(nullable = false)
+	@Column(nullable = false, columnDefinition = "TEXT")
 	private String tituloPublicacao;
 
 	private String coautores;
@@ -168,7 +168,7 @@ public class AssistanceRequest {
 	@Column(nullable = true, precision = 19, scale = 4)
 	private BigDecimal custoFinalCeapg;
 
-	@Column(nullable = true)
+	@Column(nullable = true, columnDefinition = "TEXT")
 	private String observacoesCeapg;
 
 	@Column(nullable = true)

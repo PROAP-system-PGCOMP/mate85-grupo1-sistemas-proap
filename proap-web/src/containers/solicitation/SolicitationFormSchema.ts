@@ -3,7 +3,18 @@ import { AssistanceRequest } from '../../types';
 
 const minDate = new Date('1900-01-01');
 const maxDate = new Date('2099-12-31');
-
+const validacaoNome = Yup.string()
+  .required('Campo obrigatório')
+  .test(
+    'sem-espacos-falsos',
+    'O campo não pode conter apenas espaços',
+    (value) => !!value && value.trim().length > 0
+  )
+  .min(3, 'O nome deve ter no mínimo 3 caracteres')
+  .matches(
+    /^[a-zA-ZÀ-ÿ\s]+$/, 
+    'O nome não pode conter números ou caracteres especiais'
+  );
 export const solicitantionDataFormSchema = Yup.object({
   tituloPublicacao: Yup.string()
     .required('Campo obrigatório')
@@ -25,10 +36,10 @@ export const solicitantionDataFormSchema = Yup.object({
 
 export const solicitantDetailFormSchema = Yup.object({
   solicitanteDocente: Yup.boolean().required('Campo obrigatório'),
-  nomeDocente: Yup.string().required('Campo obrigatório'),
+  nomeDocente: validacaoNome,
   nomeDiscente: Yup.string().when('solicitanteDocente', {
     is: false,
-    then: () => Yup.string().required('Campo obrigatório'),
+    then: () => validacaoNome,
     otherwise: () => Yup.string().notRequired(),
   }),
   discenteNoPrazoDoCurso: Yup.boolean().when('solicitanteDocente', {

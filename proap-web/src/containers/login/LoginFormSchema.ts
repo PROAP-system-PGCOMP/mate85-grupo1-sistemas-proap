@@ -12,7 +12,10 @@ export const INITIAL_FORM_VALUES: LoginFormValues = {
 
 export const loginFormSchema = Yup.object({
   username: Yup.string()
-    .required('Campo obrigatório')
-    .email('Insira um e-mail válido'),
-  password: Yup.string().required('Campo obrigatório'),
+    .email('Insira um e-mail válido')
+    .max(255, 'Limite de caracteres excedido')
+    .required('Campo obrigatório'),
+  password: Yup.string()
+    .max(50, 'Limite de caracteres excedido')
+    .required('Campo obrigatório'),
 });

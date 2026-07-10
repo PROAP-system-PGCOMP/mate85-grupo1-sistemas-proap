@@ -16,11 +16,23 @@ export default function ExtraSolicitationPage() {
 
   const handleSubmit = (values: FormikValues) => {
     const payload = {
-      ...values,
-      itemSolicitado: values.itemSolicitado || 'Solicitação Extra (Sem item especificado)', 
+      titulo: values.titulo || values.nomeSolicitacao || 'Solicitação Extra',
+      itemSolicitado: values.itemSolicitado || values.nomeSolicitacao || values.titulo || 'Item não especificado',
+      
+      justificativa: values.justificativa,
+      
+      valorSolicitado: Number(values.valorSolicitado) > 0 ? Number(values.valorSolicitado) : null,
+      
+      solicitacaoApoio: values.solicitacaoApoio || false,
+      solicitacaoAuxilioOutrasFontes: values.solicitacaoAuxilioOutrasFontes || false,
+      
+      nomeSolicitacao: values.nomeSolicitacao || values.titulo || '',
+      nomeAgenciaFomento: values.nomeAgenciaFomento || '',
+      
+      valorSolicitadoAgenciaFormento: String(values.valorSolicitadoAgenciaFormento || ''),
     };
 
-    return createExtraAssistanceRequest(payload as ExtraRequest)
+    return createExtraAssistanceRequest(payload as unknown as ExtraRequest)
       .then(() => {
         Toast.success('Solicitação criada com sucesso');
         navigate('/');

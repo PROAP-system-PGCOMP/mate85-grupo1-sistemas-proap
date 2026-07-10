@@ -28,29 +28,13 @@ public class InterceptorService implements HandlerInterceptor {
         DataConfig config = configAux.get();
         LocalDateTime now = LocalDateTime.now();
 
-        boolean blockByStart = false;
-        boolean blockByEnd = false;
+        boolean outsideStart = config.getStartDate() != null && now.isBefore(config.getStartDate());
+        boolean outsideEnd = config.getEndDate() != null && now.isAfter(config.getEndDate());
 
-        if (config.getStartDate() != null && now.isAfter(config.getStartDate())) {
-            blockByStart = true;
-        }
-
-        if (config.getStartDate() == null) {
-            blockByStart = true;
-        }
-
-        if (config.getEndDate() != null && now.isBefore(config.getEndDate())) {
-            blockByEnd = true;
-        }
-
-        if (config.getEndDate() == null) {
-            blockByEnd = true;
-        }
-
-        if (blockByStart && blockByEnd) {
+        if (outsideStart || outsideEnd) {
             response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
             response.setContentType("application/json;charset=UTF-8");
-            response.getWriter().write("{\"message\": \"O sistema está indisponível no momento. Por favor, tente novamente mais tarde.\"}");
+            response.getWriter().write("{\"message\": \"O sistema está indisponível no momento ou fora do prazo. Por favor, tente novamente mais tarde.\"}");
             return false;
         }
 

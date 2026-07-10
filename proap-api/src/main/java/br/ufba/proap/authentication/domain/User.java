@@ -15,7 +15,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.jsonwebtoken.lang.Collections;
 
@@ -50,7 +49,7 @@ public class User implements UserDetails {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private PasswordResetToken passwordResetToken;
 
-	@JsonIgnore
+	@JsonBackReference
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "perfil_id")
 	private Perfil perfil;

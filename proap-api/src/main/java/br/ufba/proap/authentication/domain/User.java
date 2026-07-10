@@ -50,8 +50,7 @@ public class User implements UserDetails {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private PasswordResetToken passwordResetToken;
 
-	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-	@JsonBackReference
+	@JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "perfil_id")
 	private Perfil perfil;

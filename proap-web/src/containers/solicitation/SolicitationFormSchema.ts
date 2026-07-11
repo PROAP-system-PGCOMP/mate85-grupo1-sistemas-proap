@@ -17,6 +17,7 @@ const validacaoNome = Yup.string()
   );
 export const solicitantionDataFormSchema = Yup.object({
   tituloPublicacao: Yup.string()
+    .trim()
     .required('Campo obrigatório')
     .max(500, 'O título deve ter no máximo 500 caracteres'),
   coautores: Yup.array().of(Yup.string()),
@@ -57,7 +58,7 @@ export const solicitantDetailFormSchema = Yup.object({
     .min(1, 'O valor mínimo é 1'),
 });
 export const eventDetailFormSchema = Yup.object({
-  nomeEvento: Yup.string().required('Campo obrigatório')
+  nomeEvento: Yup.string().trim().required('Campo obrigatório')
     .max(255, 'O nome do evento não pode conter mais que 255 caracteres.'),
   eventoInternacional: Yup.boolean().required('Campo obrigatório'),
   dataInicio: Yup.string()
@@ -95,9 +96,9 @@ export const eventDetailFormSchema = Yup.object({
   linkHomePageEvento: Yup.string()
     .url('Insira uma URL válida')
     .max(255, 'O link deve ter no máximo 255 caracteres'),
-  cidade: Yup.string().required('Campo obrigatório')
+  cidade: Yup.string().trim().required('Campo obrigatório')
     .max(255, 'A cidade não pode conter mais que 255 caracteres.'),
-  pais: Yup.string().required('Campo obrigatório')
+  pais: Yup.string().trim().required('Campo obrigatório')
     .max(255, 'O país não pode conter mais que 255 caracteres.'),
   qualis: Yup.string().required('Campo obrigatório'),
   modalidadeParticipacao: Yup.string().required('Campo obrigatório'),
@@ -196,7 +197,7 @@ export const reviewDataFormSchema = Yup.object({
 
 export const ceapgDataFormSchema = Yup.object({
   custoFinalCeapg: Yup.number().required('Campo obrigatório'),
-  observacoesCeapg: Yup.string().notRequired()
+  observacoesCeapg: Yup.string().trim().notRequired()
     .max(1000, 'A observação não pode conter mais que 1000 caracteres.'),
 });
 

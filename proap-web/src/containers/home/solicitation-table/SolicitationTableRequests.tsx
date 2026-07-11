@@ -53,6 +53,42 @@ import {
 } from './components';
 import { ConfirmationDialog } from '../../../components/dialogs';
 
+const parseDateString = (dateString?: string): number => {
+  if (!dateString) return 0;
+
+  const nativeTime = new Date(dateString).getTime();
+  if (!isNaN(nativeTime) && dateString.includes('-')) {
+    return nativeTime;
+  }
+
+  const [datePart, timePart] = dateString.split(' ');
+
+  if (!datePart || !datePart.includes('/')) {
+    return 0; 
+  }
+
+  const [day, month, year] = datePart.split('/');
+  
+  let hours = 0, minutes = 0, seconds = 0;
+  if (timePart) {
+    const timeParts = timePart.split(':');
+    hours = Number(timeParts[0]) || 0;
+    minutes = Number(timeParts[1]) || 0;
+    seconds = Number(timeParts[2]) || 0; 
+  }
+
+  const finalDate = new Date(
+    Number(year),
+    Number(month) - 1,
+    Number(day),
+    hours,
+    minutes,
+    seconds
+  ).getTime();
+
+  return isNaN(finalDate) ? 0 : finalDate;
+};
+
 export default function SolicitationTableRequests() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -169,8 +205,8 @@ export default function SolicitationTableRequests() {
     }));
 
     return [...assist, ...extra].sort((a, b) => {
-      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      const dateA = parseDateString(a.createdAt);
+      const dateB = parseDateString(b.createdAt);
       return dateB - dateA;
     });
   }, [apoioRequests, extraRequests]);

@@ -202,6 +202,10 @@ export default function SolicitationTableRequests() {
       valorTotal: r.valorSolicitado || r.valorTotal,
       tituloPublicacao: r.titulo || r.tituloPublicacao,
       nomeEvento: r.itemSolicitado || r.nomeEvento,
+      
+      user: r.user || { name: r.userName },
+      nomeDiscente: r.userName,
+      nomeDocente: r.userName, 
     }));
 
     return [...assist, ...extra].sort((a, b) => {
@@ -243,7 +247,7 @@ export default function SolicitationTableRequests() {
       },
     },
   };
-
+  console.log("DADOS DA DEMANDA EXTRA:", extraRequests?.list);
   return (
     <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 2 }}>
       <Box sx={{ mb: 3 }}>

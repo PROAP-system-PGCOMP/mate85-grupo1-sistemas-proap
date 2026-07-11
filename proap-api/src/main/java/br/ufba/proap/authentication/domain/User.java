@@ -50,7 +50,7 @@ public class User implements UserDetails {
     private PasswordResetToken passwordResetToken;
 
 	@JsonBackReference
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "perfil_id")
 	private Perfil perfil;
 

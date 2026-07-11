@@ -37,7 +37,6 @@ import {
   Help,
   CalendarToday,
 } from '@mui/icons-material';
-import { useEffect, useState } from 'react';
 import { useSysConfig } from '../../../hooks/admin/useSysConfig';
 import TextPreviewAlert from '../../../components/FormFields/TextPreviewAlert';
 import LocationCityIcon from '@mui/icons-material/LocationCity';
@@ -48,14 +47,6 @@ export default function EventDetailFormContainer() {
     useFormikContext<InitialSolicitationFormValues>();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-  const [outroQualis, setOutroQualis] = useState('');
-
-  useEffect(() => {
-    if (!/^(A|B)[1-4]$/.test(values.qualis)) {
-      setFieldValue('qualis', outroQualis);
-    }
-  }, [outroQualis]);
 
   return (
     <Paper
@@ -501,13 +492,16 @@ export default function EventDetailFormContainer() {
             )}
 
             {values.qualis === 'Outro' && (
-              <TextField
+              <Field
+                as={TextField}
+                name="outroQualis"
                 label="Especifique o Qualis"
-                value={outroQualis}
-                onChange={(e) => setOutroQualis(e.target.value)}
-                sx={{ maxWidth: 300, bgcolor: 'white' }}
                 placeholder="Informe o Qualis"
                 size="small"
+                sx={{ maxWidth: 300, bgcolor: 'white' }}
+                error={touched.outroQualis && !!errors.outroQualis}
+                helperText={touched.outroQualis && errors.outroQualis}
+                autoFocus
               />
             )}
 

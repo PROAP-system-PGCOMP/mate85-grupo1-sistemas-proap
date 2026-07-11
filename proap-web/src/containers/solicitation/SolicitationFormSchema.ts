@@ -101,6 +101,11 @@ export const eventDetailFormSchema = Yup.object({
   pais: Yup.string().trim().required('Campo obrigatório')
     .max(255, 'O país não pode conter mais que 255 caracteres.'),
   qualis: Yup.string().required('Campo obrigatório'),
+  outroQualis: Yup.string().when('qualis', {
+    is: 'Outro',
+    then: () => Yup.string().trim().required('Por favor, especifique o Qualis'),
+    otherwise: () => Yup.string().nullable().notRequired(),
+  }),
   modalidadeParticipacao: Yup.string().required('Campo obrigatório'),
 });
 
@@ -241,6 +246,7 @@ export type InitialSolicitationFormValues = Pick<
   file: File | null;
   aceiteFinal: boolean | undefined;
   countryGroup?: string;
+  outroQualis?: string;
 };
 
 export const INITIAL_FORM_VALUES: InitialSolicitationFormValues = {
@@ -276,6 +282,7 @@ export const INITIAL_FORM_VALUES: InitialSolicitationFormValues = {
   justificativa: '',
   cartaAceite: null,
   countryGroup: '',
+  outroQualis: '',
 };
 
 export const INITIAL_REVIEW_FORM_VALUES: SolicitationFormValues = {

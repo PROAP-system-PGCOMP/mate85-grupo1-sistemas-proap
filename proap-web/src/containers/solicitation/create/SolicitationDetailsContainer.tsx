@@ -268,7 +268,7 @@ export default function SolicitationDetailsContainer({
               <span style={{ color: 'red' }}> *</span>
             </Typography>
             <TruncatedText variant="subtitle2">
-              {solicitation.qualis}
+              {solicitation.qualis === 'Outro' ? solicitation.outroQualis : solicitation.qualis}
             </TruncatedText>
           </StyledData>
         </Stack>

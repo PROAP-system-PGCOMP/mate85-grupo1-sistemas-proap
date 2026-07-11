@@ -84,7 +84,18 @@ export default function SolicitationFormContainer({
   const handleFormSubmit = (values: FormikValues) => {
     setIsDirty(false);
     setGlobalDirty(false);
-    onSubmit(values);
+    
+    const { outroQualis, ...restValues } = values;
+
+    const qualisParaSalvar = values.qualis === 'Outro' ? outroQualis : values.qualis;
+
+    const payload = {
+      ...restValues,
+      qualis: qualisParaSalvar,
+    };
+
+    onSubmit(payload);
+    
     sessionStorage.removeItem('rascunho-solicitacao-proap');
   };
 

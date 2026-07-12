@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { Field, Form, Formik, FormikHelpers } from 'formik';
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -52,14 +52,11 @@ export default function ConfirmRecoverPasswordFormContainer(props: {
       {({ errors, touched, isSubmitting }) => (
         <Form>
           <Box sx={{ display: 'flex', flexDirection: 'column', pt: 2, pb: 2 }}>
-            
+  
             <Box sx={{ textAlign: 'center', mb: 3 }}>
-              <PasswordRecoveryTypography sx={{ mb: 1 }}>
-                Criar nova senha
-              </PasswordRecoveryTypography>
-              <RecoverPasswordLinkTypography>
+              <Typography variant="body1" color="text.secondary">
                 Insira a nova senha para a sua conta.
-              </RecoverPasswordLinkTypography>
+              </Typography>
             </Box>
 
             <Field

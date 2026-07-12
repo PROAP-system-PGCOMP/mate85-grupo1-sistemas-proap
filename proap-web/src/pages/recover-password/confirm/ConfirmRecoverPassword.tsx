@@ -118,6 +118,8 @@ export default function ConfirmRecoverPassword() {
             component="h1"
             variant="h4"
             fontWeight="bold"
+            align="center"
+            sx={{ mb: 1 }}
           >
             {pageState.isValid ? 'Criar nova senha' : ''}
           </Typography>

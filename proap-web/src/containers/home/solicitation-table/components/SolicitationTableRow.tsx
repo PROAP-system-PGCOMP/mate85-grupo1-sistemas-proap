@@ -192,7 +192,7 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
     >
       <TableCell align="center">
         {tipoSolicitacao === 'Extra' ? (
-          <Chip label="Demanda Extra" size="small" variant="outlined" sx={{ color: '#d81b60', borderColor: '#d81b60' }} />
+          <Chip label="Extra" size="small" variant="outlined" sx={{ color: '#d81b60', borderColor: '#d81b60' }} />
         ) : (
           <Chip label="Publicação" color="primary" size="small" variant="outlined" />
         )}

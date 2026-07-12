@@ -247,7 +247,25 @@ export default function SolicitationTableRequests() {
       },
     },
   };
-  console.log("DADOS DA DEMANDA EXTRA:", extraRequests?.list);
+
+  const statusMenuProps = {
+    PaperProps: {
+      sx: {
+        borderRadius: '4px',
+        marginTop: '4px',
+        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+        overflow: 'hidden', 
+        '& .MuiList-root': { padding: 0 },
+        '& .MuiMenuItem-root': {
+          transition: 'background-color 0.2s',
+          '&.Mui-selected': {
+            backgroundColor: 'rgba(0, 0, 0, 0.08)',
+          },
+        },
+      },
+    },
+  };
+  
   return (
     <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 2 }}>
       <Box sx={{ mb: 3 }}>
@@ -294,7 +312,24 @@ export default function SolicitationTableRequests() {
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
               MenuProps={menuProps}
-              sx={{ height: 47, backgroundColor: 'white' }}
+              sx={{ 
+                height: 47, 
+                backgroundColor: 
+                  typeFilter === 'Apoio' ? alpha('#1976d2', 0.08) : 
+                  typeFilter === 'Extra' ? alpha('#e91e63', 0.08) : 'white',
+                color: 
+                  typeFilter === 'Apoio' ? '#1976d2' : 
+                  typeFilter === 'Extra' ? '#e91e63' : 'inherit',
+                fontWeight: typeFilter !== '' ? 500 : 400,
+                textAlign: 'center',
+                '& .MuiSelect-select': {
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '100%',
+                  boxSizing: 'border-box',
+                }
+              }}
             >
               <MenuItem value="" sx={{ color: 'gray' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, color: 'text.secondary' }}>
@@ -303,10 +338,10 @@ export default function SolicitationTableRequests() {
                 </Box>
               </MenuItem>
               
-              <MenuItem value="Apoio" sx={{ display: 'flex', justifyContent: 'center', fontWeight: 500 }}>
+              <MenuItem value="Apoio" sx={{ display: 'flex', justifyContent: 'center', fontWeight: 500, color: '#1976d2'}}>
                 Publicação
               </MenuItem>
-              <MenuItem value="Extra" sx={{ display: 'flex', justifyContent: 'center', fontWeight: 500 }}>
+              <MenuItem value="Extra" sx={{ display: 'flex', justifyContent: 'center', fontWeight: 500, color: '#e91e63' }}>
                 Demanda Extra
               </MenuItem>
             </Select>
@@ -317,23 +352,26 @@ export default function SolicitationTableRequests() {
               displayEmpty
               value={statusFilter ?? ''}
               onChange={handleStatusFilterChange}
-              MenuProps={menuProps}
+              MenuProps={statusMenuProps}
               sx={{
-                height: 47,
-                backgroundColor: getStatusAlphaColor(statusFilter),
+                height: 50,
+                backgroundColor: statusFilter !== null ? getStatusAlphaColor(statusFilter) : 'white',
                 '& .MuiSelect-select': {
                   height: '47px !important',
                   padding: '0 !important',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'start',
+                  justifyContent: 'center',
                   boxSizing: 'border-box',
                 },
+                '& .MuiSelect-select:focus': {
+                  backgroundColor: 'transparent',
+                }
               }}
               renderValue={(selected) => {
                 if (String(selected) === '') {
                   return (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, color: 'text.secondary' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, color: 'text.secondary'}}>
                       <FilterAltIcon fontSize="small" />
                       <Typography variant="body2">Filtrar</Typography>
                     </Box>
@@ -348,20 +386,48 @@ export default function SolicitationTableRequests() {
                       borderRadius: 0,
                       border: 'none',
                       backgroundColor: 'transparent',
-                      '& .MuiChip-label': { width: '100%', textAlign: 'center' }
+                      '& .MuiChip-label': { 
+                        width: '100%', 
+                        textAlign: 'center',
+                        fontSize: '1rem !important',
+                        fontWeight: '600 !important'  
+                      },
+                      '& .MuiSvgIcon-root': {
+                        fontSize: '1.2rem !important' 
+                      }
                     }}
                   />
                 );
               }}
             >
-              <MenuItem value="" sx={{ color: 'default', py: 1.5, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1.5, fontWeight: 500, borderColor: 'divider', mb: 1 }}>
+              <MenuItem value="" sx={{ color: 'text.secondary', py: 1.5, px: 2, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1.5 }}>
                 <FilterAltIcon fontSize="small" />
                 Limpar filtro
               </MenuItem>
 
               {statusOptions.map((opt) => (
-                <MenuItem key={opt.value} value={opt.value}>
-                  <StatusChip status={opt.value} sx={{ width: '100%', pointerEvents: 'none' }} />
+                <MenuItem 
+                  key={opt.value} 
+                  value={opt.value}
+                  sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'center',
+                     py: 2,
+                    '& .MuiChip-root': {
+                      backgroundColor: 'transparent !important',
+                      border: 'none !important',
+                      boxShadow: 'none !important',
+                    }
+                  }}
+                >
+                  <StatusChip 
+                    status={opt.value} 
+                    sx={{ 
+                      backgroundColor: 'transparent !important', 
+                      boxShadow: 'none',
+                      pointerEvents: 'none'
+                    }} 
+                  />
                 </MenuItem>
               ))}
             </Select>

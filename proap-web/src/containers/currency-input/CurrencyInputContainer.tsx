@@ -23,12 +23,9 @@ const CurrencyCustomFormikField = ({
     setFieldValue(name, valorWithoutMask);
   };
 
-  // useEffect(() => {
-  //   console.log(valorWithoutMask);
-  // });
+  
 
   return (
-    // TODO : Exibir mensagem de erro ao atualizar o valor da input (o touched[name] não estava funcionando)
     <StyledTextField
       label={label}
       name={name}

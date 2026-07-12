@@ -5,6 +5,7 @@ import {
   Box,
   useMediaQuery,
   useTheme,
+  Tooltip,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 
@@ -53,52 +54,56 @@ export default function HomeHotbar() {
               to="/solicitation/create"
               style={{ width: isMobile ? '100%' : 'auto' }}
             >
-              <Button
-                variant="outlined"
-                startIcon={<AddIcon />}
-                fullWidth
-                sx={{
-                  px: 2,
-                  py: 1.5,
-                  border: '2px solid',
-                  borderRadius: '8px',
-                  fontSize: '0.9rem',
-                  whiteSpace: 'nowrap',
-                  height: '100%',
-                  textAlign: 'center',
-                  '&:hover': {
-                    backgroundColor: 'rgba(24, 74, 127, 0.04)',
-                  },
-                }}
-              >
-                Apoio a publicação científica
-              </Button>
+              <Tooltip title="Apenas apoio à publicação científica">
+                <Button
+                  variant="outlined"
+                  startIcon={<AddIcon />}
+                  fullWidth
+                  sx={{
+                    px: 2,
+                    py: 1.5,
+                    border: '2px solid',
+                    borderRadius: '8px',
+                    fontSize: '0.9rem',
+                    whiteSpace: 'nowrap',
+                    height: '100%',
+                    textAlign: 'center',
+                    '&:hover': {
+                      backgroundColor: 'rgba(24, 74, 127, 0.04)',
+                    },
+                  }}
+                >
+                  Apoio a publicação científica
+                </Button>
+              </Tooltip>
             </HomeHotbarLink>
 
             <HomeHotbarLink
               to="/extra-solicitation/create"
               style={{ width: isMobile ? '100%' : 'auto' }}
             >
-              <Button
-                variant="outlined"
-                startIcon={<AddIcon />}
-                fullWidth
-                sx={{
-                  px: 2,
-                  py: 1.5,
-                  border: '2px solid',
-                  borderRadius: '8px',
-                  fontSize: '0.9rem',
-                  whiteSpace: 'nowrap',
-                  height: '100%',
-                  textAlign: 'center',
-                  '&:hover': {
-                    backgroundColor: 'rgba(24, 74, 127, 0.04)',
-                  },
-                }}
-              >
-                Demanda Extra
-              </Button>
+              <Tooltip title="Tudo o que não for relacionado à publicação científica">
+                <Button
+                  variant="outlined"
+                  startIcon={<AddIcon />}
+                  fullWidth
+                  sx={{
+                    px: 2,
+                    py: 1.5,
+                    border: '2px solid',
+                    borderRadius: '8px',
+                    fontSize: '0.9rem',
+                    whiteSpace: 'nowrap',
+                    height: '100%',
+                    textAlign: 'center',
+                    '&:hover': {
+                      backgroundColor: 'rgba(24, 74, 127, 0.04)',
+                    },
+                  }}
+                >
+                  Demanda Extra
+                </Button>
+              </Tooltip>
             </HomeHotbarLink>
           </Box>
         )}

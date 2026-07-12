@@ -49,8 +49,6 @@ api.interceptors.response.use(
   },
   (error) => {
     const url = error.config?.url || '';
-    
-    console.log("A URL que deu erro 401 foi:", url);
 
     const isLoginRequest = url.includes('signin') || url.includes('authentication');
     if (error.response && error.response.status === 401 && !isLoginRequest) {

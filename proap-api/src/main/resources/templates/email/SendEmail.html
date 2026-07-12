@@ -2,71 +2,145 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Criação de Conta</title>
+    <title>PROAP - Criação de Conta</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f6f6f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, Arial;
+            background-color: #f4f7f6;
             margin: 0;
-            padding: 20px;
+            padding: 40px 20px;
         }
-        .container {
+        .email-wrapper {
             max-width: 600px;
             margin: 0 auto;
             background-color: #ffffff;
-            padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
-        .header {
+        .color-bar {
+            width: 100%;
+            height: 12px;
+            border-collapse: collapse;
+        }
+        .color-bar td {
+            width: 25%;
+        }
+        .bg-red { background-color: #C2185B; }
+        .bg-blue { background-color: #4FC3F7; }
+        .bg-yellow { background-color: #FFD54F; }
+        .bg-green { background-color: #81C784; }
+
+        .content-container {
+            padding: 40px 40px;
             text-align: center;
-            margin-bottom: 20px;
+            color: #333333;
         }
-        .content {
+        .logo {
+            max-width: 130px;
+            margin-bottom: 25px;
+        }
+        h1 {
+            margin: 0;
+            font-size: 32px;
+            color: #333333;
+            letter-spacing: 1px;
+        }
+        h2 {
+            margin: 5px 0 25px 0;
+            font-size: 20px;
+            color: #666666;
+            font-weight: 500;
+        }
+        p {
             font-size: 16px;
-            line-height: 1.5;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: #444444;
         }
         .button {
             display: inline-block;
-            padding: 10px 20px;
-            background-color: #007bff;
+            padding: 14px 30px;
+            background-color: #4FC3F7;
             color: #ffffff !important;
             text-decoration: none;
-            border-radius: 4px;
-            margin-top: 20px;
+            border-radius: 6px;
+            font-size: 18px;
             font-weight: bold;
+            margin: 15px 0;
+            box-shadow: 0 2px 4px rgba(79, 195, 247, 0.4);
+        }
+        .url-box {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 12px;
+            border-radius: 6px;
+            word-break: break-all;
+            font-size: 14px;
+            color: #555555;
+            margin-bottom: 20px;
         }
         .footer {
-            margin-top: 30px;
-            font-size: 12px;
-            text-align: center;
-            color: #888;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eeeeee;
+        }
+        .footer p {
+            margin: 5px 0;
+            font-size: 13px;
+            color: #999999;
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="header">
-        <h2 style="color: #004050;">Bem-vindo ao PROAP</h2>
-    </div>
-    <div class="content">
-        <p>
-            Você foi convidado a fazer parte do PROAP. Para começar, clique no botão abaixo para acessar a página de cadastro e criar a sua conta:
-        </p>
-        <p style="text-align: center;">
+    <div class="email-wrapper">
+        
+        <table class="color-bar">
+            <tr>
+                <td class="bg-red"></td>
+                <td class="bg-blue"></td>
+                <td class="bg-yellow"></td>
+                <td class="bg-green"></td>
+            </tr>
+        </table>
+
+        <div class="content-container">
+            <img src="proap-web/public/favicon_IC.png" alt="Logo Computação UFBA" class="logo" />
+
+            <h1>PROAP</h1>
+            <h2>Criação de Conta</h2>
+
+            <p>
+                Você foi convidado a fazer parte do PROAP. Para começar, clique no botão abaixo para acessar a página de cadastro e criar a sua conta:
+            </p>
+
             <a th:href="${url}" class="button">
                 Criar Minha Conta
             </a>
-        </p>
-        <p>
-            Caso não seja possível clicar no botão, copie e cole o seguinte URL no seu navegador: <br>
-            <span th:text="${url}" style="color: #007bff; word-break: break-all;"></span>
-        </p>
+
+            <p>
+                Caso não seja possível clicar no botão, copie e cole o seguinte URL no seu navegador:
+            </p>
+            
+            <div class="url-box">
+                <span th:text="${url}"></span>
+            </div>
+
+            <div class="footer">
+                <p>Se você recebeu este e-mail por engano, por favor ignore-o.</p>
+                <p>Este é um e-mail automático enviado pelo sistema PROAP. Não responda.</p>
+            </div>
+        </div>
+
+        <table class="color-bar">
+            <tr>
+                <td class="bg-red"></td>
+                <td class="bg-blue"></td>
+                <td class="bg-yellow"></td>
+                <td class="bg-green"></td>
+            </tr>
+        </table>
+
     </div>
-    <div class="footer">
-        <p>Se você recebeu este e-mail por engano, por favor ignore-o.</p>
-        <p>Este é um e-mail automático enviado pelo sistema PROAP. Não responda.</p>
-    </div>
-</div>
 </body>
 </html>

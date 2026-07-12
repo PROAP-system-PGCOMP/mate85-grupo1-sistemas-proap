@@ -31,8 +31,10 @@ export default function PasswordField({
               <IconButton
                 size="small"
                 aria-label="toggle password visibility"
-                onPointerDown={handleClickDown}
-                onPointerUp={handleClickUp}
+                onPointerDown={handleClickDown}   
+                onPointerUp={handleClickUp}       
+                onPointerLeave={handleClickUp}    
+                onPointerCancel={handleClickUp}   
                 edge="end"
               >
                 {showPassword ? <Visibility /> : <VisibilityOff />}

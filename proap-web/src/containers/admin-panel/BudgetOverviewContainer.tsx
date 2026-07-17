@@ -194,14 +194,14 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
   };
 
   
-  // 1. Tenta calcular os valores através do array de solicitações
-  const calculadoSolicitado = solicitacoes.reduce((acc: number, req: SolicitacaoDTO) => acc + Number(req.valorAprovado || req.valorSolicitado || 0), 0);
+  const calculadoSolicitado = solicitacoes
+    .filter((req: SolicitacaoDTO) => req.status !== 'rejeitado' && req.status !== 'reprovado') 
+    .reduce((acc: number, req: SolicitacaoDTO) => acc + Number(req.valorAprovado || req.valorSolicitado || 0), 0);
   
   const calculadoGasto = solicitacoes
     .filter((req: SolicitacaoDTO) => !!req.avaliadorCeapg)
     .reduce((acc: number, req: SolicitacaoDTO) => acc + Number(req.custoFinalCeapg || req.valorAprovado || 0), 0);
 
-  // 2. Define os valores finais (se o cálculo for > 0 usa-o, senão usa as props do backend)
   const consumoPrevisto = calculadoSolicitado > 0 ? calculadoSolicitado : usedBudget;
   const consumoReal = calculadoGasto > 0 ? calculadoGasto : usedCeapgBudget;
 

@@ -15,7 +15,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { formatNumberToBRL } from '../../../../helpers/formatter';
 import { StatusChip } from './index';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
-// Importação do tipo necessária para o contrato do modal
+import { Button, SvgIcon, SvgIconProps} from "@mui/material";
 import { SolicitationDetailsDialogProps } from '../../request-dialog/SolicitationDetailsDialog';
 
 interface ExtraRequestCardProps {
@@ -32,6 +32,12 @@ interface ExtraRequestCardProps {
   // Substituindo a prop antiga onShowText pelo novo handler do modal
   onShowDetails: (props: SolicitationDetailsDialogProps) => void;
 }
+
+const EditSquareIcon = (props: SvgIconProps) => (
+  <SvgIcon {...props}>
+    <path d="M5 21q-.825 0-1.413-.587Q3 19.825 3 19V5q0-.825.587-1.413Q4.175 3 5 3h8.925l-2 2H5v14h14v-6.95l2-2V19q0 .825-.587 1.413Q19.825 21 19 21Zm4-6v-2.125l5.975-5.975 2.125 2.125L11.125 15Zm8.8-6.025-2.125-2.125.85-.85q.275-.275.688-.275.412 0 .687.275l.75.75q.275.275.275.688 0 .412-.275.687Z"/>
+  </SvgIcon>
+);
 
 const ExtraRequestCard: React.FC<ExtraRequestCardProps> = ({
   extraRequest,
@@ -116,19 +122,22 @@ const ExtraRequestCard: React.FC<ExtraRequestCardProps> = ({
       onClick={handleCardClick}
     >
       <CardContent sx={{ flexGrow: 1, p: 2 }}>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="flex-start"
-          mb={1}
+        <Box sx={{
+          display:"flex",
+          justifyContent:"space-between",
+          alignItems:"flex-start",
+          mb:1
+          }}
         >
           <Box>
-            <Typography
-              variant="subtitle1"
-              fontWeight="medium"
-              component="div"
-              sx={{ maxWidth: '18ch' }}
+            <Typography 
+              variant="subtitle1" 
+              component="div" 
               gutterBottom
+              sx={{
+                fontWeight: "medium",
+                maxWidth: '18ch'
+              }}
             >
               {user.name}
             </Typography>
@@ -145,16 +154,16 @@ const ExtraRequestCard: React.FC<ExtraRequestCardProps> = ({
 
         <Divider sx={{ my: 1.5 }} />
 
-        <Box mt={1.5}>
+        <Box sx={{ mt: 1.5 }}>
           <Typography variant="body2" color="text.secondary">
             Valor solicitado
           </Typography>
-          <Typography variant="h6" component="div" fontWeight="medium">
+          <Typography sx={{variant:"h6", component:"div", fontWeight:"medium"}}>
             {valorSolicitado != null ? formatNumberToBRL(valorSolicitado) : '-'}
           </Typography>
         </Box>
 
-        <Box mt={1.5} display="flex" justifyContent="space-between">
+        <Box sx={{ mt: 1.5, display: "flex", justifyContent: "space-between" }}>
           <Box>
             <Typography variant="body2" color="text.secondary">
               Valor aprovado
@@ -212,7 +221,7 @@ const ExtraRequestCard: React.FC<ExtraRequestCardProps> = ({
                   )
                 }
               >
-                <ModeEditIcon fontSize="small" />
+                <EditSquareIcon fontSize="small" />
               </IconButton>
             </span>
           </Tooltip>

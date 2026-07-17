@@ -153,7 +153,7 @@ export default function SolicitationTableRequests() {
         
         dispatch((getExtraAssistanceRequests as any)(sortBy, ascending, page, size)).then((reqExtra: any) => {
           const totalExtra = reqExtra?.payload?.total || 0;
-          setNumberPagesAssistance(Math.trunc((totalApoio + totalExtra) / size) + 1);
+          setNumberPagesAssistance(Math.ceil((totalApoio + totalExtra) / size) || 1);
         });
       });
     },
@@ -164,8 +164,8 @@ export default function SolicitationTableRequests() {
     updateAssistanceRequestList(
       getSelectedProp(),
       selectedPropToSortTable[getSelectedProp()] as boolean,
-      size,
-      currentPageAssistance
+      1000,
+      0     
     );
   };
 
@@ -188,7 +188,7 @@ export default function SolicitationTableRequests() {
 
   useEffect(() => {
     updateAssistanceRequestListWithCurrentParameters();
-  }, [currentPageAssistance, size, selectedPropToSortTable]);
+  }, [selectedPropToSortTable]);
 
   const combinedRequests = useMemo(() => {
     const assist = (apoioRequests?.list || []).map((r: any) => ({
@@ -225,6 +225,14 @@ export default function SolicitationTableRequests() {
       (typeFilter === '' || request.tipoSolicitacao === typeFilter)
     );
   });
+
+  const calculatedTotalPages = Math.ceil(filteredRequests.length / size) || 1;
+
+  const safeCurrentPage = Math.min(currentPageAssistance, calculatedTotalPages - 1);
+
+  const startIndex = safeCurrentPage * size;
+  const endIndex = startIndex + size;
+  const paginatedRequests = filteredRequests.slice(startIndex, endIndex);
 
   const menuProps = {
     PaperProps: {
@@ -437,7 +445,7 @@ export default function SolicitationTableRequests() {
 
       {viewMode === 'table' ? (
         <SolicitationTableView
-          filteredRequests={filteredRequests}
+          filteredRequests={paginatedRequests}
           searchQuery={searchQuery}
           selectedPropToSortTable={selectedPropToSortTable}
           handleClickSortTable={handleClickSortTable}
@@ -454,7 +462,7 @@ export default function SolicitationTableRequests() {
         />
       ) : (
         <SolicitationGridView
-          filteredRequests={filteredRequests}
+          filteredRequests={paginatedRequests}
           searchQuery={searchQuery}
           currentUserEmail={currentUser.email}
           userCanViewAllRequests={userCanViewAllRequests}
@@ -487,8 +495,8 @@ export default function SolicitationTableRequests() {
         </Box>
 
         <Pagination
-          count={numberPagesAssistance}
-          page={currentPageAssistance + 1}
+          count={calculatedTotalPages}
+          page={safeCurrentPage + 1}
           onChange={(_, v) => setCurrentPageAssistance(v - 1)}
           color="primary"
           showFirstButton

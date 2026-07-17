@@ -18,6 +18,8 @@ import { formatNumberToBRL } from '../../../../helpers/formatter';
 import { SolicitationDetailsDialogProps } from '../../request-dialog/SolicitationDetailsDialog';
 import { StatusChip } from './index';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
+import { Button, SvgIcon, SvgIconProps} from "@mui/material";
+
 
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -45,6 +47,12 @@ interface SolicitationCardProps {
   onClone: (id: number, tipo: string) => void;
   onShowDetails: (props: SolicitationDetailsDialogProps) => void;
 }
+
+const EditSquareIcon = (props: SvgIconProps) => (
+  <SvgIcon {...props}>
+    <path d="M5 21q-.825 0-1.413-.587Q3 19.825 3 19V5q0-.825.587-1.413Q4.175 3 5 3h8.925l-2 2H5v14h14v-6.95l2-2V19q0 .825-.587 1.413Q19.825 21 19 21Zm4-6v-2.125l5.975-5.975 2.125 2.125L11.125 15Zm8.8-6.025-2.125-2.125.85-.85q.275-.275.688-.275.412 0 .687.275l.75.75q.275.275.275.688 0 .412-.275.687Z"/>
+  </SvgIcon>
+);
 
 const SolicitationCard: React.FC<SolicitationCardProps> = ({
   solicitation,
@@ -254,7 +262,7 @@ const SolicitationCard: React.FC<SolicitationCardProps> = ({
                 onClick={handleEdit}
                 disabled={!((situacao === 0 && currentUserEmail === user?.email) || userCanReviewRequests)}
               >
-                <ModeEditIcon fontSize="small" />
+                <EditSquareIcon fontSize="small" />
               </IconButton>
             </span>
           </Tooltip>

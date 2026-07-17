@@ -9,7 +9,7 @@ import {
   Container,
   alpha,
 } from '@mui/material';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined';
 import { Link } from 'react-router-dom';
 import { ArrowBack, Email } from '@mui/icons-material';
 

@@ -110,6 +110,7 @@ export default function SolicitationTableRequests() {
     { value: 0, text: 'Pendente' },
     { value: 1, text: 'Aprovada' },
     { value: 2, text: 'Não aprovada' },
+    { value: 3, text: 'Em espera' },
   ];
 
   const { selectedPropToSortTable, getSelectedProp, handleClickSortTable } =
@@ -177,6 +178,7 @@ export default function SolicitationTableRequests() {
   const getStatusAlphaColor = (status: number | null) => {
     if (status === 1) return alpha('#4caf50', 0.05);
     if (status === 2) return alpha('#f44336', 0.05);
+    if (status === 3) return alpha('rgb(255, 251, 0)', 0.05);
     if (status === 0) return alpha('#ff9800', 0.05);
     return 'transparent';
   };

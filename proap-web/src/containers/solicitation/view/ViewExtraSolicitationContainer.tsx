@@ -10,7 +10,7 @@ import {
   Chip,
   Tooltip,
 } from '@mui/material';
-import { CheckCircle, Cancel, PendingOutlined } from '@mui/icons-material';
+import { CheckCircle, Cancel, PendingOutlined, LowPriority } from '@mui/icons-material';
 import { formatNumberToBRL } from '../../../helpers/formatter';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 
@@ -103,6 +103,8 @@ const ViewExtraSolicitationContainer: React.FC<ViewExtraSolicitationContainerPro
         return { label: 'Aprovada', color: 'success' as const, icon: <CheckCircle /> };
       case 2:
         return { label: 'Reprovada', color: 'error' as const, icon: <Cancel /> };
+      case 3:
+        return {label: 'Em espera', color: 'secondary' as const, icon: <LowPriority />};
       default:
         return { label: 'Pendente', color: 'warning' as const, icon: <HourglassEmptyIcon /> };
     }

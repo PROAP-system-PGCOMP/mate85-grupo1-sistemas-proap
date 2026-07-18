@@ -26,6 +26,7 @@ import {
   Restore,
   CheckCircle,
   Cancel,
+  LowPriority,
   Undo,
 } from '@mui/icons-material';
 import { SolicitationFormValues } from '../SolicitationFormSchema';
@@ -244,6 +245,17 @@ export default function ReviewDataFormContainer({ onBack }: ReviewDataFormContai
               Remover Avaliação
             </Button>
           </Tooltip>
+
+          <Button
+            variant='contained'
+            color="secondary"
+            size="small"
+            onClick={() => handleDecisionSelect(3)}
+            startIcon={<LowPriority />}
+            sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', color: 'white' }}
+          >
+            Em espera
+          </Button>
 
           <Button
             variant='contained'

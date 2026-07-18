@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { Formik, Form, Field } from 'formik';
 import Toast from '../../helpers/notification';
-import { Edit, Delete, Restore, CheckCircle, Cancel, Undo, ArrowBack } from '@mui/icons-material';
+import { Edit, Delete, Restore, CheckCircle, Cancel, Undo, ArrowBack, LowPriority } from '@mui/icons-material';
 import {
   getExtraAssistanceRequestById,
   reviewExtraAssistanceRequest
@@ -268,6 +268,17 @@ export default function ReviewExtraSolicitationPage() {
                           Remover Avaliação
                         </Button>
                       </Tooltip>
+
+                      <Button
+                        variant='contained'
+                        color="secondary"
+                        size="small"
+                        onClick={() => handleReviewSubmit(values, 3)}
+                        startIcon={<LowPriority />}
+                        sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', color: 'white' }}
+                      >
+                        Em espera
+                      </Button>
 
                       <Button
                         variant='contained'

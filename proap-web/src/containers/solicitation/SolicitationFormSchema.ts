@@ -165,7 +165,7 @@ export const confirmationDataFormSchema = Yup.object({
 export const reviewDataFormSchema = Yup.object({
   situacao: Yup.number()
     .required('Campo obrigatório')
-    .oneOf([0, 1, 2], 'Situação deve ser Aprovado, Reprovado ou Pendente'),
+    .oneOf([0, 1, 2, 3], 'Situação deve ser Aprovado, Reprovado, Pendente ou Em espera'),
   
   dataAvaliacaoProap: Yup.string().required('Campo obrigatório'),
 

@@ -50,12 +50,14 @@ export default function SolicitationDetailsDialog({
   const getStatusColor = () => {
     if (solicitationData.situacao === 1) return 'success';
     if (solicitationData.situacao === 2) return 'error';
+    if (solicitationData.situacao === 3) return 'secondary';
     return 'warning';
   };
 
   const getStatusText = () => {
     if (solicitationData.situacao === 1) return 'Aprovada';
     if (solicitationData.situacao === 2) return 'Não aprovada';
+    if (solicitationData.situacao === 3) return 'Em espera';
     return 'Pendente de avaliação';
   };
 

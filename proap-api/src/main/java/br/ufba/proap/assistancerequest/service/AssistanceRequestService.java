@@ -150,8 +150,8 @@ public class AssistanceRequestService {
 
 		// Validate situation value
 		Integer situacao = assistanceRequest.getSituacao();
-		if (situacao == null || (situacao != 1 && situacao != 2 && situacao != 0 && situacao != 3)) {
-			throw new IllegalArgumentException("Situação deve ser Aprovado, Reprovado ou Em espera");
+		if (situacao == null || (situacao != 1 && situacao != 2 && situacao != 0 && situacao != 3 && situacao != 4)) {
+			throw new IllegalArgumentException("Situação deve ser Aprovado, Reprovado, Em espera ou Cancelado");
 		}
 
 		AssistanceRequest persisted = assistancePersisted.get();

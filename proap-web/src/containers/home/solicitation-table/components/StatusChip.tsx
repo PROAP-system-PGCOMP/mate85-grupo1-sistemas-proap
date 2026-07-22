@@ -4,6 +4,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import LowPriority from '@mui/icons-material/LowPriority';
+import DoDisturb from '@mui/icons-material/DoDisturb';
 
 interface StatusChipProps {
   status: number;
@@ -18,6 +19,8 @@ const StatusChip: React.FC<StatusChipProps> = ({ status }) => {
     if (status === 1) return 'success';
     if (status === 2) return 'error';
     if (status === 3) return 'secondary';
+    if (status === 4) return 'error';
+
     return 'warning';
   };
 
@@ -25,6 +28,7 @@ const StatusChip: React.FC<StatusChipProps> = ({ status }) => {
     if (status === 1) return 'Aprovada';
     if (status === 2) return 'Não aprovada';
     if (status === 3) return 'Em espera';
+    if (status === 4) return 'Cancelada';
     return 'Pendente';
   };
 
@@ -32,6 +36,7 @@ const StatusChip: React.FC<StatusChipProps> = ({ status }) => {
     if (status === 1) return <CheckCircleIcon fontSize="small" />;
     if (status === 2) return <CancelIcon fontSize="small" />;
     if (status === 3) return <LowPriority fontSize="small" />;
+    if (status === 4) return <DoDisturb fontSize="small" />;
 
     return <HourglassEmptyIcon fontSize="small" />;
   };

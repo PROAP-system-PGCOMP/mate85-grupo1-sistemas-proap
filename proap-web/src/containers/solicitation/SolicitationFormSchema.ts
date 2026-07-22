@@ -165,7 +165,7 @@ export const confirmationDataFormSchema = Yup.object({
 export const reviewDataFormSchema = Yup.object({
   situacao: Yup.number()
     .required('Campo obrigatório')
-    .oneOf([0, 1, 2, 3], 'Situação deve ser Aprovado, Reprovado, Pendente ou Em espera'),
+    .oneOf([0, 1, 2, 3, 4], 'Situação deve ser Aprovado, Reprovado, Pendente, Em espera ou Cancelado'),
   
   dataAvaliacaoProap: Yup.string().required('Campo obrigatório'),
 
@@ -173,7 +173,7 @@ export const reviewDataFormSchema = Yup.object({
     .nullable() 
     .transform((value, originalValue) => (String(originalValue).trim() === '' ? null : value))
     .when('situacao', {
-      is: (situacao : number) => situacao !== 0, 
+      is: (situacao : number) => situacao === 1 || situacao === 2, 
       then: (schema) => schema.required('Campo obrigatório'),
       otherwise: (schema) => schema.notRequired(),
     }),
@@ -182,7 +182,7 @@ export const reviewDataFormSchema = Yup.object({
     .nullable()
     .transform((value, originalValue) => (String(originalValue).trim() === '' ? null : value))
     .when('situacao', {
-      is: (situacao: number) => situacao !== 0,
+      is: (situacao: number) => situacao === 1 || situacao === 2,
       then: (schema) => schema.required('Campo obrigatório'),
       otherwise: (schema) => schema.notRequired(),
     }),
@@ -191,7 +191,7 @@ export const reviewDataFormSchema = Yup.object({
     .nullable()
     .transform((value, originalValue) => (String(originalValue).trim() === '' ? null : value))
     .when('situacao', {
-      is: (situacao: number) => situacao !== 0 && situacao !== 2,
+      is: (situacao: number) => situacao === 1,
       then: (schema) => schema.required('Campo obrigatório'),
       otherwise: (schema) => schema.notRequired(),
     }),

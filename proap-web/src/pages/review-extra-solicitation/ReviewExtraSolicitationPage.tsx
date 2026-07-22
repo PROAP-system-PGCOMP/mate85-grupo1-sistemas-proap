@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { Formik, Form, Field } from 'formik';
 import Toast from '../../helpers/notification';
-import { Edit, Delete, Restore, CheckCircle, Cancel, Undo, ArrowBack, LowPriority } from '@mui/icons-material';
+import { Edit, Delete, Restore, CheckCircle, Cancel, Undo, ArrowBack, LowPriority, DoDisturb } from '@mui/icons-material';
 import {
   getExtraAssistanceRequestById,
   reviewExtraAssistanceRequest
@@ -233,7 +233,7 @@ export default function ReviewExtraSolicitationPage() {
                   </Grid>
 
                   <Grid item xs={12}>
-                    <Box sx={{ display: 'flex', gap: 2, flexDirection: isMobile ? 'column' : 'row', justifyContent: 'flex-end', mt: 2 }}>
+                    <Box sx={{ display: 'flex', gap: 2, flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', mt: 2 }}>
                       
                       <Button
                         variant="outlined"
@@ -245,63 +245,77 @@ export default function ReviewExtraSolicitationPage() {
                           borderRadius: '12px', 
                           py: 1.5, 
                           fontWeight: 'bold',
-                          borderWidth: 1
+                          borderWidth: 1,
                         }}
                       >
                         Anterior
                       </Button>
+                      <Box sx={{ display: 'flex', gap: 2, flexDirection: isMobile ? 'column' : 'row' }}>
+                        <Tooltip title="Remove a decisão atual e permite salvar como pendente">
+                          <Button
+                            variant='contained'
+                            color="primary"
+                            size="small"
+                            disabled={extraRequest?.situacao === 0}
+                            onClick={() => handleReviewSubmit(values, 0)}
+                            startIcon={<Undo />}
+                            sx={{
+                              borderRadius: '12px',
+                              py: 1.5,
+                              borderColor: 'warning.main',
+                              '&:hover': {
+                                backgroundColor: 'warning.main', 
+                              },
+                            }}
+                          >
+                            Remover
+                          </Button>
+                        </Tooltip>
 
-                      <Tooltip title="Remove a decisão atual e permite salvar como pendente">
                         <Button
                           variant='contained'
-                          color="warning"
+                          color="primary"
                           size="small"
-                          disabled={extraRequest?.situacao === 0}
-                          onClick={() => handleReviewSubmit(values, 0)}
-                          startIcon={<Undo />}
-                          sx={{
-                            borderRadius: '12px',
-                            py: 1.5,
-                            borderColor: 'warning.main',
-                          }}
+                          onClick={() => handleReviewSubmit(values, 4)}
+                          startIcon={<DoDisturb />}
+                          sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', '&:hover': { backgroundColor: 'error.main'}, }}
                         >
-                          Remover Avaliação
+                          Cancelar
                         </Button>
-                      </Tooltip>
 
-                      <Button
-                        variant='contained'
-                        color="secondary"
-                        size="small"
-                        onClick={() => handleReviewSubmit(values, 3)}
-                        startIcon={<LowPriority />}
-                        sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', color: 'white' }}
-                      >
-                        Em espera
-                      </Button>
+                        <Button
+                          variant='contained'
+                          color="primary"
+                          size="small"
+                          onClick={() => handleReviewSubmit(values, 3)}
+                          startIcon={<LowPriority />}
+                          sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', color: 'white', '&:hover': { backgroundColor: 'secondary.main'},}}
+                        >
+                          Em espera
+                        </Button>
 
-                      <Button
-                        variant='contained'
-                        color="error"
-                        size="small"
-                        onClick={() => handleReviewSubmit(values, 2)}
-                        startIcon={<Cancel />}
-                        sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold' }}
-                      >
-                        Reprovar
-                      </Button>
+                        <Button
+                          variant='contained'
+                          color="primary"
+                          size="small"
+                          onClick={() => handleReviewSubmit(values, 2)}
+                          startIcon={<Cancel />}
+                          sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', '&:hover': { backgroundColor: 'error.main'}, }}
+                        >
+                          Reprovar
+                        </Button>
 
-                      <Button
-                        variant='contained'
-                        color="success"
-                        size="small"
-                        onClick={() => handleReviewSubmit(values, 1)}
-                        startIcon={<CheckCircle />}
-                        sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', color: 'white' }}
-                      >
-                        Aprovar Solicitação
-                      </Button>
-
+                        <Button
+                          variant='contained'
+                          color="primary"
+                          size="small"
+                          onClick={() => handleReviewSubmit(values, 1)}
+                          startIcon={<CheckCircle />}
+                          sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', color: 'white', '&:hover': { backgroundColor: 'success.main'}, }}
+                        >
+                          Aprovar
+                        </Button>
+                      </Box>
                     </Box>
                   </Grid>
                 </Grid>

@@ -51,6 +51,7 @@ export default function SolicitationDetailsDialog({
     if (solicitationData.situacao === 1) return 'success';
     if (solicitationData.situacao === 2) return 'error';
     if (solicitationData.situacao === 3) return 'secondary';
+    if (solicitationData.situacao === 4) return 'error';
     return 'warning';
   };
 
@@ -58,6 +59,7 @@ export default function SolicitationDetailsDialog({
     if (solicitationData.situacao === 1) return 'Aprovada';
     if (solicitationData.situacao === 2) return 'Não aprovada';
     if (solicitationData.situacao === 3) return 'Em espera';
+    if (solicitationData.situacao === 4) return 'Cancelada';
     return 'Pendente de avaliação';
   };
 

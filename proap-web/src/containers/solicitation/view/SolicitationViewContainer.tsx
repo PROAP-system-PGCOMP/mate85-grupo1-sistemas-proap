@@ -17,7 +17,7 @@ import useSolicitation from '../../../hooks/solicitation/useSolicitation';
 import { booleanToYesOrNo, dateToLocalDate } from '../../../helpers/conversion';
 import { formatNumberToBRL } from '../../../helpers/formatter';
 import { TruncatedText } from '../SolicitationFormContainer.style';
-import { CheckCircle, Cancel, PendingOutlined, LowPriority} from '@mui/icons-material';
+import { CheckCircle, Cancel, PendingOutlined, LowPriority, DoDisturb} from '@mui/icons-material';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 
 interface InfoItemProps {
@@ -131,6 +131,8 @@ export default function SolicitationViewContainer({ id }: { id: string }) {
         return { label: 'Reprovada', color: 'error' as const, icon: <Cancel /> };
       case 3:
         return {label: 'Em espera', color: 'secondary' as const, icon: <LowPriority />};
+      case 4:
+        return {label: 'Cancelada', color: 'error' as const, icon: <DoDisturb />};
       default:
         return { label: 'Pendente', color: 'warning' as const, icon: <HourglassEmptyIcon /> };
     }

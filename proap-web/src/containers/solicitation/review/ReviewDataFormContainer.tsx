@@ -28,6 +28,8 @@ import {
   Cancel,
   LowPriority,
   Undo,
+  ArrowBack,
+  DoDisturb,
 } from '@mui/icons-material';
 import { SolicitationFormValues } from '../SolicitationFormSchema';
 import { useBudgetPercentage } from '../../../hooks/budget/useBudgetPercentage';
@@ -141,7 +143,7 @@ export default function ReviewDataFormContainer({ onBack }: ReviewDataFormContai
             as={StyledTextField}
             fullWidth
             label="Número da ATA"
-            required={values.situacao !== 0}
+            required={values.situacao === 1 || values.situacao === 2}
             name="numeroAta"
             type="number"
             error={Boolean(touched.numeroAta && errors.numeroAta)}
@@ -175,7 +177,7 @@ export default function ReviewDataFormContainer({ onBack }: ReviewDataFormContai
           <Box sx={{ flex: 1 }}>
             <Field
               as={StyledTextField}
-              required={values.situacao !== 0}
+              required={values.situacao === 1}
               fullWidth
               label="Valor aprovado"
               name="valorAprovado"
@@ -197,7 +199,7 @@ export default function ReviewDataFormContainer({ onBack }: ReviewDataFormContai
           </Box>
           <Box sx={{ flex: 1 }}>
             <FormControl fullWidth error={Boolean(touched.numeroDiariasAprovadas && errors.numeroDiariasAprovadas)}>
-              <StyledFormLabel required={values.situacao !== 0}>Diárias aprovadas</StyledFormLabel>
+              <StyledFormLabel required={values.situacao === 1 || values.situacao === 2}>Diárias aprovadas</StyledFormLabel>
               <Field as={Select} name="numeroDiariasAprovadas" size="small">
                 {diariasOptions.map((num) => (
                   <MenuItem key={num} value={num}>{num}</MenuItem>
@@ -216,69 +218,84 @@ export default function ReviewDataFormContainer({ onBack }: ReviewDataFormContai
         <Box sx={{ display: 'flex', justifyContent: isMobile ? 'center' : 'flex-end', mb: 2 }}>
           <StyledFormLabel required>Decisão da Avaliação PROAP</StyledFormLabel>
         </Box>
-        <Box sx={{ display: 'flex', gap: 2, flexDirection: isMobile ? 'column' : 'row', justifyContent: "end"}}>
+        <Box sx={{ display: 'flex', gap: 2, flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between'}}>
           {onBack && (
             <Button
               variant="outlined"
               color="primary"
               size="small"
               onClick={onBack}
-              sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', borderWidth: 1 }}
+              startIcon={<ArrowBack />}
+              sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', borderWidth: 1, width: isMobile ? '100%' : 'auto'}}
             >
               Anterior
             </Button>
           )}
-          <Tooltip title="Remove a decisão atual e permite salvar como pendente">
+          <Box sx={{ display: 'flex', gap: 2, flexDirection: isMobile ? 'column' : 'row' }}>
+            <Tooltip title="Remove a decisão atual e permite salvar como pendente">
+              <Button
+                variant='contained'
+                color="primary"
+                size="small"
+                disabled={values.situacao === 0}
+                onClick={handleRemoveEvaluation}
+                startIcon={<Undo />}
+                sx={{
+                  borderRadius: '12px',
+                  py: 1.5,
+                  '&:hover': {
+                    backgroundColor: 'warning.main', 
+                  },
+                }}
+              >
+                Remover 
+              </Button>
+            </Tooltip>
+
             <Button
               variant='contained'
-              color="warning"
+              color="primary"
               size="small"
-              disabled={values.situacao === 0}
-              onClick={handleRemoveEvaluation}
-              startIcon={<Undo />}
-              sx={{
-                borderRadius: '12px',
-                py: 1.5,
-                borderColor: 'warning.main',
-              }}
+              onClick={() => handleDecisionSelect(4)}
+              startIcon={<DoDisturb />}
+              sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', '&:hover': { backgroundColor: 'error.main'}, }}
             >
-              Remover Avaliação
+              Cancelar
             </Button>
-          </Tooltip>
 
-          <Button
-            variant='contained'
-            color="secondary"
-            size="small"
-            onClick={() => handleDecisionSelect(3)}
-            startIcon={<LowPriority />}
-            sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', color: 'white' }}
-          >
-            Em espera
-          </Button>
+            <Button
+              variant='contained'
+              color="primary"
+              size="small"
+              onClick={() => handleDecisionSelect(3)}
+              startIcon={<LowPriority />}
+              sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', color: 'white', '&:hover': { backgroundColor: 'secondary.main'},}}
+            >
+              Em espera
+            </Button>
 
-          <Button
-            variant='contained'
-            color="error"
-            size="small"
-            onClick={() => handleDecisionSelect(2)}
-            startIcon={<Cancel />}
-            sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold' }}
-          >
-            Reprovar
-          </Button>
+            <Button
+              variant='contained'
+              color="primary"
+              size="small"
+              onClick={() => handleDecisionSelect(2)}
+              startIcon={<Cancel />}
+              sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', '&:hover': { backgroundColor: 'error.main'}, }}
+            >
+              Reprovar
+            </Button>
 
-          <Button
-            variant='contained'
-            color="success"
-            size="small"
-            onClick={() => handleDecisionSelect(1)}
-            startIcon={<CheckCircle />}
-            sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', color: 'white' }}
-          >
-            Aprovar solicitação
-          </Button>
-
+            <Button
+              variant='contained'
+              color="primary"
+              size="small"
+              onClick={() => handleDecisionSelect(1)}
+              startIcon={<CheckCircle />}
+              sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', color: 'white', '&:hover': { backgroundColor: 'success.main'}, }}
+            >
+              Aprovar
+            </Button>
+          </Box>
         </Box>
         {touched.situacao && errors.situacao && (
           <FormHelperText error sx={{ mt: 1, textAlign: isMobile ? 'center' : 'right' }}>{errors.situacao as string}</FormHelperText>

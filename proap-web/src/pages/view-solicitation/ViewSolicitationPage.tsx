@@ -25,7 +25,7 @@ const ViewSolicitationPage: React.FC = () => {
   };
   
   const handleReview = () => {
-    navigate(`/extra-solicitation/review/${id}`); 
+    navigate(`/solicitation/review/${id}`); 
   };
   return (
     <Box>

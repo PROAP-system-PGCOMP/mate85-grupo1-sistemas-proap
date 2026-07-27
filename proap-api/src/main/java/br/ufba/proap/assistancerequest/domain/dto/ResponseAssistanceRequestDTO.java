@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import br.ufba.proap.authentication.domain.dto.UserNormalResponseDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import br.ufba.proap.assistancerequest.domain.AssistanceRequest;
@@ -13,9 +12,9 @@ import br.ufba.proap.authentication.domain.dto.UserResponseDTO;
 
 public record ResponseAssistanceRequestDTO(
         Long id,
-        UserNormalResponseDTO user,
-        UserNormalResponseDTO avaliadorProap,
-        UserNormalResponseDTO avaliadorCeapg,
+        UserResponseDTO user,
+        UserResponseDTO avaliadorProap,
+        UserResponseDTO avaliadorCeapg,
         String tituloPublicacao,
         List<String> coautores,
         Boolean algumCoautorPGCOMP,
@@ -108,9 +107,9 @@ public record ResponseAssistanceRequestDTO(
     public static ResponseAssistanceRequestDTO fromEntity(AssistanceRequest entity) {
         return new ResponseAssistanceRequestDTO(
                 entity.getId(),
-                new UserNormalResponseDTO(entity.getUser()),
-                entity.getAvaliadorProap() != null ? new UserNormalResponseDTO(entity.getAvaliadorProap()) : null,
-                entity.getAvaliadorCeapg() != null ? new UserNormalResponseDTO(entity.getAvaliadorCeapg()) : null,
+                UserResponseDTO.fromUser(entity.getUser()),
+                entity.getAvaliadorProap() != null ? UserResponseDTO.fromUser(entity.getAvaliadorProap()) : null,
+                entity.getAvaliadorCeapg() != null ? UserResponseDTO.fromUser(entity.getAvaliadorCeapg()) : null,
                 entity.getTituloPublicacao(),
                 entity.getCoautores(),
                 entity.getAlgumCoautorPGCOMP(),

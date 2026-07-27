@@ -5,7 +5,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import br.ufba.proap.authentication.domain.dto.AdminUserRegistrationDTO;
-import br.ufba.proap.authentication.domain.dto.UserResponseDTO;
 import br.ufba.proap.mailsender.event.LinkEnvioEvent;
 import br.ufba.proap.mailsender.event.PasswordResetTokenEvent;
 import br.ufba.proap.mailsender.event.UserRegisteredByAdminEvent;
@@ -125,8 +124,8 @@ public class UserService implements UserDetailsService {
         return userRepository.save(loggedUser);
     }
 
-    public List<UserResponseDTO> findAll() {
-        return userRepository.findAllUsers();
+    public List<User> findAll() {
+        return userRepository.findAll();
     }
 
     public List<User> getAllUsersWithPerfilAndPermissions() {

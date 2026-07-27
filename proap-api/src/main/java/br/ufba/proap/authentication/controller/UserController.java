@@ -64,11 +64,7 @@ public class UserController {
 					!currentUser.getPerfil().hasPermission("VIEW_USER")) {
 				return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 			}
-
-			List<User> users = service.getAllUsersWithPerfilAndPermissions();
-			List<UserResponseDTO> usersDto = users.stream().map(user -> {
-				return UserResponseDTO.fromUser(user);
-			}).toList();
+			List<UserResponseDTO> usersDto = service.findAll();
 			return ResponseEntity.ok().body(usersDto);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
@@ -79,13 +75,13 @@ public class UserController {
 	// TODO: Débito técnico - Refatorar para service
 	@Transactional
 	@GetMapping("/info")
-	public ResponseEntity<UserResponseDTO> currentUserInfo() {
+	public ResponseEntity<UserNormalResponseDTO> currentUserInfo() {
 		try {
 			User currentUser = service.getLoggedUser();
 			if (currentUser == null) {
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 			}
-			return ResponseEntity.ok().body(UserResponseDTO.fromUser(currentUser));
+			return ResponseEntity.ok().body(new UserNormalResponseDTO(currentUser));
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -95,10 +91,10 @@ public class UserController {
 	// TODO: Débito técnico - Refatorar para service
 	@Transactional
 	@PutMapping("/update")
-	public ResponseEntity<UserResponseDTO> update(@RequestBody @Valid UserUpdateDTO user) {
+	public ResponseEntity<UserNormalResponseDTO> update(@RequestBody @Valid UserUpdateDTO user) {
 		try {
 			User userService = service.update(user);
-			return ResponseEntity.ok().body(UserResponseDTO.fromUser(userService));
+			return ResponseEntity.ok().body(new UserNormalResponseDTO(userService));
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();

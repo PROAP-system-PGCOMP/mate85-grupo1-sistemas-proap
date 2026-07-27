@@ -3,6 +3,7 @@ package br.ufba.proap.authentication.repository;
 import java.util.List;
 import java.util.Optional;
 
+import br.ufba.proap.authentication.domain.dto.UserResponseDTO;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -44,4 +45,28 @@ public interface UserRepository extends JpaRepository<User, Long> {
 				LEFT JOIN FETCH p.permissions
 			""")
 	List<User> findAllWithPerfilAndPermissions();
+
+    @Query("""
+            SELECT new br.ufba.proap.authentication.domain.dto.UserResponseDTO(
+            u.id,
+            u.name,
+            u.email,
+            u.cpf,
+            u.registration,
+            u.phone,
+            u.alternativePhone
+            g.name,
+            COALESCE(SUM(s.valorTotal), 0),
+            COALESCE(SUM(s.valorAprovado), 0),
+            COALESCE(SUM(f.valorSolicitado), 0),
+            COALESCE(SUM(f.valorAprovado), 0)
+            )
+            FROM Usuario u
+            LEFT JOIN AssistanceRequest s ON s.user = u
+            LEFT JOIN ExtraRequest f ON f.user = u
+            LEFT JOIN u.perfil g
+            GROUP BY u.id, u.name, u.email, u.cpf, u.registration, u.phone, g.name
+            ORDER BY COALESCE(SUM(s.valorTotal), 0) DESC
+            """)
+    List<UserResponseDTO> findAllUsers();
 }

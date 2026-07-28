@@ -54,14 +54,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
             u.cpf,
             u.registration,
             u.phone,
-            u.alternativePhone
+            u.alternativePhone,
             g.name,
             COALESCE(SUM(s.valorTotal), 0),
             COALESCE(SUM(s.valorAprovado), 0),
             COALESCE(SUM(f.valorSolicitado), 0),
             COALESCE(SUM(f.valorAprovado), 0)
             )
-            FROM Usuario u
+            FROM User u
             LEFT JOIN AssistanceRequest s ON s.user = u
             LEFT JOIN ExtraRequest f ON f.user = u
             LEFT JOIN u.perfil g

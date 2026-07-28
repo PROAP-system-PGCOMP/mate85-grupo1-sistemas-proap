@@ -65,7 +65,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             LEFT JOIN AssistanceRequest s ON s.user = u
             LEFT JOIN ExtraRequest f ON f.user = u
             LEFT JOIN u.perfil g
-            GROUP BY u.id, u.name, u.email, u.cpf, u.registration, u.phone, g.name
+            GROUP BY u.id, u.name, u.email, u.cpf, u.registration, u.phone, u.alternativePhone, g.name
             ORDER BY COALESCE(SUM(s.valorTotal), 0) DESC
             """)
     List<UserResponseDTO> findAllUsers();

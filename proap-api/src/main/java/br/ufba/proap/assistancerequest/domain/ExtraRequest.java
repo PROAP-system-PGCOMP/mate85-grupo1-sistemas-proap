@@ -75,6 +75,20 @@ public class ExtraRequest {
 	@Column(nullable = true)
 	private String observacao;
 
+    // CEAPG
+
+    @ManyToOne
+    private User avaliadorCeapg;
+
+    @Column(nullable = true, precision = 19, scale = 4)
+    private BigDecimal custoFinalCeapg;
+
+    @Column(nullable = true, columnDefinition = "TEXT")
+    private String observacoesCeapg;
+
+    @Column(nullable = true)
+    private LocalDate dataAvaliacaoCeapg;
+
 	// Apos aceite
 	@Column(nullable = true, columnDefinition = "text")
 	private String automaticDecText;
@@ -110,6 +124,38 @@ public class ExtraRequest {
 	public void setValorSolicitadoAgenciaFormento(String valorSolicitadoAgenciaFormento) {
 		this.valorSolicitadoAgenciaFormento = valorSolicitadoAgenciaFormento;
 	}
+
+    public void setAvaliadorCeapg(User avaliadorCeapg) {
+        this.avaliadorCeapg = avaliadorCeapg;
+    }
+
+    public void setCustoFinalCeapg(BigDecimal custoFinalCeapg) {
+        this.custoFinalCeapg = custoFinalCeapg;
+    }
+
+    public void setObservacoesCeapg(String observacoesCeapg) {
+        this.observacoesCeapg = observacoesCeapg;
+    }
+
+    public void setDataAvaliacaoCeapg (LocalDate dataAvaliacaoCeapg) {
+        this.setDataAvaliacaoCeapg(dataAvaliacaoCeapg);
+    }
+
+    public User getAvaliadorCeapg() {
+        return this.avaliadorCeapg;
+    }
+
+    public BigDecimal getCustoFinalCeapg() {
+        return this.custoFinalCeapg;
+    }
+
+    public String getObservacoesCeapg() {
+        return this.observacoesCeapg;
+    }
+
+    public LocalDate getDataAvaliacaoCeapg() {
+        return this.dataAvaliacaoCeapg;
+    }
 
 	public int getSituacao() {
 		return situacao;

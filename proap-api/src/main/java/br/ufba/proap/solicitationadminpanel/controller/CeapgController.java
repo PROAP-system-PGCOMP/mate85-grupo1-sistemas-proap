@@ -5,9 +5,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import br.ufba.proap.assistancerequest.domain.AssistanceRequest;
+import br.ufba.proap.assistancerequest.domain.dto.ExtraRequestResponseDTO;
 import br.ufba.proap.authentication.domain.User;
 import br.ufba.proap.authentication.service.UserService;
 import br.ufba.proap.solicitationadminpanel.domain.dto.CeapgReviewDTO;
+import br.ufba.proap.solicitationadminpanel.domain.dto.DefineAvaliadorDTO;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
@@ -82,5 +85,36 @@ public class CeapgController {
         AssistanceRequest reviewedRequest = ceapgService.reviewCeapgRequest(id, data, currentUser);
 
         return ResponseEntity.ok().body(reviewedRequest);
+    }
+
+    @PatchMapping("review/extra/{id}")
+    public ResponseEntity<ExtraRequestResponseDTO> reviewExtraCeapgRequest(@PathVariable Long id, @RequestBody CeapgReviewDTO data) {
+        User currentUser = userService.getLoggedUser();
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        ExtraRequestResponseDTO savedExtra = ceapgService.reviewExtraRequest(id, data, currentUser);
+
+        return ResponseEntity.ok().body(savedExtra);
+    }
+
+    @PatchMapping("/define/assistance")
+    public ResponseEntity<AssistanceRequest> defineAvaliador(@RequestBody @Valid DefineAvaliadorDTO data) {
+        User currentUser = userService.getLoggedUser();
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        AssistanceRequest assistanceRequest = ceapgService.defineCeapgAvaliador(data.avaliadorId(), currentUser, data.solicitacaoId());
+        return ResponseEntity.ok().body(assistanceRequest);
+    }
+
+    @PatchMapping("/define/extra")
+    public ResponseEntity<ExtraRequestResponseDTO> defineExtraAvaliador(@RequestBody @Valid DefineAvaliadorDTO data) {
+        User currentUser = userService.getLoggedUser();
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        ExtraRequestResponseDTO extraRequest = ceapgService.defineExtraRequestCeapgAvaliador(data.avaliadorId(), currentUser, data.solicitacaoId());
+        return ResponseEntity.ok().body(extraRequest);
     }
 }

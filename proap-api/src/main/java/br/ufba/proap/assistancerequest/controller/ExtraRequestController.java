@@ -128,7 +128,11 @@ public class ExtraRequestController {
                     request.getDataAvaliacaoProap(),
                     request.getValorAprovado(),
                     request.getObservacao(),
-                    request.getAutomaticDecText()
+                    request.getAutomaticDecText(),
+                    request.getAvaliadorCeapg(),
+                    request.getCustoFinalCeapg(),
+                    request.getObservacoesCeapg(),
+                    request.getDataAvaliacaoCeapg()
             ));
         }
 

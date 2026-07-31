@@ -5,6 +5,7 @@ import br.ufba.proap.assistancerequest.domain.ExtraRequest;
 import br.ufba.proap.assistancerequest.domain.dto.ExtraRequestResponseDTO;
 import br.ufba.proap.assistancerequest.repository.ExtraRequestRepostirory;
 import br.ufba.proap.authentication.domain.User;
+import br.ufba.proap.authentication.domain.dto.UserResponseDTO;
 import br.ufba.proap.authentication.repository.UserRepository;
 import br.ufba.proap.exception.UnauthorizedException;
 import br.ufba.proap.solicitationadminpanel.domain.dto.CeapgReviewDTO;
@@ -182,5 +183,14 @@ public class CeapgService {
         ExtraRequest newExtra = this.extraRequestRepostirory.save(saveExtra);
 
         return new ExtraRequestResponseDTO(newExtra);
+    }
+
+    public List<UserResponseDTO> findAllCeapg(User currentUser) {
+        if (!currentUser.getPerfil().hasPermission("CEAPG_ROLE") && !currentUser.getPerfil().hasPermission("ADMIN_ROLE")) {
+            throw new UnauthorizedException("Usuario não tem permissão");
+        }
+
+        Long id = 6L;
+        return this.userRepository.findAllCeapg(id);
     }
 }

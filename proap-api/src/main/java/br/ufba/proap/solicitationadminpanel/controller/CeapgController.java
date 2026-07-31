@@ -7,6 +7,7 @@ import java.util.List;
 import br.ufba.proap.assistancerequest.domain.AssistanceRequest;
 import br.ufba.proap.assistancerequest.domain.dto.ExtraRequestResponseDTO;
 import br.ufba.proap.authentication.domain.User;
+import br.ufba.proap.authentication.domain.dto.UserResponseDTO;
 import br.ufba.proap.authentication.service.UserService;
 import br.ufba.proap.solicitationadminpanel.domain.dto.CeapgReviewDTO;
 import br.ufba.proap.solicitationadminpanel.domain.dto.DefineAvaliadorDTO;
@@ -116,5 +117,15 @@ public class CeapgController {
         }
         ExtraRequestResponseDTO extraRequest = ceapgService.defineExtraRequestCeapgAvaliador(data.avaliadorId(), currentUser, data.solicitacaoId());
         return ResponseEntity.ok().body(extraRequest);
+    }
+
+    @GetMapping("/Users")
+    public ResponseEntity<List<UserResponseDTO>> findAllCeapgUsers() {
+        User currentUser = userService.getLoggedUser();
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        List<UserResponseDTO> data = ceapgService.findAllCeapg(currentUser);
+        return ResponseEntity.ok().body(data);
     }
 }

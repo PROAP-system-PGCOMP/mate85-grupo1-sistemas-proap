@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import br.ufba.proap.authentication.domain.User;
+import org.springframework.data.repository.query.Param;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
@@ -69,4 +70,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
             ORDER BY COALESCE(SUM(s.valorTotal), 0) DESC
             """)
     List<UserResponseDTO> findAllUsers();
+
+    @Query("""
+        SELECT u
+        FROM User u
+        WHERE u.perfil.id = :perfilId
+        GROUP BY u.id
+    """)
+    List<UserResponseDTO> findAllCeapg(@Param("perfilId") Long perfilId);
 }

@@ -1,10 +1,12 @@
 import { useState, useCallback } from 'react';
 import api from '../../services';
-import Toast from '../../helpers/notification'; // Padrão de notificações do seu projeto
+import Toast from '../../helpers/notification';
 
 interface CeapgEvaluationPayload {
   custoFinalCeapg: number;
   observacoesCeapg: string;
+  numeroAta?: string | number; 
+  tipoDemanda?: string;
 }
 
 export default function useEvaluateCeapg() {
@@ -14,15 +16,20 @@ export default function useEvaluateCeapg() {
     try {
       setLoading(true);
       
-      // LEMBRETE: Ajuste o método (api.put ou api.patch) e a URL de acordo com o CeapgController do Igor
-      const response = await api.patch(`/admin/ceapg/review/${id}`, payload);
+      const payloadParaOJava = {
+        valorFinal: payload.custoFinalCeapg,
+        observacoes: payload.observacoesCeapg,
+        numeroAta: payload.numeroAta || null, 
+      };
+      
+      const response = await api.patch(`/admin/ceapg/review/${id}`, payloadParaOJava);
       
       Toast.success('Avaliação do CEAPG salva com sucesso!');
       return response.data;
     } catch (error: any) {
       console.error('Erro na avaliação do CEAPG:', error);
       Toast.error(error.response?.data?.message || 'Erro ao salvar avaliação.');
-      throw error; // Lança o erro para o componente saber que não deve redirecionar a página
+      throw error; 
     } finally {
       setLoading(false);
     }

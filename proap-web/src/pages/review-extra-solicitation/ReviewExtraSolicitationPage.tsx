@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import api from '../../services';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
   Paper,
-  Stack,
   TextField,
   Button,
   Divider,
@@ -13,6 +13,14 @@ import {
   useTheme,
   useMediaQuery,
   Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 import { Formik, Form, Field } from 'formik';
 import Toast from '../../helpers/notification';
@@ -31,6 +39,28 @@ export default function ReviewExtraSolicitationPage() {
   const [extraRequest, setExtraRequest] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditingDate, setIsEditingDate] = useState(false);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<number | null>(null);
+  const [selectedAvaliadorId, setSelectedAvaliadorId] = useState<number | ''>('');
+  const [formValuesSnapshot, setFormValuesSnapshot] = useState<any>(null); 
+  
+  const [avaliadoresCeapg, setAvaliadoresCeapg] = useState<any[]>([]);
+
+  useEffect(() => {
+    api.get('/user/list')
+      .then(({ data }) => {
+        const apenasCeapg = data.filter((user: any) => 
+          user.profileName === 'CEAPG' || 
+          user.profileName === 'Membro CEAPG' ||
+          user.perfil?.name === 'CEAPG'
+        );
+        setAvaliadoresCeapg(apenasCeapg);
+      })
+      .catch((error) => {
+        console.error("Erro ao buscar avaliadores CEAPG:", error);
+      });
+  }, []);
 
   useEffect(() => {
     if (id) {
@@ -63,35 +93,82 @@ export default function ReviewExtraSolicitationPage() {
     return dateStr;
   };
 
-  const handleReviewSubmit = (values: any, status: number) => {
-    const safeUser = {
-      id: extraRequest.user?.id,
-      perfil: extraRequest.user?.perfil || { name: 'Solicitante' }
-    };
+  const handleOpenReviewModal = (values: any, decisionValue: number) => {
+    setFormValuesSnapshot(values);
+    setPendingAction(decisionValue);
+    setIsModalOpen(true);
+  };
 
-    const { createdAt, updatedAt, ...restOfRequest } = extraRequest;
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setPendingAction(null);
+    setSelectedAvaliadorId('');
+    setFormValuesSnapshot(null);
+  };
 
-    const payload = {
-      ...restOfRequest, 
-      user: safeUser,
+  const handleConfirmReview = async () => {
+    if (!selectedAvaliadorId || pendingAction === null || !formValuesSnapshot) return;
+    
+    try {
+      await api.patch('/admin/ceapg/define/extra', {
+        avaliadorId: Number(selectedAvaliadorId),
+        solicitacaoId: Number(id)
+      });
+
+      handleReviewSubmit(formValuesSnapshot, pendingAction, Number(selectedAvaliadorId));
+      handleCloseModal();
+    } catch (error) {
+      console.error("Erro ao atribuir o avaliador:", error);
+      Toast.error("Não foi possível atribuir o avaliador CEAPG.");
+    }
+  };
+  // ----------------------------------------------------------------------------------
+
+  const handleReviewSubmit = (values: any, status: number, avaliadorId?: number) => {
+    
+    let dataAvaliacao = values.dataAvaliacaoProap;
+    if (dataAvaliacao && dataAvaliacao.includes('-')) {
+       const [year, month, day] = dataAvaliacao.split('-');
+       dataAvaliacao = `${day}/${month}/${year}`;
+    }
+
+    const payloadExato = {
+      id: extraRequest.id,
+      titulo: extraRequest.titulo,
+      itemSolicitado: extraRequest.itemSolicitado,
+      justificativa: extraRequest.justificativa,
+      valorSolicitado: extraRequest.valorSolicitado,
+      solicitacaoApoio: extraRequest.solicitacaoApoio,
+      solicitacaoAuxilioOutrasFontes: extraRequest.solicitacaoAuxilioOutrasFontes,
+      nomeSolicitacao: extraRequest.nomeSolicitacao,
+      nomeAgenciaFomento: extraRequest.nomeAgenciaFomento,
+      valorSolicitadoAgenciaFormento: extraRequest.valorSolicitadoAgenciaFormento,
       situacao: status,
+      
+      numeroAta: values.numeroAta || null,
+      dataAvaliacaoProap: dataAvaliacao || null,
+      valorAprovado: status === 1 ? (Number(extraRequest.valorSolicitado) || 0) : 0,
       observacao: values.parecer,
-      numeroAta: values.numeroAta,
       
-      itemSolicitado: extraRequest.itemSolicitado, 
+      user: extraRequest.user?.id ? { id: extraRequest.user.id } : null,
+      avaliadorCeapg: avaliadorId ? { id: avaliadorId } : (extraRequest.avaliadorCeapg?.id ? { id: extraRequest.avaliadorCeapg.id } : null),
 
-      dataAvaliacaoProap: formatToBackend(values.dataAvaliacaoProap),
-      
-      valorAprovado: status === 1 ? (extraRequest.valorSolicitado || 0) : 0,
+      custoFinalCeapg: extraRequest.custoFinalCeapg,
+      observacoesCeapg: extraRequest.observacoesCeapg,
+      automaticDecText: extraRequest.automaticDecText,
+
+      createdAt: extraRequest.createdAt,
+      updatedAt: extraRequest.updatedAt
     };
 
-    reviewExtraAssistanceRequest(payload)
+    reviewExtraAssistanceRequest(payloadExato as any)
       .then(() => {
         Toast.success('Solicitação avaliada com sucesso!');
         navigate('/home');
       })
       .catch((error) => {      
-          Toast.error(error.response.data.message);
+          console.error("Erro detalhado:", error.response?.data);
+          Toast.error(error.response?.data?.message || 'Erro ao avaliar solicitação.');
       });
   };
 
@@ -239,6 +316,7 @@ export default function ReviewExtraSolicitationPage() {
                         variant="outlined"
                         color="primary"
                         size="small"
+                        type="button"
                         onClick={() => navigate(-1)}
                         startIcon={<ArrowBack />}
                         sx={{ 
@@ -256,6 +334,7 @@ export default function ReviewExtraSolicitationPage() {
                             variant='contained'
                             color="primary"
                             size="small"
+                            type="button"
                             disabled={extraRequest?.situacao === 0}
                             onClick={() => handleReviewSubmit(values, 0)}
                             startIcon={<Undo />}
@@ -276,6 +355,7 @@ export default function ReviewExtraSolicitationPage() {
                           variant='contained'
                           color="primary"
                           size="small"
+                          type="button"
                           onClick={() => handleReviewSubmit(values, 4)}
                           startIcon={<DoDisturb />}
                           sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', '&:hover': { backgroundColor: 'error.main'}, }}
@@ -287,6 +367,7 @@ export default function ReviewExtraSolicitationPage() {
                           variant='contained'
                           color="primary"
                           size="small"
+                          type="button"
                           onClick={() => handleReviewSubmit(values, 3)}
                           startIcon={<LowPriority />}
                           sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', color: 'white', '&:hover': { backgroundColor: 'secondary.main'},}}
@@ -294,11 +375,13 @@ export default function ReviewExtraSolicitationPage() {
                           Em espera
                         </Button>
 
+                        {/* Botões que abrem o modal */}
                         <Button
                           variant='contained'
                           color="primary"
                           size="small"
-                          onClick={() => handleReviewSubmit(values, 2)}
+                          type="button"
+                          onClick={() => handleOpenReviewModal(values, 2)}
                           startIcon={<Cancel />}
                           sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', '&:hover': { backgroundColor: 'error.main'}, }}
                         >
@@ -309,7 +392,8 @@ export default function ReviewExtraSolicitationPage() {
                           variant='contained'
                           color="primary"
                           size="small"
-                          onClick={() => handleReviewSubmit(values, 1)}
+                          type="button"
+                          onClick={() => handleOpenReviewModal(values, 1)}
                           startIcon={<CheckCircle />}
                           sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', color: 'white', '&:hover': { backgroundColor: 'success.main'}, }}
                         >
@@ -324,6 +408,53 @@ export default function ReviewExtraSolicitationPage() {
           );
         }}
       </Formik>
+
+      <Dialog 
+        open={isModalOpen} 
+        onClose={handleCloseModal}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontWeight: 'bold' }}>
+          Indicar Revisor CEAPG
+        </DialogTitle>
+        <DialogContent dividers>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Para concluir a ação de <strong>{pendingAction === 1 ? 'aprovar' : 'reprovar'}</strong>, selecione o revisor do CEAPG responsável por esta avaliação.
+          </Typography>
+
+          <FormControl fullWidth size="small" sx={{ mt: 1 }}>
+            <InputLabel id="select-revisor-label">Revisor Responsável *</InputLabel>
+            <Select
+              labelId="select-revisor-label"
+              value={selectedAvaliadorId}
+              label="Revisor Responsável *"
+              onChange={(e) => setSelectedAvaliadorId(Number(e.target.value))}
+            >
+              {avaliadoresCeapg.map((avaliador) => (
+                <MenuItem key={avaliador.id} value={avaliador.id}>
+                  {avaliador.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button onClick={handleCloseModal} color="inherit">
+            Cancelar
+          </Button>
+          <Button 
+            onClick={handleConfirmReview} 
+            variant="contained" 
+            color={pendingAction === 1 ? 'success' : 'error'}
+            disabled={!selectedAvaliadorId}
+            sx={{ color: 'white' }}
+          >
+            Finalizar Avaliação
+          </Button>
+        </DialogActions>
+      </Dialog>
+
     </Box>
   );
 }

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Field, useFormikContext } from 'formik';
+import api from '../../../services';
+import { useParams } from 'react-router-dom';
 import {
   Box,
   FormControl,
@@ -13,6 +15,11 @@ import {
   Button,
   useTheme,
   useMediaQuery,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  InputLabel,
 } from '@mui/material';
 import {
   StyledData,
@@ -39,21 +46,62 @@ interface ReviewDataFormContainerProps {
 }
 
 export default function ReviewDataFormContainer({ onBack }: ReviewDataFormContainerProps) {
-  // 1. Adicionamos o setValues aqui
-  const { values, errors, touched, setFieldValue, setValues, submitForm } =
+  const { id: urlId } = useParams<{ id: string }>(); 
+  
+  const { values, errors, touched, setFieldValue, setValues, submitForm, isValid, isSubmitting } =
     useFormikContext<SolicitationFormValues>();
   const [isEditingDate, setIsEditingDate] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<number | null>(null);
+  const [selectedAvaliadorId, setSelectedAvaliadorId] = useState<number | ''>('');
+  
+  const [avaliadoresCeapg, setAvaliadoresCeapg] = useState<any[]>([]);
+  const [isLoadingAvaliadores, setIsLoadingAvaliadores] = useState(false);
+
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+    }
+  }, [errors]);
+
+  useEffect(() => {
+  }, [isSubmitting]);
+
   const maxDiarias = values.quantidadeDiariasSolicitadas || 0;
   const diariasOptions = Array.from({ length: maxDiarias + 1 }, (_, i) => i);
 
-  // Hook para cálculo de impacto no orçamento
+  const currentYear = new Date().getFullYear();
+  const requestYear = values.createdAt ? new Date(values.createdAt).getFullYear() : currentYear;
+
   const { totalBudget, percentageOfBudget, isLoading } = useBudgetPercentage({
-    year: values.createdAt,
+    year: requestYear, 
     value: values.valorTotal,
   });
+
+  useEffect(() => {
+    const fetchAvaliadores = async () => {
+      try {
+        setIsLoadingAvaliadores(true);
+        const { data } = await api.get('/user/list');
+        
+        const apenasCeapg = data.filter((user: any) => 
+          user.profileName === 'CEAPG' || 
+          user.profileName === 'Membro CEAPG' ||
+          user.perfil?.name === 'CEAPG'
+        );
+        
+        setAvaliadoresCeapg(apenasCeapg);
+      } catch (error) {
+        console.error('Erro ao buscar avaliadores do CEAPG:', error);
+      } finally {
+        setIsLoadingAvaliadores(false);
+      }
+    };
+
+    fetchAvaliadores();
+  }, []);
 
   useEffect(() => {
     if (!values.dataAvaliacaoProap) {
@@ -70,8 +118,8 @@ export default function ReviewDataFormContainer({ onBack }: ReviewDataFormContai
     setIsEditingDate(false);
   };
 
-  const handleRemoveEvaluation = () => {
-    setValues({
+  const handleRemoveEvaluation = async () => {
+    await setValues({
       ...values,
       situacao: 0,
       valorAprovado: '' as any, 
@@ -79,14 +127,72 @@ export default function ReviewDataFormContainer({ onBack }: ReviewDataFormContai
       numeroAta: '' as any,     
       observacao: ''
     });
-    
-    setTimeout(() => submitForm(), 50);
+    submitForm();
   };
 
-  const handleDecisionSelect = (value: number) => {
-    setFieldValue('situacao', value);
+  const handleDecisionSelect = async (value: number) => {
+    await setFieldValue('situacao', value);
+    submitForm();
+  };
+
+  const handleOpenReviewModal = (decisionValue: number) => {
+    setPendingAction(decisionValue); 
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setPendingAction(null);
+    setSelectedAvaliadorId('');
+  };
+
+  const handleConfirmReview = async () => {
+    if (!selectedAvaliadorId || pendingAction === null) return;
     
-    setTimeout(() => submitForm(), 50);
+    if (pendingAction === 1 || pendingAction === 2) {
+      if (!values.numeroAta) {
+        alert("O preenchimento do 'Número da ATA' é obrigatório para Aprovar ou Reprovar.");
+        handleCloseModal();
+        return;
+      }
+    }
+    if (pendingAction === 1) {
+      if (values.valorAprovado === undefined || values.valorAprovado === null || (values.valorAprovado as any) === '') {
+        alert("O preenchimento do 'Valor aprovado' é obrigatório para Aprovar.");
+        handleCloseModal();
+        return;
+      }
+    }
+
+    const solicitacaoId = (values as any).id || urlId || window.location.pathname.split('/').pop();
+
+    try {
+      await api.patch('/admin/ceapg/define/assistance', {
+        avaliadorId: Number(selectedAvaliadorId),
+        solicitacaoId: Number(solicitacaoId) 
+      });
+
+      setValues({
+        ...values,
+        situacao: pendingAction,
+        avaliadorCeapgId: selectedAvaliadorId,
+        avaliadorCeapg: {
+          ...(values.avaliadorCeapg || {}),
+          id: selectedAvaliadorId
+        } as any 
+      });
+      
+      handleCloseModal();
+      
+      setTimeout(() => {
+        submitForm();
+      }, 150);
+      
+    } catch (error) {
+      console.error("Erro ao atribuir o avaliador:", error);
+      alert("Falha na comunicação com o servidor ao definir avaliador."); 
+      handleCloseModal();
+    }
   };
 
   const formatDisplayDate = (dateString?: string) => {
@@ -95,7 +201,6 @@ export default function ReviewDataFormContainer({ onBack }: ReviewDataFormContai
     return date.toLocaleDateString('pt-BR');
   };
   
-
   return (
     <Box sx={{ p: 2 }}>
       <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold' }}>
@@ -190,7 +295,6 @@ export default function ReviewDataFormContainer({ onBack }: ReviewDataFormContai
         </Box>
       </Box>
 
-      {/* Seção: Diárias */}
       <Box sx={{ mb: 3, p: 2, border: '1px solid #e0e0e0', borderRadius: 2 }}>
         <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 2 : 4 }}>
           <Box sx={{ flex: 1 }}>
@@ -232,24 +336,21 @@ export default function ReviewDataFormContainer({ onBack }: ReviewDataFormContai
             </Button>
           )}
           <Box sx={{ display: 'flex', gap: 2, flexDirection: isMobile ? 'column' : 'row' }}>
+            
             <Tooltip title="Remove a decisão atual e permite salvar como pendente">
-              <Button
-                variant='contained'
-                color="primary"
-                size="small"
-                disabled={values.situacao === 0}
-                onClick={handleRemoveEvaluation}
-                startIcon={<Undo />}
-                sx={{
-                  borderRadius: '12px',
-                  py: 1.5,
-                  '&:hover': {
-                    backgroundColor: 'warning.main', 
-                  },
-                }}
-              >
-                Remover 
-              </Button>
+              <span>
+                <Button
+                  variant='contained'
+                  color="primary"
+                  size="small"
+                  disabled={values.situacao === 0}
+                  onClick={handleRemoveEvaluation}
+                  startIcon={<Undo />}
+                  sx={{ borderRadius: '12px', py: 1.5, '&:hover': { backgroundColor: 'warning.main' } }}
+                >
+                  Remover 
+                </Button>
+              </span>
             </Tooltip>
 
             <Button
@@ -258,7 +359,7 @@ export default function ReviewDataFormContainer({ onBack }: ReviewDataFormContai
               size="small"
               onClick={() => handleDecisionSelect(4)}
               startIcon={<DoDisturb />}
-              sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', '&:hover': { backgroundColor: 'error.main'}, }}
+              sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', '&:hover': { backgroundColor: 'error.main'} }}
             >
               Cancelar
             </Button>
@@ -269,29 +370,37 @@ export default function ReviewDataFormContainer({ onBack }: ReviewDataFormContai
               size="small"
               onClick={() => handleDecisionSelect(3)}
               startIcon={<LowPriority />}
-              sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', color: 'white', '&:hover': { backgroundColor: 'secondary.main'},}}
+              sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', color: 'white', '&:hover': { backgroundColor: 'secondary.main'} }}
             >
               Em espera
             </Button>
 
             <Button
+              type="button"
               variant='contained'
               color="primary"
               size="small"
-              onClick={() => handleDecisionSelect(2)}
+              onClick={(e) => {
+                e.preventDefault();
+                handleOpenReviewModal(2);
+              }}
               startIcon={<Cancel />}
-              sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', '&:hover': { backgroundColor: 'error.main'}, }}
+              sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', '&:hover': { backgroundColor: 'error.main'} }}
             >
               Reprovar
             </Button>
 
             <Button
+              type="button"
               variant='contained'
               color="primary"
               size="small"
-              onClick={() => handleDecisionSelect(1)}
+              onClick={(e) => {
+                e.preventDefault();
+                handleOpenReviewModal(1);
+              }} 
               startIcon={<CheckCircle />}
-              sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', color: 'white', '&:hover': { backgroundColor: 'success.main'}, }}
+              sx={{ borderRadius: '12px', py: 1.5, fontWeight: 'bold', color: 'white', '&:hover': { backgroundColor: 'success.main'} }}
             >
               Aprovar
             </Button>
@@ -301,6 +410,64 @@ export default function ReviewDataFormContainer({ onBack }: ReviewDataFormContai
           <FormHelperText error sx={{ mt: 1, textAlign: isMobile ? 'center' : 'right' }}>{errors.situacao as string}</FormHelperText>
         )}
       </Box>
+
+      {/* --- MODAL DE SELEÇÃO DO REVISOR --- */}
+      <Dialog 
+        open={isModalOpen} 
+        onClose={handleCloseModal}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontWeight: 'bold' }}>
+          Indicar Revisor CEAPG
+        </DialogTitle>
+        <DialogContent dividers>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Para concluir a ação de <strong>{pendingAction === 1 ? 'aprovar' : 'reprovar'}</strong>, selecione o revisor do CEAPG responsável por esta avaliação.
+          </Typography>
+
+          <FormControl fullWidth size="small" sx={{ mt: 1 }}>
+            <InputLabel id="select-revisor-label">Revisor Responsável *</InputLabel>
+            <Select
+              labelId="select-revisor-label"
+              value={selectedAvaliadorId}
+              label="Revisor Responsável *"
+              onChange={(e) => setSelectedAvaliadorId(Number(e.target.value))}
+              disabled={isLoadingAvaliadores}
+            >
+              {isLoadingAvaliadores ? (
+                <MenuItem disabled value="">
+                  <CircularProgress size={20} sx={{ mr: 2 }} /> Carregando revisores...
+                </MenuItem>
+              ) : avaliadoresCeapg.length === 0 ? (
+                <MenuItem disabled value="">
+                  Nenhum revisor encontrado
+                </MenuItem>
+              ) : (
+                avaliadoresCeapg.map((avaliador) => (
+                  <MenuItem key={avaliador.id} value={avaliador.id}>
+                    {avaliador.name}
+                  </MenuItem>
+                ))
+              )}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button onClick={handleCloseModal} color="inherit">
+            Cancelar
+          </Button>
+          <Button 
+            onClick={handleConfirmReview} 
+            variant="contained" 
+            color={pendingAction === 1 ? 'success' : 'error'}
+            disabled={!selectedAvaliadorId}
+            sx={{ color: 'white' }}
+          >
+            Finalizar Avaliação
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

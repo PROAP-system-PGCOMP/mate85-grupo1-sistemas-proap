@@ -3,6 +3,7 @@ package br.ufba.proap.assistancerequest.service;
 import java.util.List;
 import java.util.Optional;
 
+import br.ufba.proap.assistancerequest.domain.dto.ExtraRequestResponseDTO;
 import br.ufba.proap.assistancerequest.repository.ExtraRequestQueryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,10 +49,10 @@ public class ExtraRequestService {
 	}
 
 	public static class ExtraRequestListFiltered {
-		public List<ExtraRequest> list;
+		public List<ExtraRequestResponseDTO> list;
 		public long total;
 
-		public ExtraRequestListFiltered(List<ExtraRequest> list, long total) {
+		public ExtraRequestListFiltered(List<ExtraRequestResponseDTO> list, long total) {
 			this.list = list;
 			this.total = total;
 		}
@@ -86,14 +87,18 @@ public class ExtraRequestService {
 		else
 			count = extraRequestRepostirory.countByUser(user);
 
-		return new ExtraRequestListFiltered(
-				extraRequestQueryRepository.findFiltered(
+		List<ExtraRequest> extraRequests = extraRequestQueryRepository.findFiltered(
 						sortBy,
 						ascending,
 						page,
 						size,
-						userHasPermission ? null : user),
-				count);
+						userHasPermission ? null : user);
+
+        List<ExtraRequestResponseDTO> dtos = extraRequests.stream()
+                .map(ExtraRequestResponseDTO::new)
+                .toList();
+
+        return new ExtraRequestListFiltered(dtos, count);
 	}
 
 	public Boolean userHasAnyExtraRequests(Long userId) {

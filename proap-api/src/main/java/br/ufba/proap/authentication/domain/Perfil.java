@@ -35,7 +35,7 @@ public class Perfil implements Serializable {
 	@Column(nullable = false, unique = true)
 	private String name;
 
-	@ManyToMany(fetch = FetchType.LAZY)
+	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "aut_perfil_permission", schema = "proap", joinColumns = @JoinColumn(name = "perfil_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))
 	private Set<Permission> permissions;
 

@@ -1,6 +1,7 @@
 package br.ufba.proap.assistancerequest.domain.dto;
 
 import br.ufba.proap.assistancerequest.domain.ExtraRequest;
+import br.ufba.proap.authentication.domain.User;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
@@ -52,7 +53,12 @@ public record ExtraRequestResponseDTO(
         LocalDate dataAvaliacaoProap,
         BigDecimal valorAprovado,
         String observacao,
-        String automaticDecText
+        String automaticDecText,
+
+        User avaliadorCeapg,
+        BigDecimal custoFinalCeapg,
+        String observacoesCeapg,
+        LocalDate dataAvaliacaoCeapg
 ) {
     public ExtraRequestResponseDTO(ExtraRequest extra) {
         this(
@@ -74,7 +80,11 @@ public record ExtraRequestResponseDTO(
                 extra.getDataAvaliacaoProap(),
                 extra.getValorAprovado(),
                 extra.getObservacao(),
-                extra.getAutomaticDecText()
+                extra.getAutomaticDecText(),
+                extra.getAvaliadorCeapg(),
+                extra.getCustoFinalCeapg(),
+                extra.getObservacoesCeapg(),
+                extra.getDataAvaliacaoCeapg()
         );
     }
 }

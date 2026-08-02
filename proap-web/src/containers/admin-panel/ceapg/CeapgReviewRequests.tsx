@@ -4,8 +4,6 @@ import {
   Box,
   CircularProgress,
   Chip,
-  useMediaQuery,
-  useTheme,
   Table,
   TableBody,
   TableCell,
@@ -16,10 +14,6 @@ import {
   IconButton,
   Tooltip,
   Paper,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { CeapgResponse } from '../../../types';
@@ -27,7 +21,7 @@ import { formatNumberToBRL } from '../../../helpers/formatter';
 import GradingIcon from '@mui/icons-material/Grading';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Visibility, ExpandMore, AccountBalanceWallet, Savings } from '@mui/icons-material';
+import { Visibility, ExpandMore } from '@mui/icons-material';
 import DateRangeFilter from '../../../components/custom/DateRangeFilter';
 
 interface TableCellHeaderProps {
@@ -52,11 +46,7 @@ const TableCellHeader: React.FC<TableCellHeaderProps> = ({
     <TableCell
       align={align}
       sortDirection={isSorted ? orderDirection : false}
-      sx={{
-        fontWeight: 'bold',
-        backgroundColor: 'grey.50',
-        whiteSpace: 'nowrap',
-      }}
+      sx={{ fontWeight: 'bold', backgroundColor: 'grey.50', whiteSpace: 'nowrap' }}
     >
       <TableSortLabel
         active={isSorted}
@@ -95,7 +85,6 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
   requests,
   startDate,
   endDate,
-  montanteTotal = 0, 
   onStartDateChange,
   onEndDateChange,
   onFilter,
@@ -105,7 +94,19 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
   const navigate = useNavigate();
   const [localStartDate, setLocalStartDate] = useState(startDate);
   const [localEndDate, setLocalEndDate] = useState(endDate);
-  const theme = useTheme();
+
+  const checkIsCompleted = (req: any) => {
+    const sit = req.situacao || 0;
+    let completed = !!req.dataAvaliacaoCeapg;
+    
+    if (sit === 2 || sit === 4) {
+      completed = true;
+    }
+    
+    return completed;
+  };
+
+  const filteredRequests = requests.filter((req) => !checkIsCompleted(req));
 
   const [localSortConfig, setLocalSortConfig] = useState<{ key: string; asc: boolean }>({
     key: 'id',
@@ -136,8 +137,8 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
       let bVal = b[currentKey];
 
       if (currentKey === 'isCompleted') {
-        aVal = !!a.avaliadorCeapg ? 1 : 0;
-        bVal = !!b.avaliadorCeapg ? 1 : 0;
+        aVal = checkIsCompleted(a) ? 1 : 0;
+        bVal = checkIsCompleted(b) ? 1 : 0;
       }
 
       if (aVal === null || aVal === undefined) return 1;
@@ -168,12 +169,12 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
     onFilter(localStartDate, localEndDate);
   };
 
-  const handleReviewSolicitation = (id: number) => {
-    navigate(`/admin/ceapg/review/${id}`);
+  const handleReviewSolicitation = (id: number, tipo: string) => {
+    navigate(`/admin/ceapg/review/${id}`, { state: { tipoDemanda: tipo } });
   };
 
-  const handleViewSolicitation = (id: number) => {
-    navigate(`/admin/ceapg/view/${id}`);
+  const handleViewSolicitation = (id: number, tipo: string) => {
+    navigate(`/admin/ceapg/view/${id}`, { state: { tipoDemanda: tipo } });
   };
 
   const formatDate = (dateString: string | null) => {
@@ -181,9 +182,24 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
     try {
       return format(parseISO(dateString), 'dd/MM/yyyy', { locale: ptBR });
     } catch (e) {
-      console.error('Error formatting date:', e);
       return 'Data inválida';
     }
+  };
+
+  const getChipColor = (tipo: string) => {
+    switch (tipo.toUpperCase()) {
+      case 'EXTRA': return 'secondary';
+      case 'PUBLICAÇÃO': 
+      case 'PUBLICACAO': return 'info';
+      default: return 'primary';
+    }
+  };
+
+  const getEvaluatorDisplay = (evaluator: any) => {
+    if (!evaluator) return '-';
+    if (typeof evaluator === 'string') return evaluator;
+    if (typeof evaluator === 'object' && evaluator.name) return evaluator.name;
+    return '-';
   };
 
   return (
@@ -201,8 +217,8 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
         <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
           <CircularProgress />
         </Box>
-      ) : requests.length === 0 ? (
-        <Alert severity="info" sx={{ mt: 2 }}>Nenhuma solicitação encontrada no período selecionado.</Alert>
+      ) : filteredRequests.length === 0 ? (
+        <Alert severity="info" sx={{ mt: 2 }}>Nenhuma solicitação pendente encontrada.</Alert>
       ) : (
         <Box sx={{ width: '100%', mt: 2 }}>
           <TableContainer
@@ -219,113 +235,85 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
             <Table stickyHeader aria-label="ceapg unified table">
               <TableHead>
                 <TableRow>
-                  <TableCellHeader
-                    text="Solicitação"
-                    sortBy="id"
-                    selectedPropToSortTable={activeSortRecord}
-                    handleClickSortTable={handleSortClick}
-                  />
-                  <TableCellHeader
-                    text="Valor aprovado em reunião"
-                    sortBy="custoFinalCeapg"
-                    align="center"
-                    selectedPropToSortTable={activeSortRecord}
-                    handleClickSortTable={handleSortClick}
-                  />
-                  <TableCellHeader
-                    text="Valor aprovado pelo CEAPG"
-                    sortBy="valorAprovado"
-                    align="center"
-                    selectedPropToSortTable={activeSortRecord}
-                    handleClickSortTable={handleSortClick}
-                  />
-                  <TableCellHeader
-                    text="Avaliador"
-                    sortBy="avaliadorProap"
-                    align="center"
-                    selectedPropToSortTable={activeSortRecord}
-                    handleClickSortTable={handleSortClick}
-                  />
-                  <TableCellHeader
-                    text="Data"
-                    sortBy="dataAvaliacaoProap"
-                    align="center"
-                    selectedPropToSortTable={activeSortRecord}
-                    handleClickSortTable={handleSortClick}
-                  />
-                  <TableCellHeader
-                    text="ATA"
-                    sortBy="numeroAta"
-                    align="center"
-                    selectedPropToSortTable={activeSortRecord}
-                    handleClickSortTable={handleSortClick}
-                  />
-                  <TableCellHeader
-                    text="Status"
-                    sortBy="isCompleted"
-                    align="center"
-                    selectedPropToSortTable={activeSortRecord}
-                    handleClickSortTable={handleSortClick}
-                  />
-                  <TableCell align="center" sx={{ fontWeight: 'bold', backgroundColor: 'grey.50' }}>
-                    Ações
-                  </TableCell>
+                  <TableCellHeader text="Solicitação" sortBy="id" selectedPropToSortTable={activeSortRecord} handleClickSortTable={handleSortClick} />
+                  <TableCellHeader text="Tipo" sortBy="tipoSolicitacao" align="center" selectedPropToSortTable={activeSortRecord} handleClickSortTable={handleSortClick} />
+                  <TableCellHeader text="Valor aprovado na reunião" sortBy="custoFinalCeapg" align="center" selectedPropToSortTable={activeSortRecord} handleClickSortTable={handleSortClick} />
+                  <TableCellHeader text="Valor aprovado pelo CEAPG" sortBy="valorAprovado" align="center" selectedPropToSortTable={activeSortRecord} handleClickSortTable={handleSortClick} />
+                  <TableCellHeader text="Avaliador" sortBy="avaliadorProap" align="center" selectedPropToSortTable={activeSortRecord} handleClickSortTable={handleSortClick} />
+                  <TableCellHeader text="Data" sortBy="dataAvaliacaoProap" align="center" selectedPropToSortTable={activeSortRecord} handleClickSortTable={handleSortClick} />
+                  <TableCellHeader text="ATA" sortBy="numeroAta" align="center" selectedPropToSortTable={activeSortRecord} handleClickSortTable={handleSortClick} />
+                  <TableCellHeader text="Status" sortBy="isCompleted" align="center" selectedPropToSortTable={activeSortRecord} handleClickSortTable={handleSortClick} />
+                  <TableCell align="center" sx={{ fontWeight: 'bold', backgroundColor: 'grey.50' }}>Ações</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {sortData(requests).map((request) => {
-                  const isCompleted = !!request.avaliadorCeapg;
+                {sortData(filteredRequests).map((request) => {
+                  const tipo = (request as any).tipoDemanda || (request as any).tipoSolicitacao || 'NORMAL'; 
+                  const tipoFormatado = tipo.charAt(0).toUpperCase() + tipo.slice(1).toLowerCase();
+                  
+                  const isCompleted = checkIsCompleted(request);
+                  const sit = (request as any).situacao || 0;
+
+                  let statusLabel = 'Pendente';
+                  let statusColor: any = 'warning';
+                  
+                  if (isCompleted) {
+                     if (sit === 4) {
+                         statusLabel = 'Cancelada';
+                         statusColor = 'error';
+                     } else if (sit === 2) {
+                         statusLabel = 'Reprovada';
+                         statusColor = 'error';
+                     } else {
+                         statusLabel = 'Finalizada';
+                         statusColor = 'success';
+                     }
+                  }
+
+                  const displayValorAprovado = (sit === 2 || sit === 4) 
+                    ? formatNumberToBRL(0) 
+                    : formatNumberToBRL(request.valorAprovado);
 
                   return (
-                    <TableRow key={request.id} hover>
+                    <TableRow key={`${tipo}-${request.id}`} hover>
                       <TableCell>#{request.id}</TableCell>
-
-                      <TableCell align="center" sx={{ fontWeight: 'normal' }}>
-                        {formatNumberToBRL(request.valorAprovado)}
+                      <TableCell align="center">
+                        <Chip label={tipoFormatado} color={getChipColor(tipo)} size="small" variant="outlined" sx={{ fontWeight: 'bold', fontSize: '0.75rem' }} />
                       </TableCell>
-                      
+                      <TableCell align="center" sx={{ fontWeight: 'normal' }}>
+                        {displayValorAprovado}
+                      </TableCell>
                       <TableCell align="center" sx={{ fontWeight: 'normal' }}>
                         {isCompleted
-                          ? formatNumberToBRL(request.custoFinalCeapg || request.valorAprovado)
+                          ? (sit === 2 || sit === 4) ? formatNumberToBRL(0) : formatNumberToBRL(request.custoFinalCeapg || request.valorAprovado)
                           : '-'}
                       </TableCell>
-                
                       <TableCell align="center">
-                        {isCompleted
-                          ? (request.avaliadorCeapg || '-')
-                          : (request.avaliadorProap || 'Sistema')}
+                        {getEvaluatorDisplay(request.avaliadorCeapg || request.avaliadorProap || 'Sistema')}
                       </TableCell>
-
                       <TableCell align="center">
                         {formatDate(isCompleted ? request.dataAvaliacaoCeapg : request.dataAvaliacaoProap)}
                       </TableCell>
-
                       <TableCell align="center">{request.numeroAta || '-'}</TableCell>
-
                       <TableCell align="center">
                         <Chip
-                          label={isCompleted ? 'Finalizado' : 'Pendente'}
-                          color={isCompleted ? 'success' : 'warning'}
+                          label={statusLabel}
+                          color={statusColor}
                           size="small"
                           variant={isCompleted ? 'filled' : 'outlined'}
                           sx={{ fontWeight: 'medium', color: isCompleted ? 'white' : 'warning.main' }}
                         />
                       </TableCell>
-
                       <TableCell align="center">
                         {isCompleted ? (
                           <Tooltip title="Visualizar Detalhes">
-                            <IconButton onClick={() => handleViewSolicitation(request.id)} size="small">
+                            <IconButton onClick={() => handleViewSolicitation(request.id, tipo)} size="small">
                               <Visibility fontSize="small" />
                             </IconButton>
                           </Tooltip>
                         ) : (
                           <Tooltip title="Avaliar Prestação de Contas">
-                            <IconButton
-                              color="default"
-                              onClick={() => handleReviewSolicitation(request.id)}
-                              size="small"
-                            >
+                            <IconButton color="default" onClick={() => handleReviewSolicitation(request.id, tipo)} size="small">
                               <GradingIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>

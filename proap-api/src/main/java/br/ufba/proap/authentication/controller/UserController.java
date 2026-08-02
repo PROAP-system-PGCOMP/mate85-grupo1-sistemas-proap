@@ -65,16 +65,38 @@ public class UserController {
 				return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 			}
 
-			List<User> users = service.getAllUsersWithPerfilAndPermissions();
-			List<UserResponseDTO> usersDto = users.stream().map(user -> {
-				return UserResponseDTO.fromUser(user);
-			}).toList();
-			return ResponseEntity.ok().body(usersDto);
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-		}
-	}
+            List<User> users = service.getAllUsersWithPerfilAndPermissions();
+            List<UserResponseDTO> usersDto = users.stream().map(user -> {
+                return UserResponseDTO.fromUser(user);
+            }).toList();
+            return ResponseEntity.ok().body(usersDto);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @Autowired
+    private br.ufba.proap.authentication.repository.UserRepository userRepository;
+
+    @Transactional
+    @GetMapping("/ranking")
+    public ResponseEntity<List<UserResponseDTO>> getRanking() {
+        try {
+            // Opcional: Adicionar validação de permissão aqui se apenas admins puderem ver o ranking
+            User currentUser = service.getLoggedUser();
+            if (currentUser == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+
+            List<UserResponseDTO> ranking = userRepository.findAllUsers();
+            return ResponseEntity.ok().body(ranking);
+            
+        } catch (Exception e) {
+            logger.error("Erro ao buscar o ranking: " + e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
 	// TODO: Débito técnico - Refatorar para service
 	@Transactional

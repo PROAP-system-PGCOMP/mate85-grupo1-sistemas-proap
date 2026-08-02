@@ -1,5 +1,6 @@
 import * as Yup from 'yup';
 import { AssistanceRequest } from '../../types';
+import { Q } from 'vitest/dist/chunks/reporters.d.DG9VKi4m.js';
 
 const minDate = new Date('1900-01-01');
 const maxDate = new Date('2099-12-31');
@@ -166,7 +167,15 @@ export const reviewDataFormSchema = Yup.object({
   situacao: Yup.number()
     .required('Campo obrigatório')
     .oneOf([0, 1, 2, 3, 4], 'Situação deve ser Aprovado, Reprovado, Pendente, Em espera ou Cancelado'),
-  
+
+  avaliadorCeapgId: Yup.number()
+    .nullable()
+    .when('situacao', {
+      is: (situacao: number) => situacao === 1 || situacao === 2, 
+      then: (schema) => schema.required('Selecione o revisor CEAPG responsável'),
+      otherwise: (schema) => schema.notRequired(),
+  }),
+
   dataAvaliacaoProap: Yup.string().required('Campo obrigatório'),
 
   numeroAta: Yup.number()
@@ -209,6 +218,7 @@ export const ceapgDataFormSchema = Yup.object({
 export interface SolicitationFormValues
   extends Omit<AssistanceRequest, 'automaticDecText'> {
   aceiteFinal: boolean | undefined;
+  avaliadorCeapgId?: number | null;
 }
 
 export type InitialSolicitationFormValues = Pick<
@@ -287,6 +297,7 @@ export const INITIAL_FORM_VALUES: InitialSolicitationFormValues = {
 
 export const INITIAL_REVIEW_FORM_VALUES: SolicitationFormValues = {
   id: undefined,
+  avaliadorCeapgId: null,
   tituloPublicacao: '',
   coautores: [],
   eventoInternacional: false,

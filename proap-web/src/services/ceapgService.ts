@@ -50,3 +50,32 @@ export const getAllCeapgReviews = async (
     });
   return response.data as CeapgResponse[];
 };
+
+export interface RankingUserDTO {
+  id: number;
+  name: string;
+  email: string;
+  cpf: string;
+  registrationNumber: string; 
+  phone: string;
+  alternativePhone: string;
+  profileName: string;        
+  requestedNormalAmount: number; 
+  aproveNormalAmount: number;    
+  requestedExtraAmount: number; 
+  aprovedExtraAmount: number;   
+}
+
+export const getApprovedRanking = async () => {
+  const response = await api
+    .get('/user/ranking')
+    .catch((error) => {
+      console.error(
+        'Erro ao buscar o ranking de usuários:',
+        error.response?.data?.message || error.message,
+      );
+      return { data: [] };
+    });
+    
+  return response.data as RankingUserDTO[];
+};

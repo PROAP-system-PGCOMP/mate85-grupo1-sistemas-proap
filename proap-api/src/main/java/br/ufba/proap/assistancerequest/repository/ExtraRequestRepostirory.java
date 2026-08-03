@@ -1,9 +1,11 @@
 package br.ufba.proap.assistancerequest.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import br.ufba.proap.assistancerequest.domain.ExtraRequest;
@@ -23,4 +25,13 @@ public interface ExtraRequestRepostirory extends JpaRepository<ExtraRequest, Lon
             "LEFT JOIN FETCH u.perfil " +
             "ORDER BY e.createdAt DESC")
     List<ExtraRequest> findAllWithUserAndPerfil();
+
+    @Query("""
+            SELECT e FROM ExtraRequest e
+            WHERE e.createdAt BETWEEN :startDate AND :endDate
+            AND e.situacao = 1
+            ORDER BY e.createdAt DESC
+        """)
+    List<ExtraRequest> findTotalApprovedValueByDateRange(@Param("startDate") LocalDateTime startDate,
+                                                         @Param("endDate") LocalDateTime endDate);
 }

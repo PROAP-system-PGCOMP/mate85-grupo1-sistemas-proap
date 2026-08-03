@@ -1,6 +1,10 @@
 package br.ufba.proap.solicitationadminpanel.service;
 
+import br.ufba.proap.assistancerequest.domain.dto.ExtraRequestResponseDTO;
+import br.ufba.proap.assistancerequest.repository.ExtraRequestRepostirory;
+import br.ufba.proap.solicitationadminpanel.domain.dto.FindAprovedExtraRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,6 +16,8 @@ import jakarta.ws.rs.NotFoundException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -22,6 +28,9 @@ public class BudgetService {
 
     @Autowired
     private AssistanceRequestRepository assistanteRequestRepository;
+
+    @Autowired
+    private ExtraRequestRepostirory extraRequestRepostirory;
 
     @Transactional
     public SolicitationAdmin setBudget(BigDecimal budget, Integer year) {
@@ -50,6 +59,13 @@ public class BudgetService {
     public List<AssistanceIdValueDTO> getTotalApprovedAssistanceRequestsValue(LocalDate startDate, LocalDate endDate) {
         return AssistanceIdValueDTO
                 .convertPairsToDTOs(assistanteRequestRepository.findTotalApprovedValueByDateRange(startDate, endDate));
+    }
+
+    @Transactional
+    public List<ExtraRequestResponseDTO> getTotalApprovedExtraRequestsValue(FindAprovedExtraRequestDTO data) {
+        LocalDateTime startDate = data.start().atStartOfDay();
+        LocalDateTime endDate = data.end().atTime(LocalTime.MAX);
+        return extraRequestRepostirory.findTotalApprovedValueByDateRange(startDate, endDate).stream().map(ExtraRequestResponseDTO ::new).toList();
     }
 
     @Transactional

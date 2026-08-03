@@ -138,7 +138,7 @@ public class ExtraRequest {
     }
 
     public void setDataAvaliacaoCeapg (LocalDate dataAvaliacaoCeapg) {
-        this.setDataAvaliacaoCeapg(dataAvaliacaoCeapg);
+        this.dataAvaliacaoCeapg = dataAvaliacaoCeapg;
     }
 
     public User getAvaliadorCeapg() {

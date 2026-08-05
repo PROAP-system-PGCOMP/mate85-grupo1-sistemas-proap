@@ -63,8 +63,20 @@ public class BudgetService {
 
     @Transactional
     public List<ExtraRequestResponseDTO> getTotalApprovedExtraRequestsValue(FindAprovedExtraRequestDTO data) {
-        LocalDateTime startDate = data.start().atStartOfDay();
-        LocalDateTime endDate = data.end().atTime(LocalTime.MAX);
+        LocalDateTime startDate;
+        LocalDateTime endDate;
+
+        if (data.start() != null) {
+            startDate = data.start().atStartOfDay();
+        } else {
+            startDate = null;
+        }
+        if (data.end() != null) {
+            endDate = data.end().atTime(LocalTime.MAX);
+        } else {
+            endDate = null;
+        }
+
         return extraRequestRepostirory.findTotalApprovedValueByDateRange(startDate, endDate).stream().map(ExtraRequestResponseDTO ::new).toList();
     }
 

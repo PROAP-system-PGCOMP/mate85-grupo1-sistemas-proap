@@ -28,7 +28,8 @@ public interface ExtraRequestRepostirory extends JpaRepository<ExtraRequest, Lon
 
     @Query("""
             SELECT e FROM ExtraRequest e
-            WHERE e.createdAt BETWEEN :startDate AND :endDate
+            WHERE (:startDate IS NULL OR e.createdAt >= :startDate)
+            (AND :endDate IS NULL OR e.createdAt <= :endDate)
             AND e.situacao = 1
             ORDER BY e.createdAt DESC
         """)

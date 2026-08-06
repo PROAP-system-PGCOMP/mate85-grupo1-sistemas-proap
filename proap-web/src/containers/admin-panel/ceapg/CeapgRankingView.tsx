@@ -252,8 +252,6 @@ const CeapgRankingView = () => {
             <TableBody>
               {sortedData.length > 0 ? (
                 sortedData.map((user) => {
-                  const isDocente = user.profileName?.toUpperCase() === 'DOCENTE';
-
                   return (
                     <TableRow key={user.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                       <TableCell>
@@ -270,8 +268,8 @@ const CeapgRankingView = () => {
                         <Chip 
                           label={user.profileName} 
                           size="small" 
-                          color={isDocente ? "primary" : "default"}
-                          variant={isDocente ? "filled" : "outlined"}
+                          color="default"
+                          variant="outlined"
                           sx={{ fontWeight: 'bold', fontSize: '0.75rem' }}
                         />
                       </TableCell>

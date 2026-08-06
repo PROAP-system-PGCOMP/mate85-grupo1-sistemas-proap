@@ -1,5 +1,6 @@
 package br.ufba.proap.assistancerequest.repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -35,4 +36,7 @@ public interface ExtraRequestRepostirory extends JpaRepository<ExtraRequest, Lon
         """)
     List<ExtraRequest> findTotalApprovedValueByDateRange(@Param("startDate") LocalDateTime startDate,
                                                          @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT SUM(e.valorAprovado) FROM ExtraRequest e WHERE YEAR(e.createdAt) = :year AND e.situacao = 1")
+    BigDecimal findTotalApprovedValueByYear(Integer year);
 }

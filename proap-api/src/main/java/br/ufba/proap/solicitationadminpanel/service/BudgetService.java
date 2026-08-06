@@ -89,7 +89,12 @@ public class BudgetService {
         BigDecimal totalSpent = assistanteRequestRepository.findTotalApprovedValueByYear(year) != null
                 ? assistanteRequestRepository.findTotalApprovedValueByYear(year)
                 : BigDecimal.ZERO;
-        return totalBudget.subtract(totalSpent);
+
+        BigDecimal totalExtraSpent = extraRequestRepostirory.findTotalApprovedValueByYear(year) != null
+                ? extraRequestRepostirory.findTotalApprovedValueByYear(year)
+                : BigDecimal.ZERO;
+
+        return totalBudget.subtract(totalSpent.add(totalExtraSpent));
     }
 
     @Transactional

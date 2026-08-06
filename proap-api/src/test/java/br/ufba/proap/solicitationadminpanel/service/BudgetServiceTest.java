@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+
+import br.ufba.proap.assistancerequest.repository.ExtraRequestRepostirory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +30,9 @@ public class BudgetServiceTest {
 
     @Mock
     private AssistanceRequestRepository assistanceRequestRepository;
+
+    @Mock
+    private ExtraRequestRepostirory extraRequestRepostirory;
 
     @InjectMocks
     private BudgetService budgetService;
@@ -117,26 +122,30 @@ public class BudgetServiceTest {
     void testGetRemainingBudget() {
         when(repository.findByYear(testYear)).thenReturn(Optional.of(solicitationAdmin));
         when(assistanceRequestRepository.findTotalApprovedValueByYear(testYear)).thenReturn(new BigDecimal("30000.00"));
+        when(extraRequestRepostirory.findTotalApprovedValueByYear(testYear)).thenReturn(new BigDecimal("5000.00"));
 
         BigDecimal result = budgetService.getRemainingBudget(testYear);
 
-        assertEquals(new BigDecimal("70000.00"), result);
+        // 100000 - (30000 + 5000) = 65000.00
+        assertEquals(new BigDecimal("65000.00"), result);
     }
 
     @Test
     void testGetRemainingBudget_NoBudget() {
         when(repository.findByYear(testYear)).thenReturn(Optional.empty());
         when(assistanceRequestRepository.findTotalApprovedValueByYear(testYear)).thenReturn(new BigDecimal("30000.00"));
+        when(extraRequestRepostirory.findTotalApprovedValueByYear(testYear)).thenReturn(new BigDecimal("5000.00"));
 
         BigDecimal result = budgetService.getRemainingBudget(testYear);
 
-        assertEquals(new BigDecimal("-30000.00"), result);
+        assertEquals(new BigDecimal("-35000.00"), result);
     }
 
     @Test
     void testGetRemainingBudget_NoSpending() {
         when(repository.findByYear(testYear)).thenReturn(Optional.of(solicitationAdmin));
         when(assistanceRequestRepository.findTotalApprovedValueByYear(testYear)).thenReturn(null);
+        when(extraRequestRepostirory.findTotalApprovedValueByYear(testYear)).thenReturn(null);
 
         BigDecimal result = budgetService.getRemainingBudget(testYear);
 

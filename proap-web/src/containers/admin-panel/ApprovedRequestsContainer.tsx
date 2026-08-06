@@ -46,7 +46,7 @@ function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
 function getComparator<Key extends keyof any>(
   order: Order,
   orderBy: Key,
-): (a: { [key in Key]: any }, b: { [key in Key]: any }) => number {
+): (a: any, b: any) => number {
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);
@@ -85,7 +85,7 @@ const TableCellHeader: React.FC<TableCellHeaderProps> = ({
         active={isSorted}
         direction={isSorted ? order : 'asc'}
         onClick={() => onRequestSort(sortBy)}
-        IconComponent={ExpandMore} // <--- A setinha que você queria!
+        IconComponent={ExpandMore}
         sx={{
           flexDirection: align === 'center' ? 'row' : 'inherit',
           '& .MuiTableSortLabel-icon': {
@@ -134,14 +134,40 @@ const ApprovedRequests: React.FC<ApprovedRequestsProps> = ({
     onFilter(localStartDate, localEndDate);
   };
 
-  const handleViewSolicitation = (id: number) => {
-    navigate(`/admin-panel/solicitation/view/${id}`);
+  const handleViewSolicitation = (request: AssistanceIdValueDTO) => {
+    if (request.isExtra) {
+      navigate(`/extra-solicitation/view/${request.id}`, { state: { hideActions: true } }); 
+      return;
+    }
+    
+    navigate(`/admin-panel/solicitation/view/${request.id}`, { state: { hideActions: true } });
   };
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'Não disponível';
+  const formatDate = (dateValue: any) => {
+    if (!dateValue) return '-';
+    
     try {
-      return format(parseISO(dateString), 'dd/MM/yyyy', { locale: ptBR });
+      if (typeof dateValue === 'string') {
+        if (dateValue.includes('/')) {
+          return dateValue.split(' ')[0];
+        }
+
+        if (dateValue.includes('-')) {
+          const datePart = dateValue.split('T')[0].split(' ')[0];
+          const parts = datePart.split('-');
+          if (parts.length === 3) {
+            return `${parts[2]}/${parts[1]}/${parts[0]}`; 
+          }
+        }
+      }
+
+      if (Array.isArray(dateValue) && dateValue.length >= 3) {
+        const day = String(dateValue[2]).padStart(2, '0');
+        const month = String(dateValue[1]).padStart(2, '0');
+        return `${day}/${month}/${dateValue[0]}`;
+      }
+
+      return dateValue;
     } catch (e) {
       return 'Data inválida';
     }
@@ -226,6 +252,11 @@ const ApprovedRequests: React.FC<ApprovedRequestsProps> = ({
                     order={order}
                     onRequestSort={handleRequestSort}
                   />
+                  
+                  <TableCell sx={{ fontWeight: 'bold', backgroundColor: 'grey.50' }}>
+                    Tipo
+                  </TableCell>
+
                   <TableCellHeader
                     text="Data de Criação"
                     sortBy="createdAt"
@@ -247,8 +278,7 @@ const ApprovedRequests: React.FC<ApprovedRequestsProps> = ({
                     order={order}
                     onRequestSort={handleRequestSort}
                   />
-                  
-                  {/* Status não é ordenável, então mantemos a TableCell nativa */}
+
                   <TableCell sx={{ fontWeight: 'bold', backgroundColor: 'grey.50' }}>
                     Status
                   </TableCell>
@@ -266,15 +296,33 @@ const ApprovedRequests: React.FC<ApprovedRequestsProps> = ({
               <TableBody>
                 {sortedRequests.map((request) => (
                   <TableRow
-                    key={request.id}
+                    key={request.isExtra ? `extra-${request.id}` : `normal-${request.id}`}
                     hover
-                    onClick={() => handleViewSolicitation(request.id)}
+                    onClick={() => handleViewSolicitation(request)}
                     sx={{ cursor: 'pointer' }}
                   >
                     <TableCell>#{request.id}</TableCell>
+                    
+                    <TableCell>
+                      <Chip
+                        label={request.isExtra ? "Extra" : "Publicação"}
+                        color={request.isExtra ? undefined : "primary"}
+                        variant="outlined"
+                        size="small"
+                        sx={{ 
+                          fontWeight: '500',
+                          ...(request.isExtra && {
+                            color: '#d81b60',
+                            borderColor: '#d81b60'
+                          })
+                        }}
+                      />
+                    </TableCell>
+
                     <TableCell>{formatDate(request.createdAt)}</TableCell>
                     <TableCell>{formatDate(request.dataAvaliacaoProap)}</TableCell>
                     <TableCell>{request.avaliadorProap || '-'}</TableCell>
+                    
                     <TableCell>
                       <Chip
                         label="Aprovada"
@@ -283,7 +331,8 @@ const ApprovedRequests: React.FC<ApprovedRequestsProps> = ({
                         sx={{ fontWeight: 'medium', color: 'white' }}
                       />
                     </TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 'bold', color: 'black' }}>
+
+                    <TableCell align="right" sx={{ color: 'black' }}>
                       {formatNumberToBRL(request.value)}
                     </TableCell>
                   </TableRow>

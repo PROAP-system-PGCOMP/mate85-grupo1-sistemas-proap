@@ -72,7 +72,7 @@ export default function ReviewExtraSolicitationPage() {
         })
         .catch((error) => {
           console.error("Erro ao buscar demanda:", error);
-          alert("Erro ao carregar dados da solicitação.");
+          Toast.error("Erro ao carregar dados da solicitação.");
           setIsLoading(false);
         });
     }
@@ -122,7 +122,6 @@ export default function ReviewExtraSolicitationPage() {
       Toast.error("Não foi possível atribuir o avaliador CEAPG.");
     }
   };
-  // ----------------------------------------------------------------------------------
 
   const handleReviewSubmit = (values: any, status: number, avaliadorId?: number) => {
     

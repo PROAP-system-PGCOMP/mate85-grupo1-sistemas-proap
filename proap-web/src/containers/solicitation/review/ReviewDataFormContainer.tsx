@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Field, useFormikContext } from 'formik';
 import api from '../../../services';
+import Toast from '../../../helpers/notification';
 import { useParams } from 'react-router-dom';
 import {
   Box,
@@ -151,14 +152,14 @@ export default function ReviewDataFormContainer({ onBack }: ReviewDataFormContai
     
     if (pendingAction === 1 || pendingAction === 2) {
       if (!values.numeroAta) {
-        alert("O preenchimento do 'Número da ATA' é obrigatório para Aprovar ou Reprovar.");
+        Toast.error("O preenchimento do 'Número da ATA' é obrigatório para Aprovar ou Reprovar.");
         handleCloseModal();
         return;
       }
     }
     if (pendingAction === 1) {
       if (values.valorAprovado === undefined || values.valorAprovado === null || (values.valorAprovado as any) === '') {
-        alert("O preenchimento do 'Valor aprovado' é obrigatório para Aprovar.");
+        Toast.error("O preenchimento do 'Valor aprovado' é obrigatório para Aprovar.");
         handleCloseModal();
         return;
       }
@@ -190,7 +191,7 @@ export default function ReviewDataFormContainer({ onBack }: ReviewDataFormContai
       
     } catch (error) {
       console.error("Erro ao atribuir o avaliador:", error);
-      alert("Falha na comunicação com o servidor ao definir avaliador."); 
+      Toast.error("Falha na comunicação com o servidor ao definir avaliador."); 
       handleCloseModal();
     }
   };
@@ -411,7 +412,6 @@ export default function ReviewDataFormContainer({ onBack }: ReviewDataFormContai
         )}
       </Box>
 
-      {/* --- MODAL DE SELEÇÃO DO REVISOR --- */}
       <Dialog 
         open={isModalOpen} 
         onClose={handleCloseModal}

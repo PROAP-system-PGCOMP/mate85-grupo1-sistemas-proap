@@ -296,7 +296,7 @@ const CeapgRankingView = () => {
                         {renderFormattedMoney(user.aprovedExtraAmount)}
                       </TableCell>
 
-                      <TableCell align="center" sx={{ bgcolor: 'grey.50' }}>
+                      <TableCell align="center">
                         {renderFormattedMoney(user.totalAprovado, true, true)}
                       </TableCell>
                     </TableRow>

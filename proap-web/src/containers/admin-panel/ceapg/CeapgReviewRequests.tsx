@@ -188,9 +188,9 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
 
   const getChipColor = (tipo: string) => {
     switch (tipo.toUpperCase()) {
-      case 'EXTRA': return 'secondary';
+      case 'EXTRA': return 'default';
       case 'PUBLICAÇÃO': 
-      case 'PUBLICACAO': return 'info';
+      case 'PUBLICACAO': return 'primary';
       default: return 'primary';
     }
   };
@@ -278,7 +278,7 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
                     <TableRow key={`${tipo}-${request.id}`} hover>
                       <TableCell>#{request.id}</TableCell>
                       <TableCell align="center">
-                        <Chip label={tipoFormatado} color={getChipColor(tipo)} size="small" variant="outlined" sx={{ fontWeight: 'bold', fontSize: '0.75rem' }} />
+                        <Chip label={tipoFormatado} color={getChipColor(tipo)} size="small" variant="outlined" sx={{ fontWeight: 'bold', fontSize: '0.75rem', ...(tipo.toUpperCase() === 'EXTRA' && {color: '#d81b60',borderColor: '#d81b60'}) }} />
                       </TableCell>
                       <TableCell align="center" sx={{ fontWeight: 'normal' }}>
                         {displayValorAprovado}

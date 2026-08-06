@@ -1,11 +1,11 @@
 package br.ufba.proap.solicitationadminpanel.domain.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record DefineAvaliadorDTO(
-        @NotBlank
+        @NotNull(message = "O ID do avaliador é obrigatório")
         Long avaliadorId,
-        @NotBlank
+        @NotNull(message = "O ID da solicitação é obrigatório")
         Long solicitacaoId
 ) {
 }

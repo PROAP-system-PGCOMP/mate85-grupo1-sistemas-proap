@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Button, SvgIcon, SvgIconProps} from "@mui/material";
-import { useNavigate, useParams } from 'react-router-dom';
+import { Button, SvgIcon, SvgIconProps } from "@mui/material";
+// 1. Adicionamos o useLocation na importação do react-router-dom
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
 
 import {
@@ -25,15 +26,18 @@ const EditSquareIcon = (props: SvgIconProps) => (
   </SvgIcon>
 );
 
-
 export default function ViewExtraSolicitationPage() {
   const { id } = useParams<{ id: string }>();
   const [extraRequest, setExtraRequest] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  
   const navigate = useNavigate();
+  const location = useLocation(); 
 
   const userCanReviewRequests = useHasPermission('ADMIN_ROLE');
+  
+  const hideActions = location.state?.hideActions === true;
 
   const handleBackClick = () => {
     navigate(-1);
@@ -74,7 +78,6 @@ export default function ViewExtraSolicitationPage() {
     fetchData();
   }, [id]);
 
-  
   let content;
   if (loading) {
     content = <LoadingIndicator />;
@@ -91,32 +94,33 @@ export default function ViewExtraSolicitationPage() {
       <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 2 }}>{content}</Paper>
       <Box display="flex" justifyContent="space-between" mt={4}>
         <Button
-                sx={{ mt: 4 }}
-                variant="contained"
-                color="primary"
-                onClick={handleBackClick}
-              >
-                Voltar
+          sx={{ mt: 4 }}
+          variant="contained"
+          color="primary"
+          onClick={handleBackClick}
+        >
+          Voltar
         </Button>
-        {userCanReviewRequests && (
+        
+        {userCanReviewRequests && !hideActions && (
           <Box display="flex" justifyContent="space-between" gap={2}>
             <Button
-                    sx={{ mt: 4, display:"flex", gap: 1 }}
-                    variant="contained"
-                    color="primary"
-                    onClick={handleEdit}
-                  >
-                    <EditSquareIcon />
-                    Editar
+              sx={{ mt: 4, display:"flex", gap: 1 }}
+              variant="contained"
+              color="primary"
+              onClick={handleEdit}
+            >
+              <EditSquareIcon />
+              Editar
             </Button>
             <Button
-                    sx={{ mt: 4, display:"flex", gap: 1 }}
-                    variant="contained"
-                    color="primary"
-                    onClick={handleReview}
-                  >
-                    <FactCheckIcon fontSize="small" />
-                    Revisar
+              sx={{ mt: 4, display:"flex", gap: 1 }}
+              variant="contained"
+              color="primary"
+              onClick={handleReview}
+            >
+              <FactCheckIcon fontSize="small" />
+              Revisar
             </Button>
           </Box>
         )}

@@ -12,6 +12,7 @@ export interface AssistanceIdValueDTO {
   createdAt: string;
   dataAvaliacaoProap: string;
   avaliadorProap: string;
+  isExtra?: boolean;
 }
 
 export interface BudgetSummaryDTO {
@@ -54,10 +55,40 @@ export const getTotalAssistanceRequestsValue = async (
   if (startDate) params.startDate = startDate;
   if (endDate) params.endDate = endDate;
 
-  const response = await api.get('/admin/budget/total-assistance-requests', {
-    params,
-  });
-  return response.data;
+  const extraParams: Record<string, string> = {};
+  if (startDate) extraParams.start = startDate;
+  if (endDate) extraParams.end = endDate;
+
+  try {
+    const [normalResponse, extraResponse] = await Promise.all([
+      api.get('/admin/budget/total-assistance-requests', { params }),
+      api.get('/admin/budget/total-approved-extra-requests', { params: extraParams }),
+    ]);
+
+    const normais: AssistanceIdValueDTO[] = normalResponse.data.map((req: any) => ({
+      ...req,
+      isExtra: false
+    }));
+    const extras = extraResponse.data;
+
+    const extrasMapeadas: AssistanceIdValueDTO[] = extras.map((req: any) => ({
+      id: req.id,
+      value: req.custoFinalCeapg ?? req.valorAprovado ?? 0,
+      
+      createdAt: Array.isArray(req.createdAt) 
+        ? new Date(req.createdAt[0], req.createdAt[1] - 1, req.createdAt[2]).toISOString()
+        : req.createdAt || req.dataCriacao,
+        
+      dataAvaliacaoProap: req.dataAvaliacaoProap || req.dataAvaliacaoCeapg || '-',
+      avaliadorProap: req.avaliadorProap?.name || req.avaliadorProap || req.avaliadorCeapg?.name || '-',
+      isExtra: true 
+    }));
+
+    return [...normais, ...extrasMapeadas];
+  } catch (error) {
+    console.error("Erro ao buscar as solicitações:", error);
+    throw error;
+  }
 };
 
 export const getRemainingBudget = async (year: number): Promise<number> => {

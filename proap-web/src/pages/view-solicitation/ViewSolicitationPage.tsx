@@ -2,7 +2,7 @@ import React from 'react';
 import SolicitationViewContainer from '../../containers/solicitation/view/SolicitationViewContainer';
 import { Box, Button, SvgIcon, SvgIconProps} from "@mui/material";
 import FactCheckIcon from '@mui/icons-material/FactCheck';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import useHasPermission from '../../hooks/auth/useHasPermission';
 
 const EditSquareIcon = (props: SvgIconProps) => (
@@ -14,19 +14,24 @@ const EditSquareIcon = (props: SvgIconProps) => (
 const ViewSolicitationPage: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  
+  const location = useLocation();
+  const hideActions = location.state?.hideActions === true;
 
   const userCanReviewRequests = useHasPermission('ADMIN_ROLE');
 
   const handleBackClick = () => {
     navigate(-1);
   };
+  
   const handleEdit = () => {
-    navigate(`/extra-solicitation/edit/${id}`); 
+    navigate(`/solicitation/edit/${id}`); 
   };
   
   const handleReview = () => {
     navigate(`/solicitation/review/${id}`); 
   };
+  
   return (
     <Box>
       <SolicitationViewContainer id={id!} />
@@ -39,7 +44,8 @@ const ViewSolicitationPage: React.FC = () => {
               >
                 Voltar
         </Button>
-        {userCanReviewRequests && (
+        
+        {userCanReviewRequests && !hideActions && (
           <Box display="flex" justifyContent="space-between" gap={2}>
             <Button
                     sx={{ mt: 4, display:"flex", gap: 1}}

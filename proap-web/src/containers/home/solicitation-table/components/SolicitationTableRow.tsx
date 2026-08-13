@@ -77,7 +77,13 @@ const safelyFormatDate = (dateString: string | null) => {
   if (!dateString) return '-';
   if (dateString.includes('/')) return dateString;
   try {
-    return format(parseISO(dateString), 'dd/MM/yyyy HH:mm', { locale: ptBR });
+    const [datePart, timePart] = dateString.split('T');
+    if (!datePart || !timePart) return dateString;
+
+    const [year, month, day] = datePart.split('-');
+    const time = timePart.substring(0, 5);
+
+    return `${day}/${month}/${year} ${time}`;
   } catch (e) {
     return dateString;
   }

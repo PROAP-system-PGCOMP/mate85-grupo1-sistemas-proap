@@ -226,13 +226,19 @@ export default function SystemConfigFormContainer({
   const [newCategory, setNewCategory] = useState<string>('');
   const [activeTab, setActiveTab] = useState(0);
 
+  const formattedInitialValues = {
+    ...initialValues,
+    startDate: initialValues.startDate ? initialValues.startDate.toString().substring(0, 10) : '',
+    endDate: initialValues.endDate ? initialValues.endDate.toString().substring(0, 10) : '',
+  };
+
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
   };
 
   return (
     <Formik
-      initialValues={initialValues}
+      initialValues={formattedInitialValues}
       validationSchema={systemConfigSchema}
       onSubmit={(values) => {
         onSubmit(values); 

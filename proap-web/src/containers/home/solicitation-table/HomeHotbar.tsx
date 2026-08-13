@@ -50,10 +50,13 @@ export default function HomeHotbar() {
               width: isMobile ? '100%' : 'auto',
             }}
           >
-            <HomeHotbarLink
-              to="/solicitation/create"
-              style={{ width: isMobile ? '100%' : 'auto' }}
-            >
+            
+              <a
+                href="https://docs.google.com/forms/d/e/1FAIpQLScFhwKpi7v3tHi1APVzIsOYZOshPV7UOh9Z_R3csZwP-fr9Ag/viewform?usp=send_form"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ width: isMobile ? '100%': 'auto', textDecoration: 'none' }}
+              >
               <Tooltip title="Apenas apoio à publicação científica">
                 <Button
                   variant="outlined"
@@ -76,7 +79,7 @@ export default function HomeHotbar() {
                   Apoio a publicação científica
                 </Button>
               </Tooltip>
-            </HomeHotbarLink>
+              </a>
 
             <HomeHotbarLink
               to="/extra-solicitation/create"

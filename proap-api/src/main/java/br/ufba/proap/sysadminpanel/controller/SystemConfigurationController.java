@@ -140,10 +140,6 @@ public class SystemConfigurationController {
 
     @GetMapping("/find-period")
     public ResponseEntity<?> findPeriod() {
-        ResponseEntity<String> permissionCheck = checkAdminPermission();
-        if (permissionCheck != null ) {
-            return permissionCheck;
-        }
 
         DataConfig config = interceptorRepository.findById(1L)
                 .orElse(new DataConfig());

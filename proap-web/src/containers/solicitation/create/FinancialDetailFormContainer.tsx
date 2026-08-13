@@ -251,7 +251,7 @@ export default function FinancialDetailFormContainer() {
                     >
                       <IconButton
                         size="small"
-                        sx={{ position: 'absolute', right: -10, top: 14 }}
+                        sx={{ position: 'absolute', right: 0, top: 25 }}
                         color="primary"
                       >
                         <Info fontSize="small" />

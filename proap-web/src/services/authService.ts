@@ -9,7 +9,24 @@ import { setUser } from '../store/slices/user-profile-slice/userProfileSlice';
 export const registerUser =
   (values: RegisterFormValues) => (dispatch: AppDispatch) => {
     return api.post('user/create', values).catch((error) => {
-      throw new Error(error.response.data.message);
+      
+      const data = error.response?.data;
+      let mensagemDeErro = 'Erro de comunicação com o servidor.';
+
+      if (data) {
+        if (data.message) {
+          mensagemDeErro = data.message;
+        } 
+        
+        else if (typeof data === 'object' && Object.keys(data).length > 0) {
+          const primeiroErro = Object.values(data)[0];
+          if (typeof primeiroErro === 'string') {
+            mensagemDeErro = primeiroErro;
+          }
+        }
+      }
+
+      throw new Error(mensagemDeErro);
     });
   };
 

@@ -56,9 +56,6 @@ export default function SolicitationPage() {
     return <UnauthorizedPage />;
   }
 
-  if (!config.enableSolicitation) {
-    return <SolicitationsDisabled />;
-  }
 
   if (cloneFromId && isCloneLoading) {
     return (

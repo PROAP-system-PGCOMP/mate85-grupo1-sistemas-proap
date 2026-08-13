@@ -48,9 +48,7 @@ export default function ExtraSolicitationPage() {
       });
   };
 
-  if (!config.enableSolicitation) {
-    return <SolicitationsDisabled />;
-  }
+
 
   return (
     <ExtraSolicitationFormContainer

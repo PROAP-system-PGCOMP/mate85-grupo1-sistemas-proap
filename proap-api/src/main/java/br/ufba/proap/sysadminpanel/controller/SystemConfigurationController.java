@@ -126,8 +126,11 @@ public class SystemConfigurationController {
             return permissionCheck;
         }
 
-        DataConfig config = interceptorRepository.findById(1L)
-                .orElse(new DataConfig());
+        DataConfig config = interceptorRepository.findById(1L).orElseGet(() -> {
+            DataConfig newConfig = new DataConfig();
+            newConfig.setId(1L); 
+            return newConfig;
+        });
 
         config.setStartDate(dto.startDate());
         config.setEndDate(dto.endDate());
@@ -141,9 +144,12 @@ public class SystemConfigurationController {
     @GetMapping("/find-period")
     public ResponseEntity<?> findPeriod() {
 
-        DataConfig config = interceptorRepository.findById(1L)
-                .orElse(new DataConfig());
-
+        DataConfig config = interceptorRepository.findById(1L).orElseGet(() -> {
+            DataConfig newConfig = new DataConfig();
+            newConfig.setId(1L);
+            return newConfig;
+        });
+        
         PeriodResponseDTO data = new PeriodResponseDTO(config);
         return ResponseEntity.ok(data);
     }

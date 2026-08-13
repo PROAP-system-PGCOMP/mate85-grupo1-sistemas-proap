@@ -28,12 +28,11 @@ export const updateSystemConfiguration = async (
 ): Promise<SystemConfiguration> => {
   const configRes = await api.put('/admin/system-config', configuration);
 
-  if (configuration.startDate && configuration.endDate) {
-    await api.put('/admin/system-config/period', {
-      startDate: `${configuration.startDate}T00:00:00`,
-      endDate: `${configuration.endDate}T23:59:59`,
-    });
-  }
+  
+  await api.put('/admin/system-config/period', {
+    startDate: configuration.startDate ? `${configuration.startDate}T00:00:00` : null,
+    endDate: configuration.endDate ? `${configuration.endDate}T23:59:59` : null,
+  });
 
   const updatedConfig = configRes.data;
 

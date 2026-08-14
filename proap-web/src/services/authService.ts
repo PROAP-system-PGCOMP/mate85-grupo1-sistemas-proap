@@ -6,6 +6,11 @@ import api from '.';
 import { SignInResponse, StatusResponse, User } from '../types';
 import { setUser } from '../store/slices/user-profile-slice/userProfileSlice';
 
+export interface ReviewUserRolePayload {
+  userId: number;
+  status: 'APPROVED' | 'REJECTED';
+}
+
 export const registerUser =
   (values: RegisterFormValues) => (dispatch: AppDispatch) => {
     return api.post('user/create', values).catch((error) => {
@@ -106,5 +111,14 @@ export const registerUserByAdmin = async (values: any) => {
     .then((response) => response.data)
     .catch((error) => {
       throw new Error(error.response.data.message || 'Erro ao cadastrar usuário');
+    });
+};
+
+export const reviewUserRole = async (payload: ReviewUserRolePayload) => {
+  return await api
+    .patch('user/review-user-role', payload) 
+    .then((response) => response.data)
+    .catch((error) => {
+      throw new Error(error.response?.data?.message || 'Erro ao avaliar solicitação do usuário.');
     });
 };

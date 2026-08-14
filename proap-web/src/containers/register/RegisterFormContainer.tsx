@@ -1,5 +1,4 @@
 import { useCallback, useMemo } from 'react';
-
 import { useNavigate } from 'react-router-dom';
 
 import StepperForm, {
@@ -10,6 +9,7 @@ import { FormikValues } from 'formik';
 import PersonalDataFormContainer from './PersonalDataFormContainer';
 import ContactDataFormContainer from './ContactDataFormContainer';
 import PasswordFormContainer from './PasswordFormContainer';
+import UserProfileFormContainer from './UserProfileFormContainer';
 
 import { registerUser } from '../../services/authService';
 import Toast from '../../helpers/notification';
@@ -21,6 +21,7 @@ import {
   personalDataFormSchema,
   contactDataFormSchema,
   passwordFormSchema,
+  userProfileFormSchema,
 } from './RegisterFormSchema';
 
 export default function RegisterFormContainer() {
@@ -29,7 +30,19 @@ export default function RegisterFormContainer() {
 
   const handleSubmit = useCallback(
     (values: FormikValues) => {
-      return dispatch(registerUser(values as RegisterFormValues))
+      const payload = {
+        name: values.name,
+        email: values.email,
+        cpf: values.cpf,
+        phone: values.phone,
+        password: values.password,
+        alternativePhone: values.alternativePhone,
+        registration: values.registration,
+        requestPerfilId: Number(values.profileId),
+      };
+
+      // 2. Enviando o payload mapeado
+      return dispatch(registerUser(payload as any))
         .then(() => {
           Toast.success('Conta criada com sucesso!');
           navigate('/');
@@ -38,7 +51,7 @@ export default function RegisterFormContainer() {
           Toast.error('Erro ao criar conta: ' + error.message);
         });
     },
-    [dispatch],
+    [dispatch, navigate]
   );
 
   const registerFormSteps: FormStep[] = useMemo(
@@ -57,6 +70,11 @@ export default function RegisterFormContainer() {
         label: 'Senha',
         component: PasswordFormContainer,
         schema: passwordFormSchema,
+      },
+      {
+        label: 'Vínculo',
+        component: UserProfileFormContainer,
+        schema: userProfileFormSchema,
       },
     ],
     [],

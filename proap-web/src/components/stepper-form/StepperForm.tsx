@@ -17,7 +17,7 @@ import {
   FormikValues,
   useFormikContext,
 } from 'formik';
-import React, { useCallback, useEffect, useMemo, useState } from 'react'; // 👇 useEffect ADICIONADO AQUI
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { AnySchema } from 'yup';
 import { StepperCircularProgress } from './StepperForm.style';
 

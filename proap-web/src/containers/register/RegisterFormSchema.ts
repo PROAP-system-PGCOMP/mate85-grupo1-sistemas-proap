@@ -52,6 +52,10 @@ export const passwordFormSchema = Yup.object({
     .min(8, 'A senha deve ter no mínimo 8 caracteres'),
 });
 
+export const userProfileFormSchema = Yup.object({
+  profileId: Yup.mixed().required('Por favor, informe o seu perfil de vínculo com a instituição.'),
+});
+
 export interface RegisterFormValues {
   name: string;
   email: string;
@@ -61,6 +65,7 @@ export interface RegisterFormValues {
   confirmPassword: string;
   registration: string;
   alternativePhone: string;
+  profileId: number | string; 
 }
 
 export const INITIAL_FORM_VALUES: RegisterFormValues = {
@@ -72,4 +77,5 @@ export const INITIAL_FORM_VALUES: RegisterFormValues = {
   confirmPassword: '',
   registration: '',
   alternativePhone: '',
+  profileId: '', 
 };

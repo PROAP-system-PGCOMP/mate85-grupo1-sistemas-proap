@@ -57,17 +57,17 @@ public interface UserRepository extends JpaRepository<User, Long> {
             u.phone,
             u.alternativePhone,
             g.name,
-            COALESCE(SUM(s.valorTotal), 0),
-            COALESCE(SUM(s.valorAprovado), 0),
-            COALESCE(SUM(f.valorSolicitado), 0),
-            COALESCE(SUM(f.valorAprovado), 0)
+            (SELECT COALESCE(SUM(s.valorTotal), 0) FROM AssistanceRequest s WHERE s.user = u),
+            (SELECT COALESCE(SUM(s.valorAprovado), 0) FROM AssistanceRequest s WHERE s.user = u),
+            (SELECT COALESCE(SUM(f.valorSolicitado), 0) FROM ExtraRequest f WHERE f.user = u),
+            (SELECT COALESCE(SUM(f.valorAprovado), 0) FROM ExtraRequest f WHERE f.user = u),
+            req.name,
+            u.profileStatus
             )
             FROM User u
-            LEFT JOIN AssistanceRequest s ON s.user = u
-            LEFT JOIN ExtraRequest f ON f.user = u
             LEFT JOIN u.perfil g
-            GROUP BY u.id, u.name, u.email, u.cpf, u.registration, u.phone, u.alternativePhone, g.name
-            ORDER BY COALESCE(SUM(s.valorTotal), 0) DESC
+            LEFT JOIN u.requestedPerfil req
+            ORDER BY (SELECT COALESCE(SUM(s.valorTotal), 0) FROM AssistanceRequest s WHERE s.user = u) DESC
             """)
     List<UserResponseDTO> findAllUsers();
 

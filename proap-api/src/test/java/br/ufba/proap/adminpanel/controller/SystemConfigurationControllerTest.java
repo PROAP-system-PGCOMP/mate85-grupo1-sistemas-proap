@@ -7,7 +7,10 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,12 +65,13 @@ public class SystemConfigurationControllerTest {
         Permission permission = new Permission();
         permission.setKey("ADMIN_ROLE");
         permission.setEnabled(true);
-        adminPerfil.setPermissions(java.util.Set.of(permission));
+        adminPerfil.setPermissions(Set.of(permission));
         adminUser.setPerfil(adminPerfil);
 
-        // Configuração de usuário comum
+        // Configuração de usuário comum (COM PERMISSIONS INICIALIZADAS VAZIAS)
         regularUser = new User();
         Perfil regularPerfil = new Perfil();
+        regularPerfil.setPermissions(Collections.emptySet()); // Evita o NullPointerException
         regularUser.setPerfil(regularPerfil);
     }
 

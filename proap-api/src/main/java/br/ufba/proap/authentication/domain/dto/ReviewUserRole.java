@@ -1,12 +1,11 @@
 package br.ufba.proap.authentication.domain.dto;
 
 import br.ufba.proap.authentication.domain.enums.ProfileStatus;
-import jakarta.validation.constraints.NotBlank;
-
+import jakarta.validation.constraints.NotNull;
 public record ReviewUserRole(
-        @NotBlank
+        @NotNull
         Long userId,
-        @NotBlank
+        @NotNull
         ProfileStatus status
 ) {
 }

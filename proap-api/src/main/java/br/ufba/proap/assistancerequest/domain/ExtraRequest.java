@@ -3,6 +3,7 @@ package br.ufba.proap.assistancerequest.domain;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
@@ -138,7 +139,7 @@ public class ExtraRequest {
     }
 
     public void setDataAvaliacaoCeapg (LocalDate dataAvaliacaoCeapg) {
-        this.setDataAvaliacaoCeapg(dataAvaliacaoCeapg);
+        this.dataAvaliacaoCeapg = dataAvaliacaoCeapg;
     }
 
     public User getAvaliadorCeapg() {
@@ -288,15 +289,15 @@ public class ExtraRequest {
 		this.updatedAt = updatedAt;
 	}
 
-	@PrePersist
-	public void prePersist() {
-		setCreatedAt(LocalDateTime.now());
-	}
+    @PrePersist
+    public void prePersist() {
+        setCreatedAt(LocalDateTime.now(ZoneId.of("America/Bahia")));
+    }
 
-	@PreUpdate
-	public void preUpdate() {
-		setUpdatedAt(LocalDateTime.now());
-	}
+    @PreUpdate
+    public void preUpdate() {
+        setUpdatedAt(LocalDateTime.now(ZoneId.of("America/Bahia")));
+    }
 
 	public String getTitulo() {
 		return titulo;

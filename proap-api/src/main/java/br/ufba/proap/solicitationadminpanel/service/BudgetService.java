@@ -1,6 +1,10 @@
 package br.ufba.proap.solicitationadminpanel.service;
 
+import br.ufba.proap.assistancerequest.domain.dto.ExtraRequestResponseDTO;
+import br.ufba.proap.assistancerequest.repository.ExtraRequestRepostirory;
+import br.ufba.proap.solicitationadminpanel.domain.dto.FindAprovedExtraRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,6 +16,8 @@ import jakarta.ws.rs.NotFoundException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -22,6 +28,9 @@ public class BudgetService {
 
     @Autowired
     private AssistanceRequestRepository assistanteRequestRepository;
+
+    @Autowired
+    private ExtraRequestRepostirory extraRequestRepostirory;
 
     @Transactional
     public SolicitationAdmin setBudget(BigDecimal budget, Integer year) {
@@ -53,6 +62,25 @@ public class BudgetService {
     }
 
     @Transactional
+    public List<ExtraRequestResponseDTO> getTotalApprovedExtraRequestsValue(FindAprovedExtraRequestDTO data) {
+        LocalDateTime startDate;
+        LocalDateTime endDate;
+
+        if (data.start() != null) {
+            startDate = data.start().atStartOfDay();
+        } else {
+            startDate = null;
+        }
+        if (data.end() != null) {
+            endDate = data.end().atTime(LocalTime.MAX);
+        } else {
+            endDate = null;
+        }
+
+        return extraRequestRepostirory.findTotalApprovedValueByDateRange(startDate, endDate).stream().map(ExtraRequestResponseDTO ::new).toList();
+    }
+
+    @Transactional
     public BigDecimal getRemainingBudget(Integer year) {
         BigDecimal totalBudget = repository.findByYear(year)
                 .map(SolicitationAdmin::getOrcamentoAnual)
@@ -61,7 +89,12 @@ public class BudgetService {
         BigDecimal totalSpent = assistanteRequestRepository.findTotalApprovedValueByYear(year) != null
                 ? assistanteRequestRepository.findTotalApprovedValueByYear(year)
                 : BigDecimal.ZERO;
-        return totalBudget.subtract(totalSpent);
+
+        BigDecimal totalExtraSpent = extraRequestRepostirory.findTotalApprovedValueByYear(year) != null
+                ? extraRequestRepostirory.findTotalApprovedValueByYear(year)
+                : BigDecimal.ZERO;
+
+        return totalBudget.subtract(totalSpent.add(totalExtraSpent));
     }
 
     @Transactional

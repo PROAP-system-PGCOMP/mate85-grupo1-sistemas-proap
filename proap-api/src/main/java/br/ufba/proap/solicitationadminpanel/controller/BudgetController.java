@@ -1,5 +1,7 @@
 package br.ufba.proap.solicitationadminpanel.controller;
 
+import br.ufba.proap.assistancerequest.domain.dto.ExtraRequestResponseDTO;
+import br.ufba.proap.solicitationadminpanel.domain.dto.FindAprovedExtraRequestDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,5 +129,16 @@ public class BudgetController {
     public ResponseEntity<List<Integer>> getAvailableYears() {
         List<Integer> years = budgetService.getAvailableYears();
         return ResponseEntity.ok(years);
+    }
+
+    @GetMapping("/total-approved-extra-requests")
+    public ResponseEntity<List<ExtraRequestResponseDTO>> getExtraRequestAprovedByDateRange(
+            FindAprovedExtraRequestDTO data) {
+        User currentUser = userService.getLoggedUser();
+        if (currentUser.getPerfil() == null || !currentUser.getPerfil().hasPermission("ADMIN_ROLE") && !currentUser.getPerfil().hasPermission("CEAPG_ROLE")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        List<ExtraRequestResponseDTO> totalValue = budgetService.getTotalApprovedExtraRequestsValue(data);
+        return ResponseEntity.ok().body(totalValue);
     }
 }

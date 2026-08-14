@@ -1,13 +1,20 @@
 package br.ufba.proap.authentication.service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
 import br.ufba.proap.authentication.domain.dto.AdminUserRegistrationDTO;
+import br.ufba.proap.authentication.domain.dto.UserResponseDTO;
+import br.ufba.proap.authentication.domain.enums.ProfileStatus;
+import br.ufba.proap.authentication.repository.PerfilRepository;
+import br.ufba.proap.exception.UnauthorizedException;
 import br.ufba.proap.mailsender.event.LinkEnvioEvent;
 import br.ufba.proap.mailsender.event.PasswordResetTokenEvent;
 import br.ufba.proap.mailsender.event.UserRegisteredByAdminEvent;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.NotFoundException;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -36,6 +43,9 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     private PerfilService perfilService;
+
+    @Autowired
+    private PerfilRepository perfilRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -80,6 +90,7 @@ public class UserService implements UserDetailsService {
         return (User) this.loadUserByUsername(username);
     }
 
+    @Transactional
     public void create(CreateUserDTO user) {
         if (userRepository.findByEmail(user.email()).isPresent()) {
             throw new ValidationException("Email já cadastrado");
@@ -94,6 +105,8 @@ public class UserService implements UserDetailsService {
         if (user.password().length() < 8) {
             throw new ValidationException("A senha deve ter no mínimo 8 caracteres");
         }
+
+
         User newUser = new User();
         newUser.setEmail(user.email());
         newUser.setName(user.name());
@@ -102,6 +115,15 @@ public class UserService implements UserDetailsService {
         newUser.setPhone(user.phone());
         newUser.setAlternativePhone(user.alternativePhone());
         newUser.setPerfil(defaultPerfil);
+
+        if (user.requestPerfilId() != null && !Objects.equals(user.requestPerfilId(), defaultPerfil.getId())) {
+            Perfil requestPerfil = perfilRepository.findById(user.requestPerfilId())
+                    .orElseThrow(() -> new NotFoundException("Perfil não foi encontrado"));
+
+            newUser.setRequestedPerfil(requestPerfil);
+            newUser.setProfileStatus(ProfileStatus.PENDING);
+        }
+
         newUser.setPassword(passwordEncoder.encode(user.password()));
         userRepository.saveAndFlush(newUser);
     }
@@ -232,5 +254,33 @@ public class UserService implements UserDetailsService {
             throw new ValidationException("Email já cadastrado");
         }
         eventPublisher.publishEvent(new LinkEnvioEvent(this, email));
+    }
+
+    @Transactional
+    public void reviewUserRole(Long id, ProfileStatus status) {
+        User loggedUser = getLoggedUser();
+
+        if (!loggedUser.getPerfil().hasPermission("ADMIN_ROLE")) {
+            throw new UnauthorizedException("Usuario não possui permissão");
+        }
+
+        if (status == ProfileStatus.PENDING) {
+            throw new BadRequestException("O status não pode ser pendente");
+        }
+
+        User user = this.userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Usuario não encontrado"));
+
+        if (user.getRequestedPerfil() == null || user.getRequestedPerfil().equals(user.getPerfil())) {
+            throw new BadRequestException("Usuario não possui solicitação de permissão ou a solicitação é igual ao perfil atual");
+        }
+
+        if (status == ProfileStatus.APPROVED) {
+            user.setPerfil(user.getRequestedPerfil());
+        }
+
+        user.setRequestedPerfil(null);
+        user.setProfileStatus(status);
+        this.userRepository.save(user);
     }
 }

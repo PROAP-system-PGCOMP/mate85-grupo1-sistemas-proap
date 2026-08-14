@@ -3,6 +3,7 @@ package br.ufba.proap.assistancerequest.domain;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
@@ -279,12 +280,12 @@ public class AssistanceRequest {
 
 	@PrePersist
 	public void prePersist() {
-		setCreatedAt(LocalDateTime.now());
+		setCreatedAt(LocalDateTime.now(ZoneId.of("America/Bahia")));
 	}
 
 	@PreUpdate
 	public void preUpdate() {
-		setUpdatedAt(LocalDateTime.now());
+		setUpdatedAt(LocalDateTime.now(ZoneId.of("America/Bahia")));
 	}
 
 }

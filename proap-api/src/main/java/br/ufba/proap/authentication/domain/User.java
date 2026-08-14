@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Objects;
 
+import br.ufba.proap.authentication.domain.enums.ProfileStatus;
 import jakarta.persistence.*;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -53,6 +54,30 @@ public class User implements UserDetails {
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "perfil_id")
 	private Perfil perfil;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "requested_perfil_id")
+    private Perfil requestedPerfil;
+
+    public void setRequestedPerfil(Perfil perfil) {
+        this.requestedPerfil = perfil;
+    }
+
+    public Perfil getRequestedPerfil() {
+        return this.requestedPerfil;
+    }
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "profile_status")
+    private ProfileStatus profileStatus;
+
+    public void setProfileStatus(ProfileStatus status) {
+        this.profileStatus = status;
+    }
+
+    public ProfileStatus getProfileStatus() {
+        return this.profileStatus;
+    }
 
 	public Perfil getPerfil() {
 		return perfil;

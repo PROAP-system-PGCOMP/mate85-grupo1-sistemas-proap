@@ -9,6 +9,6 @@ public record CreateUserDTO(
                 message = "Apenas e-mails do domínio @ufba.br são permitidos."
         ) String email,
         @NotBlank String password, @NotBlank String name,
-        @NotBlank String cpf, @NotBlank String registration, String phone,
+        @NotBlank String cpf, @NotBlank String registration, String phone, Long requestPerfilId,
         String alternativePhone) {
 }

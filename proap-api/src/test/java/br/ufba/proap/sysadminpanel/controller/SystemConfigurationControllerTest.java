@@ -53,33 +53,27 @@ class SystemConfigurationControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(systemConfigurationController).build();
         objectMapper = new ObjectMapper();
 
+        // 1. Criar Permissão Admin
         Permission adminRolePermission = new Permission();
         adminRolePermission.setId(1L);
         adminRolePermission.setKey("ADMIN_ROLE");
-        adminRolePermission.setDescription("Admin permission");
         adminRolePermission.setEnabled(true);
 
-        Permission userRolePermission = new Permission();
-        userRolePermission.setId(2L);
-        userRolePermission.setKey("USER_ROLE");
-        userRolePermission.setDescription("User permission");
-        userRolePermission.setEnabled(true);
-
+        // 2. Perfil Admin (Com permissão)
         Perfil adminPerfil = new Perfil();
-        adminPerfil.setId(2L);
+        adminPerfil.setId(1L);
         adminPerfil.setName("Admin");
         Set<Permission> adminPermissions = new HashSet<>();
         adminPermissions.add(adminRolePermission);
-        adminPermissions.add(userRolePermission);
-        adminPerfil.setPermissions(adminPermissions);
+        adminPerfil.setPermissions(adminPermissions); // Permissão setada!
 
+        // 3. Perfil Usuário Regular (Sem a permissão ADMIN_ROLE, mas com o Set inicializado para não dar NPE)
         Perfil regularPerfil = new Perfil();
-        regularPerfil.setId(1L);
+        regularPerfil.setId(2L);
         regularPerfil.setName("Discente");
-        Set<Permission> userPermissions = new HashSet<>();
-        userPermissions.add(userRolePermission);
-        regularPerfil.setPermissions(userPermissions);
+        regularPerfil.setPermissions(new HashSet<>()); // SET VAZIO (evita null!)
 
+        // 4. Instanciar os Usuários
         adminUser = new User();
         adminUser.setName("Admin User");
         adminUser.setEmail("admin@example.com");

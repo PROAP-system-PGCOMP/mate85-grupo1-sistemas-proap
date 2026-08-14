@@ -20,6 +20,7 @@ import { formatNumberToBRL } from '../../../helpers/formatter';
 import { getApprovedRanking, RankingUserDTO } from '../../../services/ceapgService';
 
 type Order = 'asc' | 'desc';
+type ChipColor = "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning";
 
 interface TableCellHeaderProps {
   text: string;
@@ -92,6 +93,16 @@ const CeapgRankingView = () => {
 
     fetchRanking();
   }, []);
+
+  const getProfileChipColor = (profileName: string): ChipColor => {
+    const profile = (profileName || '').toLowerCase();
+    if (profile.includes('admin')) return 'success';
+    if (profile.includes('ceapg')) return 'warning';
+    if (profile.includes('funcionario')) return 'warning';
+    if (profile.includes('docente')) return 'primary';
+    if (profile.includes('discente')) return 'info';
+    return 'error';
+  };
 
   const handleFilterChange = (
     event: React.MouseEvent<HTMLElement>,
@@ -203,7 +214,7 @@ const CeapgRankingView = () => {
     <Box>
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', mb: 3, alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2 }}>
         <Typography variant="h6" color="primary" fontWeight="bold">
-          Ranking de Recursos Concedidos
+          Demonstrativo de Recursos Concedidos
         </Typography>
         
         <ToggleButtonGroup
@@ -266,11 +277,10 @@ const CeapgRankingView = () => {
                       </TableCell>
                       <TableCell>
                         <Chip 
-                          label={user.profileName} 
+                          label={user.profileName ? user.profileName.charAt(0).toUpperCase() + user.profileName.slice(1) : ''} 
                           size="small" 
-                          color="default"
-                          variant="outlined"
-                          sx={{ fontWeight: 'bold', fontSize: '0.75rem' }}
+                          color={getProfileChipColor(user.profileName)}
+                          sx={{ fontWeight: 'medium', color: 'white', fontSize: '0.75rem' }}
                         />
                       </TableCell>
                       

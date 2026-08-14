@@ -32,7 +32,7 @@ export const updateSystemConfiguration = async (
   await api.put('/admin/system-config/period', {
     startDate: configuration.startDate ? `${configuration.startDate}T00:00:00` : null,
     endDate: configuration.endDate ? `${configuration.endDate}T23:59:59` : null,
-  });
+  }, { responseType: 'text' });
 
   const updatedConfig = configRes.data;
 

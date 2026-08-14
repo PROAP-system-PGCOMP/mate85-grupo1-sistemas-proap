@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import br.ufba.proap.authentication.repository.PerfilRepository;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,6 +65,9 @@ class UserServiceTest {
 
     @Mock
     private SecurityContext securityContext;
+
+    @Mock
+    private PerfilRepository perfilRepository;
 
     private User user;
     private User adminUser;
@@ -269,7 +273,7 @@ class UserServiceTest {
         when(userRepository.findByEmail(EMAIL_PARAM)).thenReturn(Optional.empty());
         when(userRepository.findByCpf(CPF_PARAM)).thenReturn(Optional.empty());
         when(perfilService.findByName(Perfil.getDefaultPerfilName())).thenReturn(Optional.of(defaultPerfil));
-        when(perfilService.findById(PROFILE_ID)).thenReturn(Optional.of(adminPerfil));
+        when(perfilRepository.findById(PROFILE_ID)).thenReturn(Optional.of(adminPerfil));
         when(passwordEncoder.encode(PASSWORD_PARAM)).thenReturn(PASSWORD_ENCODED);
 
         userService.create(dtoWithRequestedPerfil);
@@ -304,7 +308,7 @@ class UserServiceTest {
         when(userRepository.findByEmail(EMAIL_PARAM)).thenReturn(Optional.empty());
         when(userRepository.findByCpf(CPF_PARAM)).thenReturn(Optional.empty());
         when(perfilService.findByName(Perfil.getDefaultPerfilName())).thenReturn(Optional.of(defaultPerfil));
-        when(userRepository.findById(PROFILE_ID)).thenReturn(Optional.empty());
+        when(perfilRepository.findById(PROFILE_ID)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> userService.create(dtoWithRequestedPerfil));
         verify(userRepository, never()).saveAndFlush(any(User.class));
@@ -361,9 +365,10 @@ class UserServiceTest {
         assertEquals("A senha deve ter no mínimo 8 caracteres", exception.getMessage());
         verify(userRepository, never()).saveAndFlush(any(User.class));
     }
-
     @Test
     void reviewUserRole_WhenApproved_ShouldUpdateUserRoleAndClearRequestedPerfil() {
+        // FIX: Define o perfil atual como defaultPerfil para ser DIFERENTE do adminPerfil solicitado
+        user.setPerfil(defaultPerfil);
         user.setRequestedPerfil(adminPerfil);
         user.setProfileStatus(ProfileStatus.PENDING);
 
@@ -382,6 +387,7 @@ class UserServiceTest {
 
     @Test
     void reviewUserRole_WhenRejected_ShouldKeepOldRoleAndClearRequestedPerfil() {
+        user.setPerfil(defaultPerfil);
         user.setRequestedPerfil(adminPerfil);
         user.setProfileStatus(ProfileStatus.PENDING);
 
@@ -397,7 +403,6 @@ class UserServiceTest {
         assertEquals(ProfileStatus.REJECTED, user.getProfileStatus());
         verify(userRepository).save(user);
     }
-
     @Test
     void reviewUserRole_WhenUserNotAdmin_ShouldThrowUnauthorizedException() {
         when(securityContext.getAuthentication()).thenReturn(authentication);

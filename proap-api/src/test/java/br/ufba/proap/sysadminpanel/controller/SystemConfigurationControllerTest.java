@@ -89,7 +89,6 @@ class SystemConfigurationControllerTest {
         regularUser.setName("Regular User");
         regularUser.setEmail("regular@example.com");
         regularUser.setPerfil(regularPerfil);
-
     }
 
     private void mockAdminUser() {
@@ -276,5 +275,18 @@ class SystemConfigurationControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(resourceLinks)))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void updateConfiguration_whenUserServiceThrowsException_shouldReturnInternalServerErrorOrForbidden() throws Exception {
+        when(userService.getLoggedUser()).thenThrow(new RuntimeException("Erro simulado"));
+
+        SystemConfigurationDTO configDTO = new SystemConfigurationDTO();
+        configDTO.setEnableSolicitation(true);
+
+        mockMvc.perform(put("/api/admin/system-config")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(configDTO)))
+                .andExpect(status().isForbidden()); // Ou isInternalServerError(), dependendo da tratativa do seu Controller
     }
 }

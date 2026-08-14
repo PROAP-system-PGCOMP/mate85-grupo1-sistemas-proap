@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.ufba.proap.authentication.domain.User;
+import br.ufba.proap.authentication.domain.dto.StatusResponseDTO;
 import br.ufba.proap.authentication.service.UserService;
 import br.ufba.proap.sysadminpanel.domain.dto.SystemConfigurationDTO;
 import br.ufba.proap.sysadminpanel.domain.dto.UrlMapperDTO;
@@ -120,8 +121,8 @@ public class SystemConfigurationController {
     }
 
     @PutMapping("/period")
-    public ResponseEntity<String> updatePeriod(@RequestBody PeriodRequestDTO dto) {
-        ResponseEntity<String> permissionCheck = checkAdminPermission();
+    public ResponseEntity<StatusResponseDTO> updatePeriod(@RequestBody PeriodRequestDTO dto) {
+        ResponseEntity<StatusResponseDTO> permissionCheck = checkAdminPermission();
         if (permissionCheck != null) {
             return permissionCheck;
         }
@@ -137,7 +138,7 @@ public class SystemConfigurationController {
 
         interceptorRepository.save(config);
 
-        return ResponseEntity.ok("Período atualizado com sucesso");
+        return ResponseEntity.ok(new StatusResponseDTO("Sucesso", "Período atualizado com sucesso"));
 
     }
 

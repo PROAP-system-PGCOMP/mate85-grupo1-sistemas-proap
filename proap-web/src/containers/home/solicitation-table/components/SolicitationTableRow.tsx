@@ -31,6 +31,8 @@ interface SolicitationRowData {
     name: string;
     email: string;
   };
+  userName?: string;  
+  userEmail?: string;
   valorTotal?: number;
   createdAt?: string;
   situacao?: number;
@@ -92,6 +94,8 @@ const safelyFormatDate = (dateString: string | null) => {
 const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
   id,
   user = { name: '', email: '' },
+  userName,  
+  userEmail,
   valorTotal = 0,
   createdAt = '',
   situacao = 0,
@@ -181,6 +185,14 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
     });
   };
 
+  if (tipoSolicitacao === 'Extra') {
+    console.log('--- DEBUG DEMANDA EXTRA ---');
+    console.log('ID:', id);
+    console.log('Situação (é 0?):', situacao);
+    console.log('Email logado:', currentUserEmail);
+    console.log('Email do dono (chegou do Java?):', user?.email);
+  }
+
   // --- ADIÇÃO 3: FUNÇÃO PARA ABRIR O MODAL DE ATA ---
   const handleOpenAta = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -192,7 +204,7 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
       });
     }
   };
-
+  const ownerEmail = user?.email || userEmail;
   return (
     <TableRow
       onClick={handleRowClick}
@@ -268,7 +280,7 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
               <IconButton
                 size="small"
                 onClick={handleEdit}
-                disabled={!((situacao == 0 && currentUserEmail === user.email) || userCanReviewRequests)}
+                disabled={!((situacao == 0 && currentUserEmail === ownerEmail) || userCanReviewRequests)}
               >
                 <EditSquareIcon fontSize="small" />
               </IconButton>
@@ -280,7 +292,7 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
               <IconButton
                 size="small"
                 onClick={handleDelete}
-                disabled={!((situacao == 0 && currentUserEmail === user.email) || userCanReviewRequests)}
+                disabled={!((situacao == 0 && currentUserEmail === ownerEmail) || userCanReviewRequests)}
               >
                 <DeleteIcon fontSize="small" />
               </IconButton>

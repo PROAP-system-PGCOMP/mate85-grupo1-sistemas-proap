@@ -4,7 +4,7 @@ export const userProfileSchema = Yup.object().shape({
   name: Yup.string().required('Nome é obrigatório')
     .max(255, 'O nome não pode ultrapassar 255 caracteres')
     .matches(
-      /^[a-zA-ZÀ-ÿ\s]+$/, 
+      /^[a-zA-ZÀ-ÿ\s']+$/, 
       'O nome não pode conter números ou caracteres especiais'
     )
     .test('nome-completo', 'Informe o nome completo (nome e sobrenome)', (value) => {

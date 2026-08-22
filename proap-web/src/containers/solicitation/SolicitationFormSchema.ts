@@ -13,7 +13,7 @@ const validacaoNome = Yup.string()
   )
   .min(3, 'O nome deve ter no mínimo 3 caracteres')
   .matches(
-    /^[a-zA-ZÀ-ÿ\s]+$/, 
+    /^[a-zA-ZÀ-ÿ\s']+$/, 
     'O nome não pode conter números ou caracteres especiais'
   );
 export const solicitantionDataFormSchema = Yup.object({

@@ -52,8 +52,8 @@ public interface AssistanceRequestRepository extends JpaRepository<AssistanceReq
                     FROM AssistanceRequest t
                     WHERE (:perfil IS NULL OR t.user.perfil.id IN :perfil)
                     AND (:eventoInternacional IS NULL OR t.eventoInternacional = :eventoInternacional)
-                    AND (:startDate IS NULL OR t.createdAt >= :startDate)
-                    AND (:endDate IS NULL OR t.createdAt <= :endDate)
+                    AND (CAST(:startDate AS localdatetime) IS NULL OR t.createdAt >= :startDate)
+                    AND (CAST(:endDate AS localdatetime) IS NULL OR t.createdAt <= :endDate)
                     GROUP BY t.user.perfil, t.eventoInternacional
                 """
     )

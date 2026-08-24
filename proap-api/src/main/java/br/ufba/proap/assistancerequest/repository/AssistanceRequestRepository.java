@@ -61,4 +61,6 @@ public interface AssistanceRequestRepository extends JpaRepository<AssistanceReq
                                                    @Param("eventoInternacional") Boolean eventoInternacional,
                                                    @Param("startDate")LocalDateTime startDate,
                                                    @Param("endDate")LocalDateTime endDate);
+
+    long count();
 }

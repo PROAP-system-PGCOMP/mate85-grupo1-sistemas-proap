@@ -6,12 +6,14 @@ import java.util.Optional;
 
 import br.ufba.proap.assistancerequest.domain.dto.CreateExtraRequestDTO;
 import br.ufba.proap.assistancerequest.domain.dto.ExtraRequestResponseDTO;
+import br.ufba.proap.assistancerequest.domain.dto.TotalElementosResponseDTO;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import br.ufba.proap.assistancerequest.domain.ExtraRequest;
@@ -85,6 +87,7 @@ public class ExtraRequestController {
         }
     }
 
+    @Transactional
     @GetMapping("/find/{id}")
     public ResponseEntity<ExtraRequestResponseDTO> findById(@PathVariable Long id) {
         User currentUser = serviceUser.getLoggedUser();
@@ -269,6 +272,12 @@ public class ExtraRequestController {
             logger.error(e.getMessage());
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @GetMapping("/get_total_extra")
+    public ResponseEntity<TotalElementosResponseDTO> getTotalExtra() {
+        TotalElementosResponseDTO total = this.service.totalExtra();
+        return ResponseEntity.ok().body(total);
     }
 
 }

@@ -8,6 +8,7 @@ public record DashboardResponseDTO (
         Perfil perfil,
         Boolean eventoInternacional,
         BigDecimal totalSolicitado,
-        BigDecimal totalAprovado
+        BigDecimal totalAprovado,
+        long count
 ){
 }

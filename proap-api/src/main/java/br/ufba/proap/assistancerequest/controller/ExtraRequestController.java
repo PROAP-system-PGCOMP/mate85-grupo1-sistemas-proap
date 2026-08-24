@@ -4,9 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import br.ufba.proap.assistancerequest.domain.dto.CreateExtraRequestDTO;
-import br.ufba.proap.assistancerequest.domain.dto.ExtraRequestResponseDTO;
-import br.ufba.proap.assistancerequest.domain.dto.TotalElementosResponseDTO;
+import br.ufba.proap.assistancerequest.domain.dto.*;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import br.ufba.proap.assistancerequest.domain.ExtraRequest;
 import br.ufba.proap.assistancerequest.domain.Review;
-import br.ufba.proap.assistancerequest.domain.dto.ReviewDTO;
 import br.ufba.proap.assistancerequest.service.ExtraRequestService;
 import br.ufba.proap.assistancerequest.service.ExtraRequestService.ExtraRequestListFiltered;
 import br.ufba.proap.assistancerequest.service.ReviewService;
@@ -275,8 +272,8 @@ public class ExtraRequestController {
     }
 
     @GetMapping("/get_total_extra")
-    public ResponseEntity<TotalElementosResponseDTO> getTotalExtra() {
-        TotalElementosResponseDTO total = this.service.totalExtra();
+    public ResponseEntity<TotalElementosResponseDTO> getTotalExtra(CountRequestDTO data) {
+        TotalElementosResponseDTO total = this.service.totalExtra(data);
         return ResponseEntity.ok().body(total);
     }
 

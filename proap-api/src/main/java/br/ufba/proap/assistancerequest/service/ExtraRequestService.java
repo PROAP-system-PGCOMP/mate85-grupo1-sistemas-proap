@@ -3,6 +3,7 @@ package br.ufba.proap.assistancerequest.service;
 import java.util.List;
 import java.util.Optional;
 
+import br.ufba.proap.assistancerequest.domain.dto.CountRequestDTO;
 import br.ufba.proap.assistancerequest.domain.dto.ExtraRequestResponseDTO;
 import br.ufba.proap.assistancerequest.domain.dto.TotalElementosResponseDTO;
 import br.ufba.proap.assistancerequest.repository.ExtraRequestQueryRepository;
@@ -130,14 +131,14 @@ public class ExtraRequestService {
     }
 
     @Transactional(readOnly = true)
-    public TotalElementosResponseDTO totalExtra() {
+    public TotalElementosResponseDTO totalExtra(CountRequestDTO data) {
         User currentUser = userService.getLoggedUser();
 
         if (!currentUser.getPerfil().hasPermission("ADMIN_ROLE")) {
             throw new UnauthorizedException("Usuario não possui autorização");
         }
 
-        TotalElementosResponseDTO total = new TotalElementosResponseDTO(this.extraRequestRepostirory.count());
+        TotalElementosResponseDTO total = new TotalElementosResponseDTO(this.extraRequestRepostirory.count(data.startDate(), data.endDate()));
 
         return total;
     }

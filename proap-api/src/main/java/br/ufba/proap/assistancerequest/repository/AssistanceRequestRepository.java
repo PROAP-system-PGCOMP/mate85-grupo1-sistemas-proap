@@ -2,10 +2,14 @@ package br.ufba.proap.assistancerequest.repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
+import br.ufba.proap.assistancerequest.domain.dto.DashboardRequestDTO;
+import br.ufba.proap.assistancerequest.domain.dto.DashboardResponseDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import br.ufba.proap.assistancerequest.domain.AssistanceRequest;
@@ -34,4 +38,27 @@ public interface AssistanceRequestRepository extends JpaRepository<AssistanceReq
 
 	@Query(value = "SELECT COUNT(s) > 0 FROM proap_assistancerequest s WHERE s.user_id = :userId", nativeQuery = true)
 	Boolean userHasAnySolicitationRequests(Long userId);
+
+        @Query(
+                """
+                    SELECT new br.ufba.proap.assistancerequest.domain.dto.DashboardResponseDTO(
+                        t.user.perfil,
+                        t.eventoInternacional,
+                        CAST(SUM(t.valorTotal) as bigdecimal),
+                        CAST(SUM(CASE
+                            WHEN t.situacao = 1 THEN t.valorTotal ELSE 0.0 END)
+                         as bigdecimal)
+                    )
+                    FROM AssistanceRequest t
+                    WHERE (:perfil IS NULL OR t.user.perfil.id IN :perfil)
+                    AND (:eventoInternacional IS NULL OR t.eventoInternacional = :eventoInternacional)
+                    AND (:startDate IS NULL OR t.createdAt >= :startDate)
+                    AND (:endDate IS NULL OR t.createdAt <= :endDate)
+                    GROUP BY t.user.perfil, t.eventoInternacional
+                """
+    )
+    List<DashboardResponseDTO> mountDashboard(@Param("perfil")List<Long>perfilId,
+                                                   @Param("eventoInternacional") Boolean eventoInternacional,
+                                                   @Param("startDate")LocalDateTime startDate,
+                                                   @Param("endDate")LocalDateTime endDate);
 }

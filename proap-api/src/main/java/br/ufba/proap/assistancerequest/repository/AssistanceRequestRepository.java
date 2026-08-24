@@ -7,6 +7,7 @@ import java.util.List;
 
 import br.ufba.proap.assistancerequest.domain.dto.DashboardRequestDTO;
 import br.ufba.proap.assistancerequest.domain.dto.DashboardResponseDTO;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -47,7 +48,8 @@ public interface AssistanceRequestRepository extends JpaRepository<AssistanceReq
                         CAST(SUM(t.valorTotal) as bigdecimal),
                         CAST(SUM(CASE
                             WHEN t.situacao = 1 THEN t.valorTotal ELSE 0.0 END)
-                         as bigdecimal)
+                         as bigdecimal),
+                         COUNT(t)
                     )
                     FROM AssistanceRequest t
                     WHERE (:perfil IS NULL OR t.user.perfil.id IN :perfil)
@@ -61,6 +63,12 @@ public interface AssistanceRequestRepository extends JpaRepository<AssistanceReq
                                                    @Param("eventoInternacional") Boolean eventoInternacional,
                                                    @Param("startDate")LocalDateTime startDate,
                                                    @Param("endDate")LocalDateTime endDate);
-
-    long count();
+    @Query("""
+            SELECT COUNT(u)
+            FROM AssistanceRequest u
+            WHERE (CAST(:startDate AS localdatetime) IS NULL OR u.createdAt >= :startDate)
+            AND (CAST(:endDate AS localdatetime) IS NULL OR u.createdAt <= :endDate)
+            """)
+    long count(@Param("startDate")LocalDateTime startDate,
+               @Param("endDate")LocalDateTime endDate);
 }

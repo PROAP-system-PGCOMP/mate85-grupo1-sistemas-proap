@@ -211,13 +211,13 @@ public class AssistanceRequestService {
     }
 
     @Transactional(readOnly = true)
-    public TotalElementosResponseDTO totalAssistenceRequest() {
+    public TotalElementosResponseDTO totalAssistenceRequest(CountRequestDTO data) {
         User currentUser = userService.getLoggedUser();
 
         if (!currentUser.getPerfil().hasPermission("ADMIN_ROLE")) {
             throw new UnauthorizedException("Usuario não possui permissão");
         }
 
-        return new TotalElementosResponseDTO(this.assistanteRequestRepository.count());
+        return new TotalElementosResponseDTO(this.assistanteRequestRepository.count(data.startDate(), data.endDate()));
     }
 }

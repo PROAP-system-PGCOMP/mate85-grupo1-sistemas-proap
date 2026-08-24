@@ -40,5 +40,12 @@ public interface ExtraRequestRepostirory extends JpaRepository<ExtraRequest, Lon
     @Query("SELECT SUM(e.valorAprovado) FROM ExtraRequest e WHERE YEAR(e.createdAt) = :year AND e.situacao = 1")
     BigDecimal findTotalApprovedValueByYear(Integer year);
 
-    long count();
+    @Query("""
+            SELECT COUNT(u)
+            FROM ExtraRequest u
+            WHERE (CAST(:startDate AS localdatetime) IS NULL OR u.createdAt >= :startDate)
+            AND (CAST(:endDate AS localdatetime) IS NULL OR u.createdAt <= :endDate)
+            """)
+    long count(@Param("startDate")LocalDateTime startDate,
+               @Param("endDate")LocalDateTime endDate);
 }

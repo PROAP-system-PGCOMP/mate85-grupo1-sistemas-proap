@@ -325,8 +325,8 @@ public class AssistanceRequestController {
     }
 
     @GetMapping("/get_elements_total")
-    public ResponseEntity<TotalElementosResponseDTO> getElements() {
-        TotalElementosResponseDTO total = service.totalAssistenceRequest();
+    public ResponseEntity<TotalElementosResponseDTO> getElements(CountRequestDTO data) {
+        TotalElementosResponseDTO total = service.totalAssistenceRequest(data);
         return ResponseEntity.ok().body(total);
     }
 }

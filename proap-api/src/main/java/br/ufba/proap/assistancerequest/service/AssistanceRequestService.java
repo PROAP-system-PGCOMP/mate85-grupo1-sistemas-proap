@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.time.LocalDate;
 
+import br.ufba.proap.assistancerequest.domain.dto.DashboardRequestDTO;
+import br.ufba.proap.assistancerequest.domain.dto.DashboardResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -199,4 +201,15 @@ public class AssistanceRequestService {
 	public Boolean userHasAnySolicitationRequests(Long userId) {
 		return assistanteRequestRepository.userHasAnySolicitationRequests(userId);
 	}
+
+    @Transactional(readOnly = true)
+    public List<DashboardResponseDTO> createDashboard(DashboardRequestDTO data) {
+        User currentUser = userService.getLoggedUser();
+
+        if (!currentUser.getPerfil().hasPermission("ADMIN_ROLE")) {
+            throw new UnauthorizedException("Usuario não possui permissão");
+        }
+
+        return this.assistanteRequestRepository.mountDashboard(data.perfilId(), data.eventoInternacional(), data.startDate(), data.endDate());
+    }
 }

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import br.ufba.proap.assistancerequest.domain.dto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +27,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import br.ufba.proap.assistancerequest.domain.AssistanceRequest;
 import br.ufba.proap.assistancerequest.domain.Review;
-import br.ufba.proap.assistancerequest.domain.dto.AssistanceRequestCeapgDTO;
-import br.ufba.proap.assistancerequest.domain.dto.CreateAssistanceRequestDTO;
-import br.ufba.proap.assistancerequest.domain.dto.ResponseAssistanceRequestDTO;
-import br.ufba.proap.assistancerequest.domain.dto.ReviewDTO;
 import br.ufba.proap.assistancerequest.service.AssistanceRequestService;
 import br.ufba.proap.assistancerequest.service.ReviewService;
 import br.ufba.proap.assistancerequest.service.AssistanceRequestService.AssistanceRequestListFiltered;
@@ -319,5 +316,11 @@ public class AssistanceRequestController {
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new StatusResponseDTO("error", e.getMessage()));
         }
+    }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<List<DashboardResponseDTO>> dashboard(DashboardRequestDTO data) {
+        List<DashboardResponseDTO> dashboardPronto = service.createDashboard(data);
+        return ResponseEntity.ok().body(dashboardPronto);
     }
 }

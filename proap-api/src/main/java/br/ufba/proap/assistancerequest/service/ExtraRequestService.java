@@ -4,7 +4,10 @@ import java.util.List;
 import java.util.Optional;
 
 import br.ufba.proap.assistancerequest.domain.dto.ExtraRequestResponseDTO;
+import br.ufba.proap.assistancerequest.domain.dto.TotalElementosResponseDTO;
 import br.ufba.proap.assistancerequest.repository.ExtraRequestQueryRepository;
+import br.ufba.proap.authentication.service.UserService;
+import br.ufba.proap.exception.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +30,9 @@ public class ExtraRequestService {
 
 	@Autowired
 	private ExtraRequestQueryRepository extraRequestQueryRepository;
+
+    @Autowired
+    private UserService userService;
 
 	public List<ExtraRequest> findAll() {
 		return extraRequestRepostirory.findAll();
@@ -121,5 +127,19 @@ public class ExtraRequestService {
     persisted.setAutomaticDecText(" ");
 
     return extraRequestRepostirory.save(persisted);
-}
+    }
+
+    @Transactional(readOnly = true)
+    public TotalElementosResponseDTO totalExtra() {
+        User currentUser = userService.getLoggedUser();
+
+        if (!currentUser.getPerfil().hasPermission("ADMIN_ROLE")) {
+            throw new UnauthorizedException("Usuario não possui autorização");
+        }
+
+        TotalElementosResponseDTO total = new TotalElementosResponseDTO(this.extraRequestRepostirory.count());
+
+        return total;
+    }
+
 }

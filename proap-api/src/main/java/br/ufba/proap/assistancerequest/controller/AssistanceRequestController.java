@@ -323,4 +323,10 @@ public class AssistanceRequestController {
         List<DashboardResponseDTO> dashboardPronto = service.createDashboard(data);
         return ResponseEntity.ok().body(dashboardPronto);
     }
+
+    @GetMapping("/get_elements_total")
+    public ResponseEntity<TotalElementosResponseDTO> getElements() {
+        TotalElementosResponseDTO total = service.totalAssistenceRequest();
+        return ResponseEntity.ok().body(total);
+    }
 }

@@ -4,15 +4,12 @@ import java.util.List;
 import java.util.Optional;
 import java.time.LocalDate;
 
-import br.ufba.proap.assistancerequest.domain.dto.DashboardRequestDTO;
-import br.ufba.proap.assistancerequest.domain.dto.DashboardResponseDTO;
+import br.ufba.proap.assistancerequest.domain.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.ufba.proap.assistancerequest.domain.AssistanceRequest;
-import br.ufba.proap.assistancerequest.domain.dto.AssistanceRequestCeapgDTO;
-import br.ufba.proap.assistancerequest.domain.dto.ResponseAssistanceRequestDTO;
 import br.ufba.proap.assistancerequest.repository.AssistanceRequestQueryRepository;
 import br.ufba.proap.assistancerequest.repository.AssistanceRequestRepository;
 import br.ufba.proap.authentication.domain.User;
@@ -211,5 +208,16 @@ public class AssistanceRequestService {
         }
 
         return this.assistanteRequestRepository.mountDashboard(data.perfilId(), data.eventoInternacional(), data.startDate(), data.endDate());
+    }
+
+    @Transactional(readOnly = true)
+    public TotalElementosResponseDTO totalAssistenceRequest() {
+        User currentUser = userService.getLoggedUser();
+
+        if (!currentUser.getPerfil().hasPermission("ADMIN_ROLE")) {
+            throw new UnauthorizedException("Usuario não possui permissão");
+        }
+
+        return new TotalElementosResponseDTO(this.assistanteRequestRepository.count());
     }
 }

@@ -20,6 +20,7 @@ import {
   Dashboard,
   FactCheck,
   AdminPanelSettings,
+  Assessment
 } from '@mui/icons-material';
 import { BudgetFormValues } from './BudgetFormSchema';
 import { setBudget } from '../../services/budgetService';
@@ -29,6 +30,7 @@ import SectionHeader from '../../components/custom/SectionHeader';
 import BudgetOverview from './BudgetOverviewContainer';
 import useHasPermission from '../../hooks/auth/useHasPermission';
 import SettingContainer from './settings/SettingsContainer';
+import SolicitationsMetricsContainer from './settings/SolicitationsMetricsContainer';
 
 import useCeapgRequests from '../../hooks/admin/useLoadCeapgRequests';
 import useLoadApprovedRequests from '../../hooks/admin/useLoadApprovedRequests';
@@ -68,7 +70,8 @@ const a11yProps = (index: number) => {
 const AdminDashboardContainer = () => {
   const DASHBOARD_INDEX = 0;
   const APPROVED_REQUESTS_INDEX = 1;
-  const SETTINGS_INDEX = 2;
+  const SOLICITATIONS_VALUES_INDEX = 2;
+  const SETTINGS_INDEX = 3;
   const isAdmin = useHasPermission('ADMIN_ROLE');
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -258,7 +261,12 @@ const AdminDashboardContainer = () => {
               iconPosition={isMobile ? 'top' : 'start'}
               {...a11yProps(APPROVED_REQUESTS_INDEX)}
             />
-            
+            <Tab
+              icon={<Assessment />}
+              label={isMobile ? '' : 'Solicitações e Valores'}
+              iconPosition={isMobile ? 'top' : 'start'}
+              {...a11yProps(SOLICITATIONS_VALUES_INDEX)}
+            />
             {isAdmin && (
               <Tab
                 icon={<Settings />}
@@ -279,13 +287,11 @@ const AdminDashboardContainer = () => {
             <BudgetOverview
               budgetLoading={budgetByYear.loading}
               
-              // Valores originais (PROAP/Total)
               totalBudget={budgetByYear.budget?.totalBudget ?? 0}
               remainingBudget={budgetByYear.budget?.remainingBudget ?? 0}
               usedPercentage={budgetByYear.budget?.usedPercentage ?? 0}
               usedBudget={budgetByYear.budget?.usedBudget ?? 0}
               
-              // Valores CEAPG Calculados
               totalCeapgBudget={totalCeapgCalculado}
               usedCeapgBudget={usedCeapgCalculado}
               remainingCeapgBudget={remainingCeapgCalculado}
@@ -319,6 +325,14 @@ const AdminDashboardContainer = () => {
               onEndDateChange={() => {}}
               onFilter={handleApprovedRequestsFilterApply}
             />
+          </TabPanel>
+          <TabPanel value={tabValue} index={SOLICITATIONS_VALUES_INDEX}>
+            <SectionHeader
+              icon={<Assessment color="primary" />}
+              title="Painel Gerencial de Métricas"
+            />
+            
+            <SolicitationsMetricsContainer />
           </TabPanel>
 
           <TabPanel value={tabValue} index={SETTINGS_INDEX}>

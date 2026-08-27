@@ -43,7 +43,7 @@ public interface AssistanceRequestRepository extends JpaRepository<AssistanceReq
         @Query(
                 """
                     SELECT new br.ufba.proap.assistancerequest.domain.dto.DashboardResponseDTO(
-                        t.user.perfil,
+                        t.user.perfil.name,
                         t.eventoInternacional,
                         CAST(SUM(t.valorTotal) as bigdecimal),
                         CAST(SUM(CASE
@@ -56,7 +56,7 @@ public interface AssistanceRequestRepository extends JpaRepository<AssistanceReq
                     AND (:eventoInternacional IS NULL OR t.eventoInternacional = :eventoInternacional)
                     AND (CAST(:startDate AS localdatetime) IS NULL OR t.createdAt >= :startDate)
                     AND (CAST(:endDate AS localdatetime) IS NULL OR t.createdAt <= :endDate)
-                    GROUP BY t.user.perfil, t.eventoInternacional
+                    GROUP BY t.user.perfil.name, t.eventoInternacional
                 """
     )
     List<DashboardResponseDTO> mountDashboard(@Param("perfil")List<Long>perfilId,

@@ -5,7 +5,7 @@ import br.ufba.proap.authentication.domain.Perfil;
 import java.math.BigDecimal;
 
 public record DashboardResponseDTO (
-        Perfil perfil,
+        String perfilName,
         Boolean eventoInternacional,
         BigDecimal totalSolicitado,
         BigDecimal totalAprovado,

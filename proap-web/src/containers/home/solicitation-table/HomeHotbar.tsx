@@ -6,8 +6,10 @@ import {
   useMediaQuery,
   useTheme,
   Tooltip,
+  Alert,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 import { HomeHotbarLink } from './HomeHotbar.style';
 import useHasPermission from '../../../hooks/auth/useHasPermission';
@@ -27,7 +29,6 @@ export default function HomeHotbar() {
           justifyContent: 'space-between',
           alignItems: isMobile ? 'flex-start' : 'center',
           width: '100%',
-          mb: isMobile ? 2 : 3,
         }}
       >
         <Typography
@@ -107,6 +108,27 @@ export default function HomeHotbar() {
             </HomeHotbarLink>
           </Box>
         )}
+      </Box>
+
+      <Box sx={{ mt: 3, width: '100%' }}>
+        <Alert 
+          severity="warning" 
+          variant="filled"
+          icon={<WarningAmberIcon sx={{ fontSize: 40 }} />}
+          sx={{ 
+            borderRadius: 2, 
+            alignItems: 'center',
+            p: 2,
+            boxShadow: '0px 4px 12px rgba(211, 47, 47, 0.2)'
+          }}
+        >
+          <Typography variant="h6" fontWeight="bold" sx={{ mb: 0.5, lineHeight: 1.2 }}>
+            O PROAP 2026 encerrou!
+          </Typography>
+          <Typography variant="body1" sx={{ opacity: 0.95 }}>
+            O sistema encontra-se aberto <strong>exclusivamente</strong> para o registro no sistema das solicitações que já foram realizadas previamente através da planilha.
+          </Typography>
+        </Alert>
       </Box>
     </Box>
   );

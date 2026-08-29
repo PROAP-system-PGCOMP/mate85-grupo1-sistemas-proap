@@ -21,6 +21,7 @@ import {
   DialogContent,
   DialogActions,
   InputLabel,
+  IconButton,
 } from '@mui/material';
 import {
   StyledData,
@@ -38,6 +39,7 @@ import {
   Undo,
   ArrowBack,
   DoDisturb,
+  ContentCopy,
 } from '@mui/icons-material';
 import { SolicitationFormValues } from '../SolicitationFormSchema';
 import { useBudgetPercentage } from '../../../hooks/budget/useBudgetPercentage';
@@ -281,17 +283,32 @@ export default function ReviewDataFormContainer({ onBack }: ReviewDataFormContai
             </StyledData>
           </Box>
           <Box sx={{ flex: 1 }}>
-            <Field
-              as={StyledTextField}
-              required={values.situacao === 1}
-              fullWidth
-              label="Valor aprovado"
-              name="valorAprovado"
-              type="number"
-              InputProps={{ startAdornment: <InputAdornment position="start">R$</InputAdornment> }}
-              error={Boolean(touched.valorAprovado && errors.valorAprovado)}
-              helperText={touched.valorAprovado && errors.valorAprovado}
-            />
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+              <Field
+                as={StyledTextField}
+                required={values.situacao === 1}
+                fullWidth
+                label="Valor aprovado"
+                name="valorAprovado"
+                type="number"
+                InputProps={{
+                  startAdornment: <InputAdornment position="start">R$</InputAdornment>,
+                }}
+                error={Boolean(touched.valorAprovado && errors.valorAprovado)}
+                helperText={touched.valorAprovado && errors.valorAprovado}
+                sx={{ flex: 1 }}
+              />
+              
+              <Tooltip title="Copiar valor total da solicitação">
+                <IconButton
+                  onClick={() => setFieldValue('valorAprovado', values.valorTotal)}
+                  color="primary"
+                  sx={{ mt: 2 }} 
+                >
+                  <ContentCopy />
+                </IconButton>
+              </Tooltip>
+            </Box>
           </Box>
         </Box>
       </Box>

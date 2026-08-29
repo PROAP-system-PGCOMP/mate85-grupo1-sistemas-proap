@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import br.ufba.proap.assistancerequest.domain.dto.*;
+import br.ufba.proap.assistancerequest.service.AssistanceRequestService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,9 @@ public class ExtraRequestController {
 
     @Autowired
     private ExtraRequestService service;
+
+    @Autowired
+    private AssistanceRequestService assistanceRequestService;
 
     @Autowired
     private ReviewService reviewService;
@@ -152,6 +156,7 @@ public class ExtraRequestController {
             ExtraRequest extraRequest = dto.toEntity();
             extraRequest.setSituacao(0);
             extraRequest.setUser(currentUser);
+            this.assistanceRequestService.totalAssistanceRequestByUser(extraRequest.getUser(), extraRequest.getValorSolicitado());
 
             ExtraRequest savedExtra = service.save(extraRequest);
 

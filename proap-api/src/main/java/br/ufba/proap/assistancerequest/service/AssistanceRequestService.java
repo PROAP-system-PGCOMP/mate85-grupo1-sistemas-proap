@@ -1,10 +1,17 @@
 package br.ufba.proap.assistancerequest.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
+import java.time.Year;
 import java.util.List;
 import java.util.Optional;
 import java.time.LocalDate;
 
 import br.ufba.proap.assistancerequest.domain.dto.*;
+import br.ufba.proap.assistancerequest.repository.ExtraRequestRepostirory;
+import br.ufba.proap.solicitationadminpanel.domain.SolicitationAdmin;
+import br.ufba.proap.solicitationadminpanel.service.BudgetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +32,12 @@ public class AssistanceRequestService {
 
 	@Autowired
 	private AssistanceRequestQueryRepository assistanceRequestQueryRepository;
+
+    @Autowired
+    private ExtraRequestRepostirory extraRequestRepostirory;
+
+    @Autowired
+    private BudgetService budgetService;
 
 	@Autowired
 	private UserService userService;
@@ -117,6 +130,7 @@ public class AssistanceRequestService {
 	}
 
 	public AssistanceRequest save(AssistanceRequest assistanceReques) {
+        this.totalAssistanceRequestByUser(assistanceReques.getUser(), assistanceReques.getValorTotal());
 		return assistanteRequestRepository.save(assistanceReques);
 	}
 
@@ -219,5 +233,31 @@ public class AssistanceRequestService {
         }
 
         return new TotalElementosResponseDTO(this.assistanteRequestRepository.count(data.startDate(), data.endDate()));
+    }
+    @Transactional(readOnly = true)
+    public void totalAssistanceRequestByUser (User user, BigDecimal totalValue) {
+        int anoAtual = Year.now().getValue();
+
+        LocalDateTime inicioAno = LocalDateTime.of(anoAtual, 1, 1, 0, 0, 0);
+        LocalDateTime fimAno = LocalDateTime.of(anoAtual, 12, 31, 23, 59, 59);
+
+        BigDecimal totalAssistanceRequest = this.assistanteRequestRepository.totalAssistanceRequestAprovedByUser(user, inicioAno, fimAno);
+        BigDecimal totalExtraRequest = this.extraRequestRepostirory.totalExtraRequestAprovedByUser(user, inicioAno, fimAno);
+        BigDecimal total = totalAssistanceRequest.add(totalExtraRequest).add(totalValue);
+        SolicitationAdmin budget = this.budgetService.getBudgetsByYear(anoAtual);
+
+        BigDecimal dezBudget = budget.getOrcamentoAnual().multiply(new BigDecimal("10"))
+                .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
+
+        if (totalValue.compareTo(dezBudget) > 0) {
+            throw new RuntimeException("O valor da solicitação não pode ultrapassar 10% do total do Orçamento anual");
+        }
+
+        BigDecimal vinteBudget = budget.getOrcamentoAnual().multiply(new BigDecimal("20"))
+                .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
+
+        if (total.compareTo(vinteBudget) > 0) {
+            throw new RuntimeException("O valor das solicitações do usuario ultrapassam 20% do Orçamento total");
+        }
     }
 }

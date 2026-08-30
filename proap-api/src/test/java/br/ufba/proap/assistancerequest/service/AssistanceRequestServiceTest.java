@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import br.ufba.proap.assistancerequest.repository.ExtraRequestRepostirory;
+import br.ufba.proap.solicitationadminpanel.domain.SolicitationAdmin;
 import br.ufba.proap.solicitationadminpanel.service.BudgetService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -50,8 +51,19 @@ class AssistanceRequestServiceTest {
 
         owner = buildUser(1L, "owner@ufba.br", List.of("FOO"));
         evaluator = buildUser(2L, "evaluator@ufba.br", List.of("EVALUATE_REQUESTS"));
-
         pendingRequest = buildRequest(10L, owner, 0);
+
+        lenient().when(repo.totalAssistanceRequestAprovedByUser(any(), any(), any()))
+                .thenReturn(BigDecimal.ZERO);
+
+        lenient().when(extraRequestRepostirory.totalExtraRequestAprovedByUser(any(), any(), any()))
+                .thenReturn(BigDecimal.ZERO);
+
+        SolicitationAdmin mockBudget = new SolicitationAdmin();
+        mockBudget.setOrcamentoAnual(new BigDecimal("1000.00"));
+
+        lenient().when(budgetService.getBudgetsByYear(anyInt()))
+                .thenReturn(mockBudget);
     }
 
     @Test

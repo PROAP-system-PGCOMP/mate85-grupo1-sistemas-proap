@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.cglib.core.Local;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -48,4 +49,15 @@ public interface ExtraRequestRepostirory extends JpaRepository<ExtraRequest, Lon
             """)
     long count(@Param("startDate")LocalDateTime startDate,
                @Param("endDate")LocalDateTime endDate);
+
+    @Query("""
+            SELECT COALESCE(SUM(CASE
+                WHEN t.situacao = 1 THEN t.valorTotal ELSE 0.0 END), 0.0)
+            FROM ExtraRequest t
+            WHERE t.user = :user
+            AND t.createdAt BETWEEN :startDate AND :endDate
+            """)
+    BigDecimal totalExtraRequestAprovedByUser(@Param("user") User user,
+                                              @Param("startDate") LocalDateTime startDate,
+                                              @Param("endDate") LocalDateTime endDate);
 }

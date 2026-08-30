@@ -8,6 +8,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import br.ufba.proap.assistancerequest.repository.ExtraRequestRepostirory;
+import br.ufba.proap.solicitationadminpanel.domain.SolicitationAdmin;
+import br.ufba.proap.solicitationadminpanel.service.BudgetService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -30,6 +33,10 @@ class AssistanceRequestServiceTest {
     private AssistanceRequestQueryRepository queryRepo;
     @Mock
     private UserService userService;
+    @Mock
+    private ExtraRequestRepostirory extraRequestRepostirory;
+    @Mock
+    private BudgetService budgetService;
 
     @InjectMocks
     private AssistanceRequestService sut;
@@ -44,8 +51,19 @@ class AssistanceRequestServiceTest {
 
         owner = buildUser(1L, "owner@ufba.br", List.of("FOO"));
         evaluator = buildUser(2L, "evaluator@ufba.br", List.of("EVALUATE_REQUESTS"));
-
         pendingRequest = buildRequest(10L, owner, 0);
+
+        lenient().when(repo.totalAssistanceRequestAprovedByUser(any(), any(), any()))
+                .thenReturn(BigDecimal.ZERO);
+
+        lenient().when(extraRequestRepostirory.totalExtraRequestAprovedByUser(any(), any(), any()))
+                .thenReturn(BigDecimal.ZERO);
+
+        SolicitationAdmin mockBudget = new SolicitationAdmin();
+        mockBudget.setOrcamentoAnual(new BigDecimal("1000.00"));
+
+        lenient().when(budgetService.getBudgetsByYear(anyInt()))
+                .thenReturn(mockBudget);
     }
 
     @Test

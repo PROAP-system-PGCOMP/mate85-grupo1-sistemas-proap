@@ -8,6 +8,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import br.ufba.proap.assistancerequest.repository.ExtraRequestRepostirory;
+import br.ufba.proap.solicitationadminpanel.service.BudgetService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -30,6 +32,10 @@ class AssistanceRequestServiceTest {
     private AssistanceRequestQueryRepository queryRepo;
     @Mock
     private UserService userService;
+    @Mock
+    private ExtraRequestRepostirory extraRequestRepostirory;
+    @Mock
+    private BudgetService budgetService;
 
     @InjectMocks
     private AssistanceRequestService sut;

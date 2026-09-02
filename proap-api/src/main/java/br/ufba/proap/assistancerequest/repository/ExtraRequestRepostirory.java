@@ -52,7 +52,7 @@ public interface ExtraRequestRepostirory extends JpaRepository<ExtraRequest, Lon
 
     @Query("""
             SELECT COALESCE(SUM(CASE
-                WHEN t.situacao = 1 THEN t.valorTotal ELSE 0.0 END), 0.0)
+                WHEN t.situacao = 1 THEN t.valorSolicitado ELSE 0.0 END), 0.0)
             FROM ExtraRequest t
             WHERE t.user = :user
             AND t.createdAt BETWEEN :startDate AND :endDate

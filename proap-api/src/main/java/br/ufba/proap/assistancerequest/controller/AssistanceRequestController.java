@@ -3,6 +3,7 @@ package br.ufba.proap.assistancerequest.controller;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import br.ufba.proap.assistancerequest.domain.dto.*;
@@ -147,7 +148,7 @@ public class AssistanceRequestController {
     // TODO: Débito técnico - Refatorar para service
     @Transactional
     @PostMapping(value = "/create-with-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ResponseAssistanceRequestDTO> createWithFile(
+    public ResponseEntity<?> createWithFile(
             @RequestPart("form") CreateAssistanceRequestDTO form,
             @RequestPart(value = "file", required = false) MultipartFile file) {
         User currentUser = serviceUser.getLoggedUser();
@@ -178,7 +179,7 @@ public class AssistanceRequestController {
         } catch (Exception e) {
             // Qualquer outro erro
             logger.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
         }
     }
 

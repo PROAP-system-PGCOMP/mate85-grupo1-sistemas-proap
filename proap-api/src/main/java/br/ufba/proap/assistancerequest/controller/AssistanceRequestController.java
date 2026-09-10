@@ -39,6 +39,8 @@ import br.ufba.proap.filestorage.FileService;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.NotFoundException;
 
+import static org.springframework.boot.context.properties.bind.Bindable.mapOf;
+
 @RestController
 @RequestMapping("/api/assistancerequest")
 public class AssistanceRequestController {
@@ -124,7 +126,7 @@ public class AssistanceRequestController {
     // TODO: Débito técnico - Refatorar para service
     @Transactional
     @PostMapping("/create")
-    public ResponseEntity<AssistanceRequest> create(@Valid @RequestBody CreateAssistanceRequestDTO dto) {
+    public ResponseEntity<?> create(@Valid @RequestBody CreateAssistanceRequestDTO dto) {
 
         User currentUser = serviceUser.getLoggedUser();
 
@@ -142,7 +144,7 @@ public class AssistanceRequestController {
 
         } catch (Exception e) {
             logger.error("Erro ao criar solicitação: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
         }
     }
     // TODO: Débito técnico - Refatorar para service
@@ -219,7 +221,7 @@ public class AssistanceRequestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         } catch (Exception e) {
             logger.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
         }
     }
 

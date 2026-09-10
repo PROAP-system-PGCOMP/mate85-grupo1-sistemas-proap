@@ -188,7 +188,7 @@ public class AssistanceRequestController {
     // TODO: Débito técnico - Refatorar para service
     @Transactional
     @PutMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<AssistanceRequest> update(@RequestPart("form") ResponseAssistanceRequestDTO assistanceRequest,
+    public ResponseEntity<?> update(@RequestPart("form") ResponseAssistanceRequestDTO assistanceRequest,
                                                     @RequestPart(value = "file", required = false) MultipartFile file) {
         try {
             User currentUser = serviceUser.getLoggedUser();

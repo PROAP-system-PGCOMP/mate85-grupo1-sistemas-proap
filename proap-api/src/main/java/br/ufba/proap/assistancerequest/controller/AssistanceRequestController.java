@@ -140,7 +140,9 @@ public class AssistanceRequestController {
             assistanceRequest.setSituacao(0);
             assistanceRequest.setUser(currentUser);
 
-            return ResponseEntity.ok().body(service.save(assistanceRequest));
+            AssistanceRequest saved = service.save(assistanceRequest);
+
+            return ResponseEntity.ok().body(ResponseAssistanceRequestDTO.fromEntity(saved));
 
         } catch (Exception e) {
             logger.error("Erro ao criar solicitação: {}", e.getMessage());

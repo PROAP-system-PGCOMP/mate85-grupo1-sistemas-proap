@@ -23,7 +23,6 @@ export default function UserProfileFormContainer() {
   const [isStudent, setIsStudent] = useState<boolean>(true);
 
   const { profiles, isLoading } = useAllProfiles(); 
-  console.log("🔍 DADOS DOS PERFIS QUE VIERAM DA API:", profiles);
 
   useEffect(() => {
     if (isStudent && !values.profileId && profiles && profiles.length > 0) {

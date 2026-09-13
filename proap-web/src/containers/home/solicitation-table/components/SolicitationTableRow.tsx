@@ -185,15 +185,7 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
     });
   };
 
-  if (tipoSolicitacao === 'Extra') {
-    console.log('--- DEBUG DEMANDA EXTRA ---');
-    console.log('ID:', id);
-    console.log('Situação (é 0?):', situacao);
-    console.log('Email logado:', currentUserEmail);
-    console.log('Email do dono (chegou do Java?):', user?.email);
-  }
 
-  // --- ADIÇÃO 3: FUNÇÃO PARA ABRIR O MODAL DE ATA ---
   const handleOpenAta = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onOpenAtaDialog) {

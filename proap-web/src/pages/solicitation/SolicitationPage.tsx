@@ -38,18 +38,30 @@ export default function SolicitationPage() {
   }, [cloneFromId]);
 
   const handleSubmitSolicitation = useCallback(
-    (values: FormikValues) => {
+    async (values: FormikValues) => {
       const valuesWithCorrectDates: InitialSolicitationFormValues = {
         ...(values as InitialSolicitationFormValues),
         dataInicio: dateToLocalDate(values.dataInicio),
         dataFim: dateToLocalDate(values.dataFim),
       };
-      return submitSolicitation(valuesWithCorrectDates).then(() => {
+
+      try {
+        await submitSolicitation(valuesWithCorrectDates);
         Toast.success('Solicitação criada com sucesso!');
         navigate('/');
-      });
+      } catch (error: any) {
+        const backendMessage = error.response?.data?.message;
+
+        if (backendMessage) {
+          Toast.error(`Atenção: ${backendMessage}`);
+        } else {
+          Toast.error('Erro ao enviar solicitação. Verifique os dados e tente novamente.');
+        }
+
+        throw error;
+      }
     },
-    [dispatch],
+    [navigate],
   );
 
   if (!userCanCreateRequest) {

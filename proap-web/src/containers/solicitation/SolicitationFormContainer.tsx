@@ -27,7 +27,7 @@ import { useNavigationGuard } from '../../contexts/NavigationGuardContext';
 import { ConfirmationDialog } from '../../components/dialogs';
 
 interface SolicitationFormContainerProps {
-  onSubmit: (values: FormikValues) => void;
+  onSubmit: (values: FormikValues) => Promise<void> | void;
   initialValues?: InitialSolicitationFormValues;
   title?: string;
   labels?: {
@@ -81,10 +81,7 @@ export default function SolicitationFormContainer({
     return initialValues;
   }, []);
 
-  const handleFormSubmit = (values: FormikValues) => {
-    setIsDirty(false);
-    setGlobalDirty(false);
-    
+  const handleFormSubmit = async (values: FormikValues) => {
     const { outroQualis, ...restValues } = values;
 
     const qualisParaSalvar = values.qualis === 'Outro' ? outroQualis : values.qualis;
@@ -94,9 +91,16 @@ export default function SolicitationFormContainer({
       qualis: qualisParaSalvar,
     };
 
-    onSubmit(payload);
-    
-    sessionStorage.removeItem('rascunho-solicitacao-proap');
+    try {
+      await onSubmit(payload);
+      
+      setIsDirty(false);
+      setGlobalDirty(false);
+      sessionStorage.removeItem('rascunho-solicitacao-proap');
+    } catch (error) {
+      
+      throw error; 
+    }
   };
 
   const handleCancel = useCallback(() => {

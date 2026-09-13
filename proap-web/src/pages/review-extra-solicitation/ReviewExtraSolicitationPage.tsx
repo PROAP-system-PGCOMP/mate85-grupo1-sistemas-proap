@@ -148,7 +148,6 @@ export default function ReviewExtraSolicitationPage() {
           Toast.error(error.response?.data?.message || 'Erro ao avaliar solicitação.');
       });
   };
-  console.log("DADOS DA DEMANDA:", extraRequest);
   if (isLoading) return <LinearProgress />;
 
   return (

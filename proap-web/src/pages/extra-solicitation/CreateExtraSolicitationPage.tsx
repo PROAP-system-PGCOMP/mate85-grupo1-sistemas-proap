@@ -14,41 +14,40 @@ export default function ExtraSolicitationPage() {
   const navigate = useNavigate();
   const { config } = useSysConfig();
 
-  const handleSubmit = (values: FormikValues) => {
+  const handleSubmit = async (values: FormikValues) => {
     const payload = {
       titulo: values.titulo || values.nomeSolicitacao || 'Solicitação Extra',
       itemSolicitado: values.itemSolicitado || values.nomeSolicitacao || values.titulo || 'Item não especificado',
-      
       justificativa: values.justificativa,
-      
       valorSolicitado: Number(values.valorSolicitado) > 0 ? Number(values.valorSolicitado) : null,
-      
       solicitacaoApoio: values.solicitacaoApoio || false,
       solicitacaoAuxilioOutrasFontes: values.solicitacaoAuxilioOutrasFontes || false,
-      
       nomeSolicitacao: values.nomeSolicitacao || values.titulo || '',
       nomeAgenciaFomento: values.nomeAgenciaFomento || '',
-      
       valorSolicitadoAgenciaFormento: String(values.valorSolicitadoAgenciaFormento || ''),
     };
 
-    return createExtraAssistanceRequest(payload as unknown as ExtraRequest)
-      .then(() => {
-        Toast.success('Solicitação criada com sucesso');
-        navigate('/');
-      })
-      .catch((error) => {
-        console.error('Erro na criação:', error.response?.data);
+    try {
+      await createExtraAssistanceRequest(payload as unknown as ExtraRequest);
+      Toast.success('Solicitação criada com sucesso');
+      navigate('/');
+    } catch (error: any) {
+      console.error('Erro na criação:', error.response?.data);
+      
+      const backendMessage = error.response?.data?.message;
+      
+      if (backendMessage) {
+        Toast.error(`Atenção: ${backendMessage}`);
+      } else {
         Toast.error(
           error.response?.data?.itemSolicitado || 
-          error.response?.data?.message || 
-          'Falha ao criar solicitação. Verifique os dados.'
+          'Falha ao criar solicitação. Verifique os dados e tente novamente.'
         );
-        return Promise.reject(error);
-      });
+      }
+      
+      throw error;
+    }
   };
-
-
 
   return (
     <ExtraSolicitationFormContainer

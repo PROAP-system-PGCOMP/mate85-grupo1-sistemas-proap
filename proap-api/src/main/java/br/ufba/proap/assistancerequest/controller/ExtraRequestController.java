@@ -6,6 +6,8 @@ import java.util.Optional;
 
 import br.ufba.proap.assistancerequest.domain.dto.*;
 import br.ufba.proap.assistancerequest.service.AssistanceRequestService;
+import br.ufba.proap.solicitationadminpanel.controller.CeapgController;
+import br.ufba.proap.solicitationadminpanel.domain.dto.CeapgReviewDTO;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,7 +138,9 @@ public class ExtraRequestController {
                     request.getAvaliadorCeapg(),
                     request.getCustoFinalCeapg(),
                     request.getObservacoesCeapg(),
-                    request.getDataAvaliacaoCeapg()
+                    request.getDataAvaliacaoCeapg(),
+                    request.getDiferencaCeapg(),
+                    request.getStatusCeapg()
             ));
         }
 
@@ -280,6 +284,12 @@ public class ExtraRequestController {
     public ResponseEntity<TotalElementosResponseDTO> getTotalExtra(CountRequestDTO data) {
         TotalElementosResponseDTO total = this.service.totalExtra(data);
         return ResponseEntity.ok().body(total);
+    }
+
+    @PutMapping("/update_ceapg/{id}")
+    public ResponseEntity<ExtraRequest> updateCeapg(@PathVariable Long id, @Valid @RequestBody AssistanceRequestCeapgDTO dto) {
+        ExtraRequest request = this.service.updateCeapgFields(id, dto);
+        return ResponseEntity.ok(request);
     }
 
 }

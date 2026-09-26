@@ -18,8 +18,6 @@ public record CreateAssistanceRequestDTO(
         Boolean solicitanteDocente,
         @NotBlank String nomeDocente,
         @NotBlank String nomeDiscente,
-        Boolean discenteNoPrazoDoCurso,
-        Integer mesesAtrasoCurso,
         @NotBlank String nomeEvento,
         @NotNull Boolean eventoInternacional,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy") LocalDate dataInicio,
@@ -50,8 +48,6 @@ public record CreateAssistanceRequestDTO(
                 entity.getSolicitanteDocente(),
                 entity.getNomeDocente(),
                 entity.getNomeDiscente(),
-                entity.getDiscenteNoPrazoDoCurso(),
-                entity.getMesesAtrasoCurso(),
                 entity.getNomeEvento(),
                 entity.getEventoInternacional(),
                 entity.getDataInicio(),
@@ -83,8 +79,6 @@ public record CreateAssistanceRequestDTO(
         entity.setSolicitanteDocente(this.solicitanteDocente());
         entity.setNomeDocente(this.nomeDocente());
         entity.setNomeDiscente(this.nomeDiscente());
-        entity.setDiscenteNoPrazoDoCurso(this.discenteNoPrazoDoCurso());
-        entity.setMesesAtrasoCurso(this.mesesAtrasoCurso());
         entity.setNomeEvento(this.nomeEvento());
         entity.setEventoInternacional(this.eventoInternacional());
         entity.setDataInicio(this.dataInicio());

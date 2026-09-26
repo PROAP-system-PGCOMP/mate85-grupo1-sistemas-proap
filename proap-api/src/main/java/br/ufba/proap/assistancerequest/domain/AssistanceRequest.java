@@ -7,15 +7,9 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
+
+import br.ufba.proap.assistancerequest.domain.enums.StatusCeapg;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -65,12 +59,6 @@ public class AssistanceRequest {
 	private String nomeDocente;
 
 	private String nomeDiscente;
-
-	@Column(nullable = true)
-	private Boolean discenteNoPrazoDoCurso;
-
-	@Column(nullable = true, name = "meses_atraso")
-	private Integer mesesAtrasoCurso;
 
 	// Detalhamento do Evento (ou Solicitação)
 
@@ -168,6 +156,13 @@ public class AssistanceRequest {
 
 	@Column(nullable = true, precision = 19, scale = 4)
 	private BigDecimal custoFinalCeapg;
+
+    @Column(name = "diferenca_ceapg", precision = 19, scale = 4)
+    private BigDecimal diferencaCeapg;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status_ceapg")
+    private StatusCeapg statusCeapg;
 
 	@Column(nullable = true, columnDefinition = "TEXT")
 	private String observacoesCeapg;

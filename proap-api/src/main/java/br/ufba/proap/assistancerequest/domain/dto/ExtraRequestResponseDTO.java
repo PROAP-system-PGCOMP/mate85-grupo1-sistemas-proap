@@ -1,6 +1,7 @@
 package br.ufba.proap.assistancerequest.domain.dto;
 
 import br.ufba.proap.assistancerequest.domain.ExtraRequest;
+import br.ufba.proap.assistancerequest.domain.enums.StatusCeapg;
 import br.ufba.proap.authentication.domain.User;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
@@ -58,7 +59,9 @@ public record ExtraRequestResponseDTO(
         User avaliadorCeapg,
         BigDecimal custoFinalCeapg,
         String observacoesCeapg,
-        LocalDate dataAvaliacaoCeapg
+        LocalDate dataAvaliacaoCeapg,
+        BigDecimal diferencaCeapg,
+        StatusCeapg status
 ) {
     public ExtraRequestResponseDTO(ExtraRequest extra) {
         this(
@@ -84,7 +87,9 @@ public record ExtraRequestResponseDTO(
                 extra.getAvaliadorCeapg(),
                 extra.getCustoFinalCeapg(),
                 extra.getObservacoesCeapg(),
-                extra.getDataAvaliacaoCeapg()
+                extra.getDataAvaliacaoCeapg(),
+                extra.getDiferencaCeapg(),
+                extra.getStatusCeapg()
         );
     }
 }

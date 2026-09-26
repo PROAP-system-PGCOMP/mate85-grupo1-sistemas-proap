@@ -1,14 +1,18 @@
 package br.ufba.proap.assistancerequest.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import br.ufba.proap.assistancerequest.domain.dto.AssistanceRequestCeapgDTO;
 import br.ufba.proap.assistancerequest.domain.dto.CountRequestDTO;
 import br.ufba.proap.assistancerequest.domain.dto.ExtraRequestResponseDTO;
 import br.ufba.proap.assistancerequest.domain.dto.TotalElementosResponseDTO;
+import br.ufba.proap.assistancerequest.domain.enums.StatusCeapg;
 import br.ufba.proap.assistancerequest.repository.ExtraRequestQueryRepository;
 import br.ufba.proap.authentication.service.UserService;
 import br.ufba.proap.exception.UnauthorizedException;
+import jakarta.ws.rs.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -143,4 +147,37 @@ public class ExtraRequestService {
         return total;
     }
 
+    public ExtraRequest updateCeapgFields(Long id, AssistanceRequestCeapgDTO dto) {
+        User currentUser = userService.getLoggedUser();
+
+        if (!currentUser.getPerfil().hasPermission("CEAPG_ROLE")) {
+            throw new UnauthorizedException("Usuario não possui autorização");
+        }
+
+        ExtraRequest request = extraRequestRepostirory.findById(id)
+                .orElseThrow(() -> new RuntimeException("Demanda extra não encontrada"));
+
+        if (request.getSituacao() != 1) {
+            throw new BadRequestException("Demanda ainda não aprovada pela comissão");
+        }
+
+        request.setCustoFinalCeapg(dto.getCustoFinalCeapg());
+
+        BigDecimal diferenca = dto.getCustoFinalCeapg().subtract(request.getValorAprovado());
+
+        request.setDiferencaCeapg(diferenca);
+
+        if (diferenca.compareTo(BigDecimal.ZERO) > 0) {
+            request.setStatusCeapg(StatusCeapg.ACIMA_DO_LIMITE);
+        } else if (diferenca.compareTo(BigDecimal.ZERO) < 0) {
+            request.setStatusCeapg(StatusCeapg.ABAIXO_DO_LIMITE);
+        } else {
+           request.setStatusCeapg(StatusCeapg.IGUAL_AO_LIMITE);
+        }
+
+        request.setObservacoesCeapg(dto.getObservacoesCeapg());
+        request.setDataAvaliacaoCeapg(LocalDate.now());
+        request.setAvaliadorCeapg(currentUser);
+        return this.extraRequestRepostirory.save(request);
+    }
 }

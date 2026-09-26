@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.time.LocalDate;
 
 import br.ufba.proap.assistancerequest.domain.dto.*;
+import br.ufba.proap.assistancerequest.domain.enums.StatusCeapg;
 import br.ufba.proap.assistancerequest.repository.ExtraRequestRepostirory;
 import br.ufba.proap.solicitationadminpanel.domain.SolicitationAdmin;
 import br.ufba.proap.solicitationadminpanel.service.BudgetService;
@@ -203,6 +204,16 @@ public class AssistanceRequestService {
 		}
 
 		request.setCustoFinalCeapg(ceapgDTO.getCustoFinalCeapg());
+
+        BigDecimal diferenca = ceapgDTO.getCustoFinalCeapg().subtract(request.getValorAprovado());
+        request.setDiferencaCeapg(diferenca);
+        if (diferenca.compareTo(BigDecimal.ZERO) > 0) {
+            request.setStatusCeapg(StatusCeapg.ACIMA_DO_LIMITE);
+        } else if (diferenca.compareTo(BigDecimal.ZERO) < 0) {
+            request.setStatusCeapg(StatusCeapg.ABAIXO_DO_LIMITE);
+        } else {
+            request.setStatusCeapg(StatusCeapg.IGUAL_AO_LIMITE);
+        }
 		request.setObservacoesCeapg(ceapgDTO.getObservacoesCeapg());
 		request.setDataAvaliacaoCeapg(LocalDate.now());
 		request.setAvaliadorCeapg(currentUser);

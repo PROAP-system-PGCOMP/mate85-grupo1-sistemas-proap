@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import br.ufba.proap.assistancerequest.domain.enums.StatusCeapg;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import br.ufba.proap.assistancerequest.domain.AssistanceRequest;
@@ -21,8 +22,6 @@ public record ResponseAssistanceRequestDTO(
         Boolean solicitanteDocente,
         String nomeDocente,
         String nomeDiscente,
-        Boolean discenteNoPrazoDoCurso,
-        Integer mesesAtrasoCurso,
         String nomeEvento,
         Boolean eventoInternacional,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy") LocalDate dataInicio,
@@ -56,6 +55,8 @@ public record ResponseAssistanceRequestDTO(
         BigDecimal custoFinalCeapg,
         String observacoesCeapg,
         BigDecimal percentualOrcamentoAnual,
+        BigDecimal diferencaCeapg,
+        StatusCeapg statusCeapg,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm") LocalDateTime createdAt,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm") LocalDateTime updatedAt) {
 
@@ -67,8 +68,6 @@ public record ResponseAssistanceRequestDTO(
         entity.setSolicitanteDocente(this.solicitanteDocente());
         entity.setNomeDocente(this.nomeDocente());
         entity.setNomeDiscente(this.nomeDiscente());
-        entity.setDiscenteNoPrazoDoCurso(this.discenteNoPrazoDoCurso());
-        entity.setMesesAtrasoCurso(this.mesesAtrasoCurso());
         entity.setNomeEvento(this.nomeEvento());
         entity.setEventoInternacional(this.eventoInternacional());
         entity.setDataInicio(this.dataInicio());
@@ -101,6 +100,8 @@ public record ResponseAssistanceRequestDTO(
         entity.setCustoFinalCeapg(this.custoFinalCeapg());
         entity.setObservacoesCeapg(this.observacoesCeapg());
         entity.setPercentualOrcamentoAnual(this.percentualOrcamentoAnual());
+        entity.setDiferencaCeapg(this.diferencaCeapg());
+        entity.setStatusCeapg(this.statusCeapg());
         return entity;
     }
 
@@ -116,8 +117,6 @@ public record ResponseAssistanceRequestDTO(
                 entity.getSolicitanteDocente(),
                 entity.getNomeDocente(),
                 entity.getNomeDiscente(),
-                entity.getDiscenteNoPrazoDoCurso(),
-                entity.getMesesAtrasoCurso(),
                 entity.getNomeEvento(),
                 entity.getEventoInternacional(),
                 entity.getDataInicio(),
@@ -151,6 +150,8 @@ public record ResponseAssistanceRequestDTO(
                 entity.getCustoFinalCeapg(),
                 entity.getObservacoesCeapg(),
                 entity.getPercentualOrcamentoAnual(),
+                entity.getDiferencaCeapg(),
+                entity.getStatusCeapg(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt());
     }

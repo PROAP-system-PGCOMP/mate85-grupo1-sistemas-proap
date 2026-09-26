@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
+import br.ufba.proap.assistancerequest.domain.enums.StatusCeapg;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -83,6 +84,12 @@ public class ExtraRequest {
 
     @Column(nullable = true, precision = 19, scale = 4)
     private BigDecimal custoFinalCeapg;
+
+    @Column(name = "diferenca_ceapg", nullable = false, precision = 19, scale = 4)
+    private BigDecimal diferencaCeapg;
+
+    @Column(name = "status_ceapg", nullable = false)
+    private StatusCeapg statusCeapg;
 
     @Column(nullable = true, columnDefinition = "TEXT")
     private String observacoesCeapg;
@@ -193,6 +200,22 @@ public class ExtraRequest {
 	public String getObservacao() {
 		return observacao;
 	}
+
+    public BigDecimal getDiferencaCeapg() {
+        return this.diferencaCeapg;
+    }
+
+    public void setDiferencaCeapg(BigDecimal diferencaCeapg) {
+        this.diferencaCeapg = diferencaCeapg;
+    }
+
+    public StatusCeapg getStatusCeapg() {
+        return this.statusCeapg;
+    }
+
+    public void setStatusCeapg(StatusCeapg statusCeapg) {
+        this.statusCeapg = statusCeapg;
+    }
 
 	public void setObservacao(String observacao) {
 		this.observacao = observacao;

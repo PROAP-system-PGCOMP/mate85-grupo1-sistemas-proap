@@ -103,13 +103,54 @@ class AssistanceRequestControllerTest {
 
         UserResponseDTO ownerUserResponseDTO = UserResponseDTO.fromUser(mockUser);
         mockResponse = new ResponseAssistanceRequestDTO(
-                1L, ownerUserResponseDTO, null, null, "Teste", Collections.emptyList(), false, false,
-                null, null,
-                false, 0, null, false, null, null, 1,  null, null, null, null, null,
-                BigDecimal.ZERO, null, 0, BigDecimal.ZERO, false, false, BigDecimal.ZERO,
-                BigDecimal.ZERO, BigDecimal.ZERO, null, "Justificativa Original", false, 0,
-                null, null, null, 0, BigDecimal.ZERO, null, null, BigDecimal.ZERO, null,
-                BigDecimal.ZERO, null, null);
+                1L,                             // id (Long)
+                ownerUserResponseDTO,           // user (UserResponseDTO)
+                null,                           // avaliadorProap (UserResponseDTO)
+                null,                           // avaliadorCeapg (UserResponseDTO)
+                "Teste",                        // tituloPublicacao (String)
+                java.util.Collections.emptyList(), // coautores (List<String>)
+                false,                          // algumCoautorPGCOMP (Boolean)
+                false,                          // solicitanteDocente (Boolean)
+                null,                           // nomeDocente (String)
+                null,                           // nomeDiscente (String)
+                null,                           // nomeEvento (String)
+                false,                          // eventoInternacional (Boolean)
+                null,                           // dataInicio (LocalDate)
+                null,                           // dataFim (LocalDate)
+                0,                              // qtdDiasEvento (Integer)
+                null,                           // linkHomePageEvento (String)
+                null,                           // cidade (String)
+                null,                           // pais (String)
+                null,                           // qualis (String)
+                null,                           // modalidadeParticipacao (String)
+                BigDecimal.ZERO,                // valorInscricao (BigDecimal)
+                null,                           // linkPaginaInscricao (String)
+                0,                              // quantidadeDiariasSolicitadas (Integer)
+                BigDecimal.ZERO,                // valorDiaria (BigDecimal)
+                false,                          // ultimaDiariaIntegral (Boolean)
+                false,                          // isDolar (Boolean)
+                BigDecimal.ZERO,                // cotacaoMoeda (BigDecimal)
+                BigDecimal.ZERO,                // valorPassagem (BigDecimal)
+                BigDecimal.ZERO,                // valorTotal (BigDecimal)
+                null,                           // cartaAceite (String)
+                "Justificativa Original",       // justificativa (String)
+                false,                          // aceiteFinal (Boolean)
+                0,                              // situacao (Integer)
+                null,                           // comprovantePagamento (String)
+                null,                           // numeroAta (String)
+                null,                           // dataAvaliacaoProap (LocalDate)
+                0,                              // numeroDiariasAprovadas (Integer)
+                BigDecimal.ZERO,                // valorAprovado (BigDecimal)
+                null,                           // observacao (String)
+                null,                           // automaticDecText (String)
+                BigDecimal.ZERO,                // custoFinalCeapg (BigDecimal)
+                null,                           // observacoesCeapg (String)
+                BigDecimal.ZERO,                // percentualOrcamentoAnual (BigDecimal)
+                null,                           // diferencaCeapg (BigDecimal - ATENÇÃO: Espera BigDecimal, passamos null porque não tinha valor numérico correspondente)
+                null,                           // statusCeapg (StatusCeapg)
+                null,                           // createdAt (LocalDateTime)
+                null                            // updatedAt (LocalDateTime)
+        );
 
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
@@ -127,8 +168,8 @@ class AssistanceRequestControllerTest {
     // Método auxiliar mágico para gerar DTOs perfeitamente válidos nos testes
     private CreateAssistanceRequestDTO criarDtoValido() {
         return new CreateAssistanceRequestDTO(
-                "Titulo Valido", List.of(), false, true, "Prof Teste", "Disc Teste",
-                true, 0, "Evento Teste", false, LocalDate.now(), LocalDate.now().plusDays(2),
+                "Titulo Valido", List.of(), false, true, "Prof Teste", "Disc Teste"
+                , "Evento Teste", false, LocalDate.now(), LocalDate.now().plusDays(2),
                 1, "http://link.com", "Cidade", "BR", "A1", "Modalidade",
                 BigDecimal.TEN, "http://inscricao.com", 1, BigDecimal.TEN, true, false,
                 BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, "Justificativa aceitável", "");
@@ -206,7 +247,6 @@ class AssistanceRequestControllerTest {
                 mockResponse.tituloPublicacao(), mockResponse.coautores(),
                 mockResponse.algumCoautorPGCOMP(), mockResponse.solicitanteDocente(),
                 mockResponse.nomeDocente(), mockResponse.nomeDiscente(),
-                mockResponse.discenteNoPrazoDoCurso(), mockResponse.mesesAtrasoCurso(),
                 mockResponse.nomeEvento(), mockResponse.eventoInternacional(),
                 mockResponse.dataInicio(), mockResponse.dataFim(),
                 mockResponse.qtdDiasEvento(), mockResponse.linkHomePageEvento(),
@@ -225,6 +265,7 @@ class AssistanceRequestControllerTest {
                 mockResponse.observacao(), mockResponse.automaticDecText(),
                 mockResponse.custoFinalCeapg(),
                 mockResponse.observacoesCeapg(), mockResponse.percentualOrcamentoAnual(),
+                mockResponse.diferencaCeapg(), mockResponse.statusCeapg(),
                 mockResponse.createdAt(), mockResponse.updatedAt());
         when(service.findById(1L)).thenReturn(Optional.of(responseOwnedByMockUser));
 
@@ -343,8 +384,7 @@ class AssistanceRequestControllerTest {
         ResponseAssistanceRequestDTO requestBodyDto = new ResponseAssistanceRequestDTO(
                 1L, null, null, null, "Título Atualizado pelo Dono",
                 mockResponse.coautores(), mockResponse.algumCoautorPGCOMP(),
-                mockResponse.solicitanteDocente(), mockResponse.nomeDocente(), mockResponse.nomeDiscente(),
-                mockResponse.discenteNoPrazoDoCurso(), mockResponse.mesesAtrasoCurso(), mockResponse.nomeEvento(),
+                mockResponse.solicitanteDocente(), mockResponse.nomeDocente(), mockResponse.nomeDiscente(), mockResponse.nomeEvento(),
                 mockResponse.eventoInternacional(), mockResponse.dataInicio(), mockResponse.dataFim(),
                 mockResponse.qtdDiasEvento(), mockResponse.linkHomePageEvento(), mockResponse.cidade(),
                 mockResponse.pais(), mockResponse.qualis(), mockResponse.modalidadeParticipacao(),
@@ -356,7 +396,8 @@ class AssistanceRequestControllerTest {
                 mockResponse.comprovantePagamento(), mockResponse.numeroAta(), mockResponse.dataAvaliacaoProap(),
                 mockResponse.numeroDiariasAprovadas(), mockResponse.valorAprovado(), mockResponse.observacao(),
                 mockResponse.automaticDecText(), mockResponse.custoFinalCeapg(), mockResponse.observacoesCeapg(),
-                mockResponse.percentualOrcamentoAnual(), mockResponse.createdAt(), mockResponse.updatedAt());
+                mockResponse.percentualOrcamentoAnual(),
+                mockResponse.diferencaCeapg(), mockResponse.statusCeapg(), mockResponse.createdAt(), mockResponse.updatedAt());
 
         AssistanceRequest expectedSavedRequest = new AssistanceRequest();
         setPrivateField(expectedSavedRequest, "id", mockResponse.id());
@@ -401,11 +442,11 @@ class AssistanceRequestControllerTest {
 
         ResponseAssistanceRequestDTO requestBodyDto = new ResponseAssistanceRequestDTO(
                 1L, null, null, null, "Título Atualizado", Collections.emptyList(), false, false, null, null,
-                false, 0, null, false, null, null, 1, null, null, null, null, null,
+                 null, false, null, null, 1, null, null, null, null, null,
                 BigDecimal.ZERO, null, 0, BigDecimal.ZERO, false, false, BigDecimal.ZERO,
                 BigDecimal.ZERO, BigDecimal.ZERO, null, null, false, 1,
                 null, null, null, 0, BigDecimal.ZERO, null, null, BigDecimal.ZERO, null,
-                BigDecimal.ZERO, null, null);
+                BigDecimal.ZERO, BigDecimal.ZERO, null, null, null);
 
         MockMultipartFile formPart = new MockMultipartFile("form", "", "application/json",
                 objectMapper.writeValueAsBytes(requestBodyDto));
@@ -426,21 +467,20 @@ class AssistanceRequestControllerTest {
         UserResponseDTO ownerUserResponseDTO = UserResponseDTO.fromUser(mockUser);
         ResponseAssistanceRequestDTO existingApprovedRequestDto = new ResponseAssistanceRequestDTO(
                 1L, ownerUserResponseDTO, null, null, "Teste Aprovado", Collections.emptyList(), false, false, null, null,
-                false, 0, null, false, null, null, 1, null, null, null, null, null,
+                null, false, null, null, 1, null, null, null, null, null,
                 BigDecimal.ZERO, null, 0, BigDecimal.ZERO, false, false, BigDecimal.ZERO,
                 BigDecimal.ZERO, BigDecimal.ZERO, null, null, false, 1,
                 null, null, null, 0, BigDecimal.ZERO, null, null, BigDecimal.ZERO, null,
-                BigDecimal.ZERO, null, null);
+                BigDecimal.ZERO, BigDecimal.ZERO, null, null, null);
 
         when(service.findById(1L)).thenReturn(Optional.of(existingApprovedRequestDto));
 
         ResponseAssistanceRequestDTO requestBodyDto = new ResponseAssistanceRequestDTO(
-                1L, null, null, null, "Título Atualizado de Aprovada", Collections.emptyList(), false, false, null, null,
-                false, 0, null, false, null, null, 1, null, null, null, null, null,
+                1L, null, null, null, "Título Atualizado de Aprovada", Collections.emptyList(), false, false, null, null, null, false, null, null, 1, null, null, null, null, null,
                 BigDecimal.ZERO, null, 0, BigDecimal.ZERO, false, false, BigDecimal.ZERO,
                 BigDecimal.ZERO, BigDecimal.ZERO, null, null, false, 2,
                 null, null, null, 0, BigDecimal.ZERO, null, null, BigDecimal.ZERO, null,
-                BigDecimal.ZERO, null, null);
+                BigDecimal.ZERO, BigDecimal.ZERO, null, null, null);
 
         MockMultipartFile formPart = new MockMultipartFile("form", "", "application/json",
                 objectMapper.writeValueAsBytes(requestBodyDto));
@@ -462,8 +502,7 @@ class AssistanceRequestControllerTest {
         ResponseAssistanceRequestDTO requestBodyDto = new ResponseAssistanceRequestDTO(
                 1L, null, null, null, mockResponse.tituloPublicacao(),
                 mockResponse.coautores(), mockResponse.algumCoautorPGCOMP(), mockResponse.solicitanteDocente(),
-                mockResponse.nomeDocente(), mockResponse.nomeDiscente(), mockResponse.discenteNoPrazoDoCurso(),
-                mockResponse.mesesAtrasoCurso(), mockResponse.nomeEvento(), mockResponse.eventoInternacional(),
+                mockResponse.nomeDocente(), mockResponse.nomeDiscente(), mockResponse.nomeEvento(), mockResponse.eventoInternacional(),
                 mockResponse.dataInicio(), mockResponse.dataFim(), mockResponse.qtdDiasEvento(), mockResponse.linkHomePageEvento(),
                 mockResponse.cidade(), mockResponse.pais(), mockResponse.qualis(), mockResponse.modalidadeParticipacao(),
                 mockResponse.valorInscricao(), mockResponse.linkPaginaInscricao(), mockResponse.quantidadeDiariasSolicitadas(),
@@ -473,7 +512,7 @@ class AssistanceRequestControllerTest {
                 mockResponse.comprovantePagamento(), mockResponse.numeroAta(), mockResponse.dataAvaliacaoProap(),
                 mockResponse.numeroDiariasAprovadas(), mockResponse.valorAprovado(), mockResponse.observacao(),
                 mockResponse.automaticDecText(), mockResponse.custoFinalCeapg(), mockResponse.observacoesCeapg(),
-                mockResponse.percentualOrcamentoAnual(), mockResponse.createdAt(), mockResponse.updatedAt());
+                mockResponse.percentualOrcamentoAnual(), mockResponse.diferencaCeapg(), mockResponse.statusCeapg(), mockResponse.createdAt(), mockResponse.updatedAt());
 
         AssistanceRequest expectedSavedRequest = new AssistanceRequest();
         setPrivateField(expectedSavedRequest, "id", mockResponse.id());

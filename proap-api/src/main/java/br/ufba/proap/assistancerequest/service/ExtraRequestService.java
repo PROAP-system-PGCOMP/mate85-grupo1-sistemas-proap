@@ -157,7 +157,7 @@ public class ExtraRequestService {
         ExtraRequest request = extraRequestRepostirory.findById(id)
                 .orElseThrow(() -> new RuntimeException("Demanda extra não encontrada"));
 
-        if (request.getSituacao() != 1) {
+        if (request.getSituacao() != 1 || request.getSituacao() != 0) {
             throw new BadRequestException("Demanda ainda não aprovada pela comissão");
         }
 

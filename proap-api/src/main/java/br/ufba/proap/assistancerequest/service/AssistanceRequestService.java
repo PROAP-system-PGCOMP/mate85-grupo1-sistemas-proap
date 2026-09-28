@@ -199,7 +199,7 @@ public class AssistanceRequestService {
 		AssistanceRequest request = assistanteRequestRepository.findById(id)
 				.orElseThrow(() -> new NotFoundException("Solicitação não encontrada"));
 
-		if (!request.getSituacao().equals(1)) {
+		if (!request.getSituacao().equals(1) || !request.getSituacao().equals(0)) {
 			throw new UnauthorizedException("Solicitação não foi aprovada pela comissão do PROAP");
 		}
 

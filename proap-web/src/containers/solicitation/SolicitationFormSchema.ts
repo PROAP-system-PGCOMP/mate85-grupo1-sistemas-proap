@@ -1,9 +1,9 @@
 import * as Yup from 'yup';
 import { AssistanceRequest } from '../../types';
-import { Q } from 'vitest/dist/chunks/reporters.d.DG9VKi4m.js';
 
 const minDate = new Date('1900-01-01');
 const maxDate = new Date('2099-12-31');
+
 const validacaoNome = Yup.string()
   .required('Campo obrigatório')
   .test(
@@ -16,6 +16,7 @@ const validacaoNome = Yup.string()
     /^[a-zA-ZÀ-ÿ\s']+$/, 
     'O nome não pode conter números ou caracteres especiais'
   );
+
 export const solicitantionDataFormSchema = Yup.object({
   tituloPublicacao: Yup.string()
     .trim()
@@ -43,21 +44,9 @@ export const solicitantDetailFormSchema = Yup.object({
     is: false,
     then: () => validacaoNome,
     otherwise: () => Yup.string().notRequired(),
-  }),
-  discenteNoPrazoDoCurso: Yup.boolean().when('solicitanteDocente', {
-    is: true,
-    then: () => Yup.boolean().notRequired(),
-    otherwise: () => Yup.boolean().required('Campo obrigatório'),
-  }),
-  mesesAtrasoCurso: Yup.number()
-    .when('discenteNoPrazoDoCurso', {
-      is: false,
-      then: () => Yup.number().required('Campo obrigatório'),
-      otherwise: () => Yup.number().notRequired(),
-    })
-    .integer('Deve ser um número inteiro')
-    .min(1, 'O valor mínimo é 1'),
+  })
 });
+
 export const eventDetailFormSchema = Yup.object({
   nomeEvento: Yup.string().trim().required('Campo obrigatório')
     .max(255, 'O nome do evento não pode conter mais que 255 caracteres.'),
@@ -156,6 +145,7 @@ export const financialDetailFormSchema = Yup.object({
     otherwise: () => Yup.string().notRequired(),
   }),
 });
+
 export const confirmationDataFormSchema = Yup.object({
   aceiteFinal: Yup.boolean()
     .nullable()
@@ -229,8 +219,6 @@ export type InitialSolicitationFormValues = Pick<
   | 'solicitanteDocente'
   | 'nomeDocente'
   | 'nomeDiscente'
-  | 'discenteNoPrazoDoCurso'
-  | 'mesesAtrasoCurso'
   | 'nomeEvento'
   | 'eventoInternacional'
   | 'dataInicio'
@@ -277,8 +265,6 @@ export const INITIAL_FORM_VALUES: InitialSolicitationFormValues = {
   solicitanteDocente: false,
   nomeDocente: '',
   nomeDiscente: '',
-  discenteNoPrazoDoCurso: null,
-  mesesAtrasoCurso: null,
   dataInicio: '',
   dataFim: '',
   pais: '',
@@ -315,8 +301,6 @@ export const INITIAL_REVIEW_FORM_VALUES: SolicitationFormValues = {
   solicitanteDocente: false,
   nomeDocente: '',
   nomeDiscente: '',
-  discenteNoPrazoDoCurso: null,
-  mesesAtrasoCurso: null,
   dataInicio: '',
   dataFim: '',
   pais: '',

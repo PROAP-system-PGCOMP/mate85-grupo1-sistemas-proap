@@ -228,16 +228,6 @@ export default function CeapgSolicitationViewContainer({ id }: { id: string }) {
                     <InfoItem label="Nome do Docente PGCOMP" value={solicitation.nomeDocente} showTooltip={solicitation.nomeDocente.length > 50} />
                   </Grid>
                 )}
-                {!solicitation.solicitanteDocente && (
-                  <Grid item xs={12} sm={6} md={4}>
-                    <InfoItem label="Está no prazo regular do curso?" value={booleanToYesOrNo(solicitation.discenteNoPrazoDoCurso!)} />
-                  </Grid>
-                )}
-                {!solicitation.solicitanteDocente && !solicitation.discenteNoPrazoDoCurso && (
-                  <Grid item xs={12} sm={6} md={4}>
-                    <InfoItem label="Quantidade de meses de atraso" value={solicitation.mesesAtrasoCurso} />
-                  </Grid>
-                )}
               </Grid>
             </Box>
 

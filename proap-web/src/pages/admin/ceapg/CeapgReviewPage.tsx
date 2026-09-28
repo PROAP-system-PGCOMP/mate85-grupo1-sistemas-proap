@@ -237,10 +237,6 @@ const CeapgReviewPage = () => {
                       <Typography variant="caption" color="text.secondary" display="block">Nome do Docente PGCOMP</Typography>
                       <Typography variant="body1">{solicitation.nomeDocente || 'Não informado'}</Typography>
                     </Grid>
-                    <Grid item xs={12}>
-                      <Typography variant="caption" color="text.secondary" display="block">No prazo regular do curso?</Typography>
-                      <Typography variant="body1">{solicitation.discenteNoPrazoDoCurso ? 'Sim' : 'Não'}</Typography>
-                    </Grid>
                   </Grid>
                 </Grid>
 

@@ -227,19 +227,6 @@ export default function SolicitationViewContainer({ id }: { id: string }) {
                 <Grid item xs={12} sm={6}>
                   <InfoItem label="Nome do Docente PGCOMP" value={solicitation.nomeDocente} showTooltip={solicitation.nomeDocente?.length > 50} />
                 </Grid>
-
-                {!solicitation.solicitanteDocente && (
-                  <>
-                    <Grid item xs={12} sm={6}>
-                      <InfoItem label="No prazo regular do curso?" value={booleanToYesOrNo(solicitation.discenteNoPrazoDoCurso!)} />
-                    </Grid>
-                    {!solicitation.discenteNoPrazoDoCurso && (
-                      <Grid item xs={12} sm={6}>
-                        <InfoItem label="Meses de atraso" value={solicitation.mesesAtrasoCurso} />
-                      </Grid>
-                    )}
-                  </>
-                )}
               </Grid>
             </Grid>
 

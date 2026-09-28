@@ -115,29 +115,6 @@ export default function SolicitationReviewContainer() {
                     </Typography>
                   </Grid>
                 )}
-
-                {!values.solicitanteDocente && (
-                  <>
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="caption" color="text.secondary" display="block">
-                        No prazo regular do curso?
-                      </Typography>
-                      <Typography variant="body1">
-                        {booleanToYesOrNo(values.discenteNoPrazoDoCurso!)}
-                      </Typography>
-                    </Grid>
-                    {!values.discenteNoPrazoDoCurso && (
-                      <Grid item xs={12} sm={6}>
-                        <Typography variant="caption" color="text.secondary" display="block">
-                          Meses de atraso
-                        </Typography>
-                        <Typography variant="body1" color="error">
-                          {values.mesesAtrasoCurso} meses
-                        </Typography>
-                      </Grid>
-                    )}
-                  </>
-                )}
               </Grid>
             </Grid>
 

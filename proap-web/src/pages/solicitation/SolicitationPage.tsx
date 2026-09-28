@@ -88,8 +88,6 @@ export default function SolicitationPage() {
         solicitanteDocente: cloneSource.solicitanteDocente,
         nomeDocente: cloneSource.nomeDocente,
         nomeDiscente: cloneSource.nomeDiscente,
-        discenteNoPrazoDoCurso: cloneSource.discenteNoPrazoDoCurso,
-        mesesAtrasoCurso: cloneSource.mesesAtrasoCurso,
         coautores: cloneSource.coautores || [],
         algumCoautorPGCOMP: cloneSource.algumCoautorPGCOMP,
         nomeEvento: cloneSource.nomeEvento,

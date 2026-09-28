@@ -68,31 +68,6 @@ export default function SolicitationDetailsContainer({
               {solicitation.nomeDocente}
             </TruncatedText>
           </StyledData>
-
-          {!solicitation.solicitanteDocente && (
-            <StyledData>
-              <Typography>
-                Está no prazo regular para finalização do seu curso (mestrado ou
-                doutorado)? <span style={{ color: 'red' }}>*</span>
-              </Typography>
-              <TruncatedText variant="subtitle2">
-                {booleanToYesOrNo(solicitation.discenteNoPrazoDoCurso!)}
-              </TruncatedText>
-            </StyledData>
-          )}
-
-          {!solicitation.solicitanteDocente &&
-            !solicitation.discenteNoPrazoDoCurso && (
-              <StyledData>
-                <Typography>
-                  Quantos meses já se passaram do prazo regular?{' '}
-                  <span style={{ color: 'red' }}>*</span>
-                </Typography>
-                <TruncatedText variant="subtitle2">
-                  {solicitation.mesesAtrasoCurso} meses
-                </TruncatedText>
-              </StyledData>
-            )}
         </Stack>
         {/* Segunda Coluna - Detalhes do Solicitante ... */}
         <Stack sx={columnStyle}>

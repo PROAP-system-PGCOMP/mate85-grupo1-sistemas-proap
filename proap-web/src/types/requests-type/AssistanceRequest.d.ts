@@ -10,8 +10,6 @@ export interface AssistanceRequest {
   solicitanteDocente: boolean;
   nomeDocente: string;
   nomeDiscente: string;
-  discenteNoPrazoDoCurso: boolean | null;
-  mesesAtrasoCurso: number | null;
   nomeEvento: string;
   eventoInternacional: boolean;
   dataInicio: string;

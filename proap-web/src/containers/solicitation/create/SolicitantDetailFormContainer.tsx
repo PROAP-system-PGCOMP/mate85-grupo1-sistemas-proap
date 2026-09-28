@@ -11,8 +11,6 @@ import {
   Paper,
   Typography,
   Divider,
-  IconButton,
-  Tooltip,
   InputAdornment,
   MenuItem,
   alpha,
@@ -27,7 +25,7 @@ import useHasPermission from '../../../hooks/auth/useHasPermission';
 import { useEffect, useMemo } from 'react';
 import useCurrentUser from '../../../hooks/auth/useCurrentUser';
 import useUsers from '../../../hooks/auth/useUsers';
-import { Person, Help, School, AccessTime } from '@mui/icons-material';
+import { Person, School } from '@mui/icons-material';
 
 export default function SolicitantDetailFormContainer() {
   const { errors, touched, values, setFieldValue } =
@@ -107,8 +105,6 @@ export default function SolicitantDetailFormContainer() {
 
                   if (isDocente) {
                     setFieldValue('nomeDiscente', '');
-                    setFieldValue('discenteNoPrazoDoCurso', undefined);
-                    setFieldValue('mesesAtrasoCurso', undefined);
                     
                     if (userIsDocente) {
                       setFieldValue('nomeDocente', name);
@@ -215,141 +211,6 @@ export default function SolicitantDetailFormContainer() {
             }}
           </Field>
         </Stack>
-
-        {!values.solicitanteDocente && (
-          <Paper
-            elevation={0}
-            sx={{
-              p: 2,
-              borderRadius: 1,
-              border: `1px solid ${alpha(theme.palette.grey[300], 0.8)}`,
-            }}
-          >
-            <FormControl
-              error={Boolean(
-                touched.discenteNoPrazoDoCurso && errors.discenteNoPrazoDoCurso,
-              )}
-              sx={{ width: '100%' }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-                <AccessTime color="action" fontSize="small" sx={{ mr: 1 }} />
-                <StyledFormLabel
-                  required
-                  sx={{
-                    fontWeight: 'medium',
-                    fontSize: '0.95rem',
-                    color: 'text.primary',
-                    m: 0,
-                  }}
-                >
-                  Está no prazo regular para finalização do seu curso (mestrado
-                  ou doutorado)?
-                </StyledFormLabel>
-                <Tooltip title="Esta informação é importante para a análise da solicitação">
-                  <IconButton size="small" sx={{ ml: 1 }}>
-                    <Help fontSize="small" color="action" />
-                  </IconButton>
-                </Tooltip>
-              </Box>
-
-              <Stack
-                direction={{ xs: 'column', sm: 'row' }}
-                sx={{
-                  alignItems: { xs: 'start', sm: 'center' },
-                  justifyContent: 'space-between',
-                  width: '100%',
-                }}
-                spacing={2}
-              >
-                <Stack>
-                  <Field name="discenteNoPrazoDoCurso">
-                    {({ field }: { field: any }) => (
-                      <RadioGroup
-                        {...field}
-                        row
-                        value={String(field.value)}
-                        onChange={(event) => {
-                          setFieldValue(
-                            field.name,
-                            event.target.value === 'true',
-                          );
-                          setFieldValue('mesesAtrasoCurso', undefined);
-                        }}
-                      >
-                        <FormControlLabel
-                          value={true}
-                          control={<Radio color="success" />}
-                          label={<Typography variant="body1">Sim</Typography>}
-                          sx={{ mr: 3 }}
-                        />
-                        <FormControlLabel
-                          value={false}
-                          control={<Radio color="error" />}
-                          label={<Typography variant="body1">Não</Typography>}
-                        />
-                      </RadioGroup>
-                    )}
-                  </Field>
-                  {touched.discenteNoPrazoDoCurso &&
-                    errors.discenteNoPrazoDoCurso && (
-                      <FormHelperText>
-                        {errors.discenteNoPrazoDoCurso}
-                      </FormHelperText>
-                    )}
-                </Stack>
-                {!values.discenteNoPrazoDoCurso && (
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      flexDirection: { xs: 'column', sm: 'row' },
-                      alignItems: { xs: 'start', sm: 'center' },
-                      gap: 2,
-                      bgcolor: alpha(theme.palette.warning.light, 0.1),
-                      p: 1.5,
-                      borderRadius: 1,
-                      width: { xs: '100%', sm: 'auto' },
-                    }}
-                  >
-                    <StyledFormLabel
-                      required
-                      htmlFor="text-field"
-                      sx={{ m: 0, minWidth: 'max-content' }}
-                    >
-                      Quantos meses já se passaram do prazo regular?
-                    </StyledFormLabel>
-                    <Field name="mesesAtrasoCurso">
-                      {({ field }: any) => (
-                        <StyledTextField
-                          {...field}
-                          id="text-field"
-                          sx={{ maxWidth: '180px', m: 0 }}
-                          type="number"
-                          InputProps={{
-                            inputProps: { min: 1, step: 1 },
-                            startAdornment: (
-                              <InputAdornment position="start">
-                                <AccessTime color="action" fontSize="small" />
-                              </InputAdornment>
-                            ),
-                          }}
-                          error={
-                            touched.mesesAtrasoCurso &&
-                            !!errors.mesesAtrasoCurso
-                          }
-                          helperText={
-                            touched.mesesAtrasoCurso && errors.mesesAtrasoCurso
-                          }
-                          size="small"
-                          placeholder="Nº de meses"
-                        />
-                      )}
-                    </Field>
-                  </Box>
-                )}
-              </Stack>
-            </FormControl>
-          </Paper>
-        )}
       </Box>
     </Paper>
   );

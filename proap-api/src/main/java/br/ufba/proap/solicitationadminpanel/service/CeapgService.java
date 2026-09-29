@@ -3,6 +3,7 @@ package br.ufba.proap.solicitationadminpanel.service;
 import br.ufba.proap.assistancerequest.domain.AssistanceRequest;
 import br.ufba.proap.assistancerequest.domain.ExtraRequest;
 import br.ufba.proap.assistancerequest.domain.dto.ExtraRequestResponseDTO;
+import br.ufba.proap.assistancerequest.domain.enums.StatusCeapg;
 import br.ufba.proap.assistancerequest.repository.ExtraRequestRepostirory;
 import br.ufba.proap.authentication.domain.User;
 import br.ufba.proap.authentication.domain.dto.UserResponseDTO;
@@ -85,7 +86,7 @@ public class CeapgService {
             throw new NotFoundException("Solicitação de assistência não encontrada");
         }
 
-        if (AssistenceRequestOptional.get().getSituacao() != 1){
+        if (AssistenceRequestOptional.get().getSituacao() != 1 && AssistenceRequestOptional.get().getSituacao() != 0) {
             throw new IllegalArgumentException("A solicitação deve estar aprovada pelo Proap para ser revisada pelo CEAPG");
         }
         if (!currentUser.getId().equals(AssistenceRequestOptional.get().getAvaliadorCeapg().getId())) {
@@ -94,6 +95,15 @@ public class CeapgService {
 
         AssistanceRequest novo = AssistenceRequestOptional.get();
         novo.setCustoFinalCeapg(data.valorFinal());
+        BigDecimal diferenca = data.valorFinal().subtract(novo.getValorAprovado());
+        novo.setDiferencaCeapg(diferenca);
+        if (diferenca.compareTo(BigDecimal.ZERO) > 0) {
+            novo.setStatusCeapg(StatusCeapg.ACIMA_DO_LIMITE);
+        } else if (diferenca.compareTo(BigDecimal.ZERO) < 0) {
+            novo.setStatusCeapg(StatusCeapg.ABAIXO_DO_LIMITE);
+        } else {
+            novo.setStatusCeapg(StatusCeapg.IGUAL_AO_LIMITE);
+        }
         novo.setObservacoesCeapg(data.observacoes());
         novo.setDataAvaliacaoCeapg(LocalDate.now());
         novo.setNumeroAta(data.numeroAta());
@@ -165,7 +175,7 @@ public class CeapgService {
             throw new NotFoundException("Solicitação extra não encontrada");
         }
 
-        if (extra.get().getSituacao() != 1) {
+        if (extra.get().getSituacao() != 1 && extra.get().getSituacao() != 0) {
             throw new IllegalArgumentException("A solicitação não foi aprovada pelo Proap");
         }
 
@@ -176,6 +186,15 @@ public class CeapgService {
         ExtraRequest saveExtra = extra.get();
 
         saveExtra.setCustoFinalCeapg(data.valorFinal());
+        BigDecimal diferenca = data.valorFinal().subtract(saveExtra.getValorAprovado());
+        saveExtra.setDiferencaCeapg(diferenca);
+        if (diferenca.compareTo(BigDecimal.ZERO) > 0) {
+            saveExtra.setStatusCeapg(StatusCeapg.ACIMA_DO_LIMITE);
+        } else if (diferenca.compareTo(BigDecimal.ZERO) < 0) {
+            saveExtra.setStatusCeapg(StatusCeapg.ABAIXO_DO_LIMITE);
+        } else {
+            saveExtra.setStatusCeapg(StatusCeapg.IGUAL_AO_LIMITE);
+        }
         saveExtra.setNumeroAta(data.numeroAta());
         saveExtra.setDataAvaliacaoCeapg(LocalDate.now());
         saveExtra.setObservacoesCeapg(data.observacoes());

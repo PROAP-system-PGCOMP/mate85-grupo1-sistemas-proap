@@ -85,10 +85,10 @@ public class ExtraRequest {
     @Column(nullable = true, precision = 19, scale = 4)
     private BigDecimal custoFinalCeapg;
 
-    @Column(name = "diferenca_ceapg", nullable = false, precision = 19, scale = 4)
+    @Column(name = "diferenca_ceapg", precision = 19, scale = 4)
     private BigDecimal diferencaCeapg;
 
-    @Column(name = "status_ceapg", nullable = false)
+    @Column(name = "status_ceapg")
     private StatusCeapg statusCeapg;
 
     @Column(nullable = true, columnDefinition = "TEXT")

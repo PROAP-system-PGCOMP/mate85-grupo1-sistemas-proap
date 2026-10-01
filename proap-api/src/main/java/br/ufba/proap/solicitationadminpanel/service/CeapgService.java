@@ -69,8 +69,9 @@ public class CeapgService {
                     String avaliadorCeapg = (String) objArray[6];
                     LocalDate dataAvaliacaoCeapg = (LocalDate) objArray[7];
                     String numeroAta = (String) objArray[8];
+                    String nomeSolicitante = (String) objArray[9];
                     return new CeapgResponseDTO(id, valorAprovado, dataAvaliacaoProap,
-                            avaliadorProap, custoFinalCeapg, observacoesCeapg, avaliadorCeapg, dataAvaliacaoCeapg, numeroAta);
+                            avaliadorProap, custoFinalCeapg, observacoesCeapg, avaliadorCeapg, dataAvaliacaoCeapg, numeroAta, nomeSolicitante);
                 })
                 .collect(Collectors.toList());
     }

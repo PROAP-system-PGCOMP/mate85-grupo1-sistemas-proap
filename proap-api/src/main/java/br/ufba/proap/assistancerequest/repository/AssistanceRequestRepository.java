@@ -28,13 +28,13 @@ public interface AssistanceRequestRepository extends JpaRepository<AssistanceReq
   @Query("SELECT SUM(ar.valorAprovado) FROM AssistanceRequest ar WHERE YEAR(ar.createdAt) = :year AND ar.situacao = 1")
 	BigDecimal findTotalApprovedValueByYear(Integer year);
 
-	@Query("SELECT ar.id, ar.valorAprovado, ar.dataAvaliacaoProap, ap.name, ar.custoFinalCeapg, ar.observacoesCeapg, ac.name, ar.dataAvaliacaoCeapg, ar.numeroAta FROM AssistanceRequest ar LEFT JOIN ar.avaliadorProap ap LEFT JOIN ar.avaliadorCeapg ac WHERE DATE(COALESCE(ar.dataAvaliacaoProap, ar.createdAt)) BETWEEN :startDate AND :endDate AND ar.situacao IN(0,1)")
+	@Query("SELECT ar.id, ar.valorAprovado, ar.dataAvaliacaoProap, ap.name, ar.custoFinalCeapg, ar.observacoesCeapg, ac.name, ar.dataAvaliacaoCeapg, ar.numeroAta, u.name FROM AssistanceRequest ar LEFT JOIN ar.avaliadorProap ap LEFT JOIN ar.avaliadorCeapg ac LEFT JOIN ar.user u WHERE DATE(COALESCE(ar.dataAvaliacaoProap, ar.createdAt)) BETWEEN :startDate AND :endDate AND ar.situacao IN(0,1)")
 	List<Object[]> findAllCeapgRequests(LocalDate startDate, LocalDate endDate);
 
-	@Query("SELECT ar.id, ar.valorAprovado, ar.dataAvaliacaoProap, ap.name, ar.custoFinalCeapg, ar.observacoesCeapg, ac.name, ar.dataAvaliacaoCeapg FROM AssistanceRequest ar LEFT JOIN ar.avaliadorProap ap LEFT JOIN ar.avaliadorCeapg ac WHERE DATE(COALESCE(ar.dataAvaliacaoProap, ar.createdAt)) BETWEEN :startDate AND :endDate AND ar.situacao IN(0,1) AND ar.avaliadorCeapg IS NULL")
+	@Query("SELECT ar.id, ar.valorAprovado, ar.dataAvaliacaoProap, ap.name, ar.custoFinalCeapg, ar.observacoesCeapg, ac.name, ar.dataAvaliacaoCeapg, u.name FROM AssistanceRequest ar LEFT JOIN ar.avaliadorProap ap LEFT JOIN ar.avaliadorCeapg ac LEFT JOIN ar.user u WHERE DATE(COALESCE(ar.dataAvaliacaoProap, ar.createdAt)) BETWEEN :startDate AND :endDate AND ar.situacao IN(0,1) AND ar.avaliadorCeapg IS NULL")
 	List<Object[]> findAllPendingCeapgRequests(LocalDate startDate, LocalDate endDate);
 
-	@Query("SELECT ar.id, ar.valorAprovado, ar.dataAvaliacaoProap, ap.name, ar.custoFinalCeapg, ar.observacoesCeapg, ac.name, ar.dataAvaliacaoCeapg FROM AssistanceRequest ar LEFT JOIN ar.avaliadorProap ap LEFT JOIN ar.avaliadorCeapg ac WHERE DATE(COALESCE(ar.dataAvaliacaoProap, ar.createdAt)) BETWEEN :startDate AND :endDate AND ar.situacao IN(0,1) AND ar.avaliadorCeapg IS NOT NULL")
+	@Query("SELECT ar.id, ar.valorAprovado, ar.dataAvaliacaoProap, ap.name, ar.custoFinalCeapg, ar.observacoesCeapg, ac.name, ar.dataAvaliacaoCeapg, u.name FROM AssistanceRequest ar LEFT JOIN ar.avaliadorProap ap LEFT JOIN ar.avaliadorCeapg ac LEFT JOIN ar.user WHERE DATE(COALESCE(ar.dataAvaliacaoProap, ar.createdAt)) BETWEEN :startDate AND :endDate AND ar.situacao IN(0,1) AND ar.avaliadorCeapg IS NOT NULL")
 	List<Object[]> findAllCompletedCeapgRequests(LocalDate startDate, LocalDate endDate);
 
 	@Query(value = "SELECT COUNT(s) > 0 FROM proap_assistancerequest s WHERE s.user_id = :userId", nativeQuery = true)

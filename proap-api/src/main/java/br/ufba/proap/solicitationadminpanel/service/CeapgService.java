@@ -87,18 +87,16 @@ public class CeapgService {
             throw new NotFoundException("Solicitação de assistência não encontrada");
         }
 
-        if (AssistenceRequestOptional.get().getSituacao() != 1 && AssistenceRequestOptional.get().getSituacao() != 0) {
-            throw new IllegalArgumentException("A solicitação deve estar aprovada pelo Proap para ser revisada pelo CEAPG");
-        }
-        if (!currentUser.getId().equals(AssistenceRequestOptional.get().getAvaliadorCeapg().getId())) {
-            throw new UnauthorizedException("Usuario não foi designado para fazer a avaliação dessa solicitação");
-        }
-
         AssistanceRequest novo = AssistenceRequestOptional.get();
         novo.setCustoFinalCeapg(data.valorFinal());
-        BigDecimal diferenca = data.valorFinal().subtract(novo.getValorAprovado());
-        novo.setDiferencaCeapg(diferenca);
-        if (diferenca.compareTo(BigDecimal.ZERO) > 0) {
+        BigDecimal diferenca;
+        if (novo.getValorAprovado() != null) {
+            diferenca = data.valorFinal().subtract(novo.getValorAprovado());
+            novo.setDiferencaCeapg(diferenca);
+        } else {
+            diferenca = data.valorFinal().subtract(novo.getValorTotal());
+        }
+         if (diferenca.compareTo(BigDecimal.ZERO) > 0) {
             novo.setStatusCeapg(StatusCeapg.ACIMA_DO_LIMITE);
         } else if (diferenca.compareTo(BigDecimal.ZERO) < 0) {
             novo.setStatusCeapg(StatusCeapg.ABAIXO_DO_LIMITE);
@@ -176,18 +174,16 @@ public class CeapgService {
             throw new NotFoundException("Solicitação extra não encontrada");
         }
 
-        if (extra.get().getSituacao() != 1 && extra.get().getSituacao() != 0) {
-            throw new IllegalArgumentException("A solicitação não foi aprovada pelo Proap");
-        }
-
-        if (!extra.get().getAvaliadorCeapg().getId().equals(currentUser.getId())) {
-            throw new UnauthorizedException("Usuario não possui permissão para realizar essa revisão");
-        }
 
         ExtraRequest saveExtra = extra.get();
-
+        BigDecimal diferenca;
         saveExtra.setCustoFinalCeapg(data.valorFinal());
-        BigDecimal diferenca = data.valorFinal().subtract(saveExtra.getValorAprovado());
+        if (saveExtra.getValorAprovado() != null) {
+            diferenca = data.valorFinal().subtract(saveExtra.getValorAprovado());
+            saveExtra.setDiferencaCeapg(diferenca);
+        } else {
+            diferenca = data.valorFinal().subtract(saveExtra.getValorSolicitado());
+        }
         saveExtra.setDiferencaCeapg(diferenca);
         if (diferenca.compareTo(BigDecimal.ZERO) > 0) {
             saveExtra.setStatusCeapg(StatusCeapg.ACIMA_DO_LIMITE);

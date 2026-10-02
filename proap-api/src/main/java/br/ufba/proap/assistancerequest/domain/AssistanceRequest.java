@@ -162,7 +162,7 @@ public class AssistanceRequest {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status_ceapg")
-    private StatusCeapg statusCeapg;
+    private StatusCeapg statusCeapg = StatusCeapg.PENDENTE;
 
 	@Column(nullable = true, columnDefinition = "TEXT")
 	private String observacoesCeapg;

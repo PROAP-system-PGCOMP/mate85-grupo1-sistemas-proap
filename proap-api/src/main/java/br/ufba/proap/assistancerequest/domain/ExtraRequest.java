@@ -89,7 +89,7 @@ public class ExtraRequest {
     private BigDecimal diferencaCeapg;
 
     @Column(name = "status_ceapg")
-    private StatusCeapg statusCeapg;
+    private StatusCeapg statusCeapg = StatusCeapg.PENDENTE;
 
     @Column(nullable = true, columnDefinition = "TEXT")
     private String observacoesCeapg;

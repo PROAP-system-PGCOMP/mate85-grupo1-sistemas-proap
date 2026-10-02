@@ -183,6 +183,9 @@ public class AssistanceRequestService {
 		persisted.setObservacao(assistanceRequest.getObservacao());
 		persisted.setAutomaticDecText();
 		persisted.setAvaliadorProap(currentUser);
+        if (situacao == 2) {
+            persisted.setStatusCeapg(StatusCeapg.NAO_APROVADO);
+        }
 
 		return save(persisted);
 	}

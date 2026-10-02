@@ -129,6 +129,10 @@ public class ExtraRequestService {
     
     persisted.setDataAvaliacaoProap(requestFromFront.getDataAvaliacaoProap());
 
+    if (persisted.getSituacao() == 2) {
+        persisted.setStatusCeapg(StatusCeapg.NAO_APROVADO);
+    }
+
     persisted.setAutomaticDecText(" ");
 
     return extraRequestRepostirory.save(persisted);

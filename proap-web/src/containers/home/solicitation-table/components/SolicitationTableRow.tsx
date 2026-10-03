@@ -5,25 +5,19 @@ import {
   Tooltip,
   Box,
   IconButton,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
   Chip,
 } from '@mui/material';
-import { CheckCircle, Visibility, MoreVert } from '@mui/icons-material';
+import { Visibility } from '@mui/icons-material';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
-import { Button, SvgIcon, SvgIconProps} from "@mui/material";
+import { SvgIcon, SvgIconProps } from "@mui/material";
 
 import { formatNumberToBRL } from '../../../../helpers/formatter';
 import { SolicitationDetailsDialogProps } from '../../request-dialog/SolicitationDetailsDialog';
 import { StatusChip } from './index';
-import { format, parseISO } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 
 interface SolicitationRowData {
   id?: number;
@@ -52,6 +46,7 @@ interface SolicitationRowData {
   dataFim?: string;
   observacao?: string;
   tipoSolicitacao?: 'Apoio' | 'Extra';
+  statusCeapg?: string; 
 }
 
 interface SolicitationTableRowProps extends SolicitationRowData {
@@ -91,6 +86,18 @@ const safelyFormatDate = (dateString: string | null) => {
   }
 };
 
+const renderStatusCeapg = (status?: string) => {
+  const currentStatus = status || 'PENDENTE';
+  switch (currentStatus) {
+    case 'PENDENTE': return <Chip label="Pendente" size="small" sx={{ bgcolor: '#fff3e0', color: '#e65100', fontWeight: 500 }} />;
+    case 'NAO_APROVADO': return <Chip label="Não Aprovado" size="small" sx={{ bgcolor: '#ffebee', color: '#c62828', fontWeight: 500 }} />;
+    case 'ACIMA_DO_LIMITE': return <Chip label="Acima do Limite" size="small" sx={{ bgcolor: '#fce4ec', color: '#c2185b', fontWeight: 500 }} />;
+    case 'ABAIXO_DO_LIMITE': return <Chip label="Abaixo do Limite" size="small" sx={{ bgcolor: '#e8f5e9', color: '#2e7d32', fontWeight: 500 }} />;
+    case 'IGUAL_AO_LIMITE': return <Chip label="Igual ao Limite" size="small" sx={{ bgcolor: '#e3f2fd', color: '#1565c0', fontWeight: 500 }} />;
+    default: return <Chip label={currentStatus} size="small" variant="outlined" />;
+  }
+};
+
 const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
   id,
   user = { name: '', email: '' },
@@ -115,6 +122,7 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
   dataFim = '',
   observacao = '',
   tipoSolicitacao = 'Apoio',
+  statusCeapg,
   currentUserEmail,
   userCanViewAllRequests,
   userCanReviewRequests,
@@ -185,7 +193,6 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
     });
   };
 
-
   const handleOpenAta = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onOpenAtaDialog) {
@@ -196,7 +203,9 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
       });
     }
   };
+  
   const ownerEmail = user?.email || userEmail;
+
   return (
     <TableRow
       onClick={handleRowClick}
@@ -207,6 +216,7 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
         },
       }}
     >
+      <TableCell align="center">#{id}</TableCell>
       <TableCell align="center">
         {tipoSolicitacao === 'Extra' ? (
           <Chip label="Extra" size="small" variant="outlined" sx={{ color: '#d81b60', borderColor: '#d81b60' }} />
@@ -214,7 +224,6 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
           <Chip label="Publicação" color="primary" size="small" variant="outlined" />
         )}
       </TableCell>
-
       <TableCell align="left">{safelyFormatDate(createdAt)}</TableCell>
       <TableCell align="center">
         {solicitanteDocente ? (
@@ -231,6 +240,7 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
       <TableCell align="center" sx={{ whiteSpace: 'nowrap' }}>
         {valorAprovado === null ? '-' : formatNumberToBRL(valorAprovado)}
       </TableCell>
+      <TableCell align="center">{renderStatusCeapg(statusCeapg)}</TableCell>
       <TableCell align="center">{safelyFormatDate(dataAvaliacaoProap)}</TableCell>
       <TableCell align="center">{numeroAta || '-'}</TableCell>
 

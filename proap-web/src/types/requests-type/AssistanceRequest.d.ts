@@ -42,7 +42,7 @@ export interface AssistanceRequest {
   custoFinalCeapg: number;
   observacoesCeapg: string;
 
-  statusCeapg: string;
+  statusCeapg?: string;
 
   avaliadorProap: User;
   avaliadorCeapg: User;

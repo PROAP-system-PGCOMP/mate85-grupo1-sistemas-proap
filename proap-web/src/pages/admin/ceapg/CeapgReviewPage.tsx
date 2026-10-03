@@ -53,9 +53,12 @@ const CeapgReviewPage = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [valorFinal, setValorFinal] = useState<number>(0);
   const [observacao, setObservacao] = useState('');
-  const [numeroAta, setNumeroAta] = useState<string>(''); // <-- Novo estado para a ATA
+  const [numeroAta, setNumeroAta] = useState<string>('');
 
   const sData = solicitation as any;
+  
+  // Variável para verificar se existe aprovação financeira prévia válida (> 0)
+  const hasProapApproval = Boolean(sData?.valorAprovado);
 
   useEffect(() => {
     if (sData) {
@@ -138,7 +141,7 @@ const CeapgReviewPage = () => {
               </Box>
 
               <Grid container spacing={4}>
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12} md={hasProapApproval ? 6 : 12}>
                   <Typography variant="subtitle2" fontWeight="700" color="primary" sx={{ mb: 2.5, textTransform: 'uppercase', letterSpacing: 0.8 }}>
                     Informações da Solicitação
                   </Typography>
@@ -166,29 +169,31 @@ const CeapgReviewPage = () => {
                   </Grid>
                 </Grid>
 
-                <Grid item xs={12} md={6}>
-                  <Typography variant="subtitle2" fontWeight="700" color="primary" sx={{ mb: 2.5, textTransform: 'uppercase', letterSpacing: 0.8 }}>
-                    Aprovação Prévia (PROAP)
-                  </Typography>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="caption" color="text.secondary" display="block">Data da Avaliação PROAP</Typography>
-                      <Typography variant="body1">
-                        {solicitation?.dataAvaliacaoProap ? dateToLocalDate(solicitation.dataAvaliacaoProap) : 'Não informada'}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="caption" color="text.secondary" display="block">Número da ATA Inicial</Typography>
-                      <Typography variant="body1" fontWeight="500">{solicitation.numeroAta || 'Não informada'}</Typography>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Typography variant="caption" color="text.secondary" display="block">Valor Aprovado na Reunião</Typography>
-                      <Typography variant="body1" fontWeight="600" color="primary.main">
-                        {formatNumberToBRL(sData?.valorAprovado || 0)}
-                      </Typography>
+                {hasProapApproval && (
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="subtitle2" fontWeight="700" color="primary" sx={{ mb: 2.5, textTransform: 'uppercase', letterSpacing: 0.8 }}>
+                      Aprovação Prévia (PROAP)
+                    </Typography>
+                    <Grid container spacing={3}>
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="caption" color="text.secondary" display="block">Data da Avaliação PROAP</Typography>
+                        <Typography variant="body1">
+                          {solicitation?.dataAvaliacaoProap ? dateToLocalDate(solicitation.dataAvaliacaoProap) : 'Não informada'}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="caption" color="text.secondary" display="block">Número da ATA Inicial</Typography>
+                        <Typography variant="body1" fontWeight="500">{solicitation.numeroAta || 'Não informada'}</Typography>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Typography variant="caption" color="text.secondary" display="block">Valor Aprovado na Reunião</Typography>
+                        <Typography variant="body1" fontWeight="600" color="primary.main">
+                          {formatNumberToBRL(sData?.valorAprovado)}
+                        </Typography>
+                      </Grid>
                     </Grid>
                   </Grid>
-                </Grid>
+                )}
               </Grid>
             </Box>
           ) : (
@@ -352,16 +357,18 @@ const CeapgReviewPage = () => {
 
             <Box sx={{ display: 'flex', gap: 4, width: '100%' }}>
               <Box sx={{ flex: 1, bgcolor: '#f8f9fa', borderRadius: 2, border: '1px solid #edf2f7', p: 2.5 }}>
-                <Typography variant="caption" color="text.secondary" display="block">Valor Solicitado Originalmente</Typography>
+                <Typography variant="caption" color="text.secondary" display="block">Valor Solicitado</Typography>
                 <Typography variant="body1" fontWeight="600">{formatNumberToBRL(sData?.valorSolicitado || solicitation.valorTotal || 0)}</Typography>
               </Box>
 
-              <Box sx={{ flex: 1, bgcolor: '#f8f9fa', borderRadius: 2, border: '1px solid #edf2f7', p: 2.5 }}>
-                <Typography variant="caption" color="text.secondary" display="block">Valor Aprovado pelo PROAP</Typography>
-                <Typography variant="body1" fontWeight="600" color="primary.main">
-                  {formatNumberToBRL(sData?.valorAprovado || 0)}
-                </Typography>
-              </Box>
+              {hasProapApproval && (
+                <Box sx={{ flex: 1, bgcolor: '#f8f9fa', borderRadius: 2, border: '1px solid #edf2f7', p: 2.5 }}>
+                  <Typography variant="caption" color="text.secondary" display="block">Valor Aprovado pelo PROAP</Typography>
+                  <Typography variant="body1" fontWeight="600" color="primary.main">
+                    {formatNumberToBRL(sData?.valorAprovado)}
+                  </Typography>
+                </Box>
+              )}
             </Box>
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>

@@ -7,5 +7,9 @@ export interface CeapgResponse {
   observacoesCeapg: string;
   avaliadorCeapg: string;
   dataAvaliacaoCeapg: string;
-  numeroAta: string;
+  numeroAta: string | number;
+  nomeSolicitante?: string; 
+  tipoDemanda?: string;
+  statusCeapg?: string;
+  diferencaCeapg?: number;
 }

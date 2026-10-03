@@ -69,7 +69,7 @@ const PendingReviewsTab: React.FC<PendingReviewsTabProps> = ({
                     },
                   }}
                 >
-                  Solicitação #{request.id}
+                  Solicitação #{request.id} {request.nomeSolicitante ? `- ${request.nomeSolicitante}` : ''}
                 </Typography>
                 <Chip
                   icon={<PendingOutlined fontSize="small" />}

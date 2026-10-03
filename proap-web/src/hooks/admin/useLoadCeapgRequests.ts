@@ -53,6 +53,7 @@ export default function useCeapgRequests() {
                 : req.valorSolicitado,
               valorTotal: req.valorSolicitado || req.valorTotal,
               dataAvaliacaoProap: dataProap,
+              nomeSolicitante: req.userName || req.user?.name || 'Não informado', // <-- Mapeamento adicionado
             };
           });
       } catch (extraErr) {

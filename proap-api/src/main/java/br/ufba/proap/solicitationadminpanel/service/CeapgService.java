@@ -92,10 +92,11 @@ public class CeapgService {
         BigDecimal diferenca;
         if (novo.getValorAprovado() != null) {
             diferenca = data.valorFinal().subtract(novo.getValorAprovado());
-            novo.setDiferencaCeapg(diferenca);
         } else {
             diferenca = data.valorFinal().subtract(novo.getValorTotal());
         }
+
+        novo.setDiferencaCeapg(diferenca);
          if (diferenca.compareTo(BigDecimal.ZERO) > 0) {
             novo.setStatusCeapg(StatusCeapg.ACIMA_DO_LIMITE);
         } else if (diferenca.compareTo(BigDecimal.ZERO) < 0) {
@@ -180,7 +181,6 @@ public class CeapgService {
         saveExtra.setCustoFinalCeapg(data.valorFinal());
         if (saveExtra.getValorAprovado() != null) {
             diferenca = data.valorFinal().subtract(saveExtra.getValorAprovado());
-            saveExtra.setDiferencaCeapg(diferenca);
         } else {
             diferenca = data.valorFinal().subtract(saveExtra.getValorSolicitado());
         }

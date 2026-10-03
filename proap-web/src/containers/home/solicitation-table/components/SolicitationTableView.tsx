@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; // <-- Adicionado useState
+import React, { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -121,8 +121,8 @@ const SolicitationTableView: React.FC<SolicitationTableViewProps> = ({
       >
         <Table aria-label="solicitations table">
           <TableHead>
-            {/* ... Todo o seu TableHead continua exatamente igual ... */}
             <TableRow>
+              <TableCellHeader text="ID" sortBy="id" align="center" selectedPropToSortTable={selectedPropToSortTable} handleClickSortTable={handleClickSortTable} />
               <TableCell align="center" sx={{ fontWeight: 'bold', backgroundColor: 'grey.50' }}>Tipo</TableCell>
               <TableCellHeader text="Data de solicitação" sortBy="createdAt" selectedPropToSortTable={selectedPropToSortTable} handleClickSortTable={handleClickSortTable} />
               <TableCell align="center" sx={{ fontWeight: 'bold', backgroundColor: 'grey.50' }}>Vínculo</TableCell>
@@ -130,6 +130,7 @@ const SolicitationTableView: React.FC<SolicitationTableViewProps> = ({
               <TableCellHeader text="Status" sortBy="situacao" align="center" selectedPropToSortTable={selectedPropToSortTable} handleClickSortTable={handleClickSortTable} />
               <TableCellHeader text="Valor solicitado" sortBy="valorTotal" align="center" selectedPropToSortTable={selectedPropToSortTable} handleClickSortTable={handleClickSortTable} />
               <TableCellHeader text="Valor aprovado" sortBy="valorAprovado" align="center" selectedPropToSortTable={selectedPropToSortTable} handleClickSortTable={handleClickSortTable} />
+              <TableCellHeader text="Status CEAPG" sortBy="statusCeapg" align="center" selectedPropToSortTable={selectedPropToSortTable} handleClickSortTable={handleClickSortTable} />
               <TableCellHeader text="Data da avaliação" sortBy="dataAvaliacaoProap" align="center" selectedPropToSortTable={selectedPropToSortTable} handleClickSortTable={handleClickSortTable} />
               <TableCellHeader text="ATA" sortBy="numeroAta" align="left" selectedPropToSortTable={selectedPropToSortTable} handleClickSortTable={handleClickSortTable} />
               <TableCell align="center" sx={{ fontWeight: 'bold', backgroundColor: 'grey.50' }}>Ações</TableCell>
@@ -139,7 +140,7 @@ const SolicitationTableView: React.FC<SolicitationTableViewProps> = ({
           <TableBody>
             {!filteredRequests.length ? (
               <TableRow>
-                <TableCell colSpan={10}>
+                <TableCell colSpan={12}>
                   <Typography align="center" color="text.secondary" sx={{ py: 4 }}>
                     {searchQuery
                       ? 'Nenhuma solicitação encontrada para a busca realizada.'

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom'; // <-- useLocation adicionado
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -53,12 +53,14 @@ const CeapgReviewPage = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [valorFinal, setValorFinal] = useState<number>(0);
   const [observacao, setObservacao] = useState('');
+  const [numeroAta, setNumeroAta] = useState<string>(''); // <-- Novo estado para a ATA
 
   const sData = solicitation as any;
 
   useEffect(() => {
-    if (sData && sData.valorAprovado) {
-      setValorFinal(sData.valorAprovado);
+    if (sData) {
+      if (sData.valorAprovado) setValorFinal(sData.valorAprovado);
+      if (sData.numeroAta) setNumeroAta(String(sData.numeroAta));
     }
   }, [solicitation]);
 
@@ -71,6 +73,7 @@ const CeapgReviewPage = () => {
       await evaluateCeapg(Number(id), {
         custoFinalCeapg: valorFinal,
         observacoesCeapg: observacao,
+        numeroAta: numeroAta, 
         tipoDemanda: tipoDemanda 
       });
       navigate('/admin-panel');
@@ -126,7 +129,6 @@ const CeapgReviewPage = () => {
       >
         {activeStep === 0 && (
           isExtra ? (
-            
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Typography variant="h5" fontWeight="600">
@@ -176,7 +178,7 @@ const CeapgReviewPage = () => {
                       </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                      <Typography variant="caption" color="text.secondary" display="block">Número da ATA</Typography>
+                      <Typography variant="caption" color="text.secondary" display="block">Número da ATA Inicial</Typography>
                       <Typography variant="body1" fontWeight="500">{solicitation.numeroAta || 'Não informada'}</Typography>
                     </Grid>
                     <Grid item xs={12}>
@@ -190,7 +192,6 @@ const CeapgReviewPage = () => {
               </Grid>
             </Box>
           ) : (
-            
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Typography variant="h5" fontWeight="600">
@@ -351,8 +352,8 @@ const CeapgReviewPage = () => {
 
             <Box sx={{ display: 'flex', gap: 4, width: '100%' }}>
               <Box sx={{ flex: 1, bgcolor: '#f8f9fa', borderRadius: 2, border: '1px solid #edf2f7', p: 2.5 }}>
-                <Typography variant="caption" color="text.secondary" display="block">Número da ATA</Typography>
-                <Typography variant="body1" fontWeight="600">{solicitation.numeroAta || 'Não informada'}</Typography>
+                <Typography variant="caption" color="text.secondary" display="block">Valor Solicitado Originalmente</Typography>
+                <Typography variant="body1" fontWeight="600">{formatNumberToBRL(sData?.valorSolicitado || solicitation.valorTotal || 0)}</Typography>
               </Box>
 
               <Box sx={{ flex: 1, bgcolor: '#f8f9fa', borderRadius: 2, border: '1px solid #edf2f7', p: 2.5 }}>
@@ -365,7 +366,17 @@ const CeapgReviewPage = () => {
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               <TextField
-                label="Valor Final"
+                label="Número da ATA"
+                fullWidth
+                variant="outlined"
+                value={numeroAta}
+                onChange={(e) => setNumeroAta(e.target.value)}
+                placeholder="Ex: 123/2026"
+                helperText="Número da ATA de consolidação do CEAPG"
+              />
+
+              <TextField
+                label="Custo Final (Fechamento)"
                 type="number"
                 fullWidth
                 required
@@ -375,11 +386,11 @@ const CeapgReviewPage = () => {
                 InputProps={{
                   startAdornment: <InputAdornment position="start">R$</InputAdornment>,
                 }}
-                helperText="Valor final informado pelo CEAPG"
+                helperText="Valor final exato apurado pelo CEAPG na prestação de contas"
               />
 
               <TextField
-                label="Observações"
+                label="Observações CEAPG"
                 multiline
                 rows={4}
                 fullWidth

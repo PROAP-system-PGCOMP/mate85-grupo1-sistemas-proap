@@ -212,11 +212,7 @@ export default function SolicitationTableRequests() {
       nomeDocente: r.userName, 
     }));
 
-    return [...assist, ...extra].sort((a, b) => {
-      const dateA = parseDateString(a.createdAt);
-      const dateB = parseDateString(b.createdAt);
-      return dateB - dateA;
-    });
+    return [...assist, ...extra];
   }, [apoioRequests, extraRequests]);
 
   const filteredRequests = combinedRequests.filter((request) => {

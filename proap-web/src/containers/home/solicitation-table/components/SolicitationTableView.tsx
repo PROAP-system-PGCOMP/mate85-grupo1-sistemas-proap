@@ -123,9 +123,21 @@ const SolicitationTableView: React.FC<SolicitationTableViewProps> = ({
           <TableHead>
             <TableRow>
               <TableCellHeader text="ID" sortBy="id" align="center" selectedPropToSortTable={selectedPropToSortTable} handleClickSortTable={handleClickSortTable} />
-              <TableCell align="center" sx={{ fontWeight: 'bold', backgroundColor: 'grey.50' }}>Tipo</TableCell>
+              <TableCellHeader 
+                text="Tipo" 
+                sortBy={"tipoSolicitacao" as any} 
+                align="center" 
+                selectedPropToSortTable={selectedPropToSortTable} 
+                handleClickSortTable={handleClickSortTable} 
+              />
               <TableCellHeader text="Data de solicitação" sortBy="createdAt" selectedPropToSortTable={selectedPropToSortTable} handleClickSortTable={handleClickSortTable} />
-              <TableCell align="center" sx={{ fontWeight: 'bold', backgroundColor: 'grey.50' }}>Vínculo</TableCell>
+              <TableCellHeader 
+                text="Vínculo" 
+                sortBy={"solicitanteDocente" as any} 
+                align="center" 
+                selectedPropToSortTable={selectedPropToSortTable} 
+                handleClickSortTable={handleClickSortTable} 
+              />
               <TableCellHeader text="Solicitante" sortBy="user.name" align="center" selectedPropToSortTable={selectedPropToSortTable} handleClickSortTable={handleClickSortTable} />
               <TableCellHeader text="Status" sortBy="situacao" align="center" selectedPropToSortTable={selectedPropToSortTable} handleClickSortTable={handleClickSortTable} />
               <TableCellHeader text="Valor solicitado" sortBy="valorTotal" align="center" selectedPropToSortTable={selectedPropToSortTable} handleClickSortTable={handleClickSortTable} />

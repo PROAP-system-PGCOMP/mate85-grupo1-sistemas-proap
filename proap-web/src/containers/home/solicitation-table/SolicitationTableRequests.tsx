@@ -53,40 +53,56 @@ import {
 } from './components';
 import { ConfirmationDialog } from '../../../components/dialogs';
 
-const parseDateString = (dateString?: string): number => {
+const parseDateString = (dateString?: any): number => {
   if (!dateString) return 0;
 
+  if (Array.isArray(dateString)) {
+    return new Date(
+      dateString[0],
+      dateString[1] - 1,
+      dateString[2],
+      dateString[3] || 0,
+      dateString[4] || 0,
+      dateString[5] || 0
+    ).getTime();
+  }
+
   const nativeTime = new Date(dateString).getTime();
-  if (!isNaN(nativeTime) && dateString.includes('-')) {
+  if (!isNaN(nativeTime) && typeof dateString === 'string' && dateString.includes('-')) {
     return nativeTime;
   }
 
-  const [datePart, timePart] = dateString.split(' ');
-
-  if (!datePart || !datePart.includes('/')) {
-    return 0; 
-  }
-
-  const [day, month, year] = datePart.split('/');
+  if (typeof dateString === 'string') {
+    const [datePart, timePart] = dateString.split(' ');
+    if (!datePart || !datePart.includes('/')) return 0; 
   
-  let hours = 0, minutes = 0, seconds = 0;
-  if (timePart) {
-    const timeParts = timePart.split(':');
-    hours = Number(timeParts[0]) || 0;
-    minutes = Number(timeParts[1]) || 0;
-    seconds = Number(timeParts[2]) || 0; 
+    const [day, month, year] = datePart.split('/');
+    
+    let hours = 0, minutes = 0, seconds = 0;
+    if (timePart) {
+      const timeParts = timePart.split(':');
+      hours = Number(timeParts[0]) || 0;
+      minutes = Number(timeParts[1]) || 0;
+      seconds = Number(timeParts[2]) || 0; 
+    }
+  
+    const finalDate = new Date(
+      Number(year),
+      Number(month) - 1,
+      Number(day),
+      hours,
+      minutes,
+      seconds
+    ).getTime();
+  
+    return isNaN(finalDate) ? 0 : finalDate;
   }
 
-  const finalDate = new Date(
-    Number(year),
-    Number(month) - 1,
-    Number(day),
-    hours,
-    minutes,
-    seconds
-  ).getTime();
+  return 0;
+};
 
-  return isNaN(finalDate) ? 0 : finalDate;
+const getNestedValue = (obj: any, path: string) => {
+  return path.split('.').reduce((acc, part) => acc && acc[part], obj);
 };
 
 export default function SolicitationTableRequests() {
@@ -226,13 +242,53 @@ export default function SolicitationTableRequests() {
     );
   });
 
-  const calculatedTotalPages = Math.ceil(filteredRequests.length / size) || 1;
+  const sortedRequests = useMemo(() => {
+    const orderBy = Object.keys(selectedPropToSortTable).find(
+      key => selectedPropToSortTable[key as keyof typeof selectedPropToSortTable] !== undefined
+    );
+    if (!orderBy) return filteredRequests;
+
+    const isAsc = selectedPropToSortTable[orderBy as keyof typeof selectedPropToSortTable];
+
+    return [...filteredRequests].sort((a, b) => {
+      let aVal = getNestedValue(a, orderBy);
+      let bVal = getNestedValue(b, orderBy);
+
+      if (orderBy === 'solicitanteDocente') {
+        aVal = aVal ? 'docente' : 'discente';
+        bVal = bVal ? 'docente' : 'discente';
+      }
+
+      if (orderBy === 'createdAt' || orderBy === 'dataAvaliacaoProap') {
+        aVal = parseDateString(aVal);
+        bVal = parseDateString(bVal);
+      }
+      else if (orderBy === 'id' || orderBy === 'valorTotal' || orderBy === 'valorAprovado' || orderBy === 'situacao') {
+        aVal = Number(aVal || 0);
+        bVal = Number(bVal || 0);
+      }
+      else if (typeof aVal === 'string' && typeof bVal === 'string') {
+        aVal = aVal.toLowerCase();
+        bVal = bVal.toLowerCase();
+      }
+
+      if (aVal === bVal) return 0;
+
+      if (isAsc) {
+        return aVal > bVal ? 1 : -1;
+      } else {
+        return aVal < bVal ? 1 : -1;
+      }
+    });
+  }, [filteredRequests, selectedPropToSortTable]);
+
+  const calculatedTotalPages = Math.ceil(sortedRequests.length / size) || 1;
 
   const safeCurrentPage = Math.min(currentPageAssistance, calculatedTotalPages - 1);
 
   const startIndex = safeCurrentPage * size;
   const endIndex = startIndex + size;
-  const paginatedRequests = filteredRequests.slice(startIndex, endIndex);
+  const paginatedRequests = sortedRequests.slice(startIndex, endIndex);
 
   const menuProps = {
     PaperProps: {
@@ -505,7 +561,7 @@ export default function SolicitationTableRequests() {
         />
 
         <Typography variant="body2" color="text.secondary">
-          Total: <strong>{filteredRequests.length}</strong> solicitações visíveis
+          Total: <strong>{sortedRequests.length}</strong> solicitações visíveis
         </Typography>
       </Box>
 

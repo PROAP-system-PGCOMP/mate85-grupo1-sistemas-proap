@@ -158,13 +158,7 @@ export const reviewDataFormSchema = Yup.object({
     .required('Campo obrigatório')
     .oneOf([0, 1, 2, 3, 4], 'Situação deve ser Aprovado, Reprovado, Pendente, Em espera ou Cancelado'),
 
-  avaliadorCeapgId: Yup.number()
-    .nullable()
-    .when('situacao', {
-      is: (situacao: number) => situacao === 1 || situacao === 2, 
-      then: (schema) => schema.required('Selecione o revisor CEAPG responsável'),
-      otherwise: (schema) => schema.notRequired(),
-  }),
+  avaliadorCeapgId: Yup.number().nullable().notRequired(),
 
   dataAvaliacaoProap: Yup.string().required('Campo obrigatório'),
 

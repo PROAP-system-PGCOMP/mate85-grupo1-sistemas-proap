@@ -16,6 +16,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -88,6 +90,7 @@ public class ExtraRequest {
     @Column(name = "diferenca_ceapg", precision = 19, scale = 4)
     private BigDecimal diferencaCeapg;
 
+	@Enumerated(EnumType.STRING)
     @Column(name = "status_ceapg")
     private StatusCeapg statusCeapg = StatusCeapg.PENDENTE;
 

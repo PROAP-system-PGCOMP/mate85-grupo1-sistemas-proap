@@ -122,7 +122,7 @@ export const financialDetailFormSchema = Yup.object({
       otherwise: () => Yup.number().notRequired(),
     }),
   ultimaDiariaIntegral: Yup.boolean().required('Campo obrigatório'),
-  isDolar: Yup.boolean().required('Campo obrigatório'),
+  isDolar: Yup.boolean().default(false).notRequired(),
   cotacaoMoeda: Yup.number()
     .when('isDolar', {
       is: true,

@@ -141,7 +141,6 @@ export default function SolicitantDetailFormContainer() {
               {({ field }: any) => (
                 <StyledTextField
                   {...field}
-                  required
                   label="Nome do Discente PGCOMP"
                   disabled={!userIsAdmin}
                   error={touched.nomeDiscente && !!errors.nomeDiscente}

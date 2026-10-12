@@ -42,7 +42,7 @@ export const solicitantDetailFormSchema = Yup.object({
   nomeDocente: validacaoNome,
   nomeDiscente: Yup.string().when('solicitanteDocente', {
     is: false,
-    then: () => validacaoNome,
+    then: () => Yup.string().nullable().notRequired(),
     otherwise: () => Yup.string().notRequired(),
   })
 });

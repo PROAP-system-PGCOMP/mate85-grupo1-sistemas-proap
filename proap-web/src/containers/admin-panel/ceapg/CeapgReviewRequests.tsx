@@ -237,6 +237,7 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
                 <TableRow>
                   <TableCellHeader text="Solicitação" sortBy="id" selectedPropToSortTable={activeSortRecord} handleClickSortTable={handleSortClick} />
                   <TableCellHeader text="Tipo" sortBy="tipoSolicitacao" align="center" selectedPropToSortTable={activeSortRecord} handleClickSortTable={handleSortClick} />
+                  <TableCellHeader text="Solicitante" sortBy="nomeSolicitante" align="center" selectedPropToSortTable={activeSortRecord} handleClickSortTable={handleSortClick} />
                   <TableCellHeader text="Valor aprovado na reunião" sortBy="custoFinalCeapg" align="center" selectedPropToSortTable={activeSortRecord} handleClickSortTable={handleSortClick} />
                   <TableCellHeader text="Valor aprovado pelo CEAPG" sortBy="valorAprovado" align="center" selectedPropToSortTable={activeSortRecord} handleClickSortTable={handleSortClick} />
                   <TableCellHeader text="Avaliador" sortBy="avaliadorProap" align="center" selectedPropToSortTable={activeSortRecord} handleClickSortTable={handleSortClick} />
@@ -280,6 +281,7 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
                       <TableCell align="center">
                         <Chip label={tipoFormatado} color={getChipColor(tipo)} size="small" variant="outlined" sx={{ fontWeight: 'bold', fontSize: '0.75rem', ...(tipo.toUpperCase() === 'EXTRA' && {color: '#d81b60',borderColor: '#d81b60'}) }} />
                       </TableCell>
+                      <TableCell align="center">{request.nomeSolicitante || '-'}</TableCell>
                       <TableCell align="center" sx={{ fontWeight: 'normal' }}>
                         {displayValorAprovado}
                       </TableCell>

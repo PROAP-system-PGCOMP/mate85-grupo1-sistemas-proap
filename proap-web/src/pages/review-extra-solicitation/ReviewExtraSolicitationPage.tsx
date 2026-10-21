@@ -84,13 +84,11 @@ export default function ReviewExtraSolicitationPage() {
   };
 
   const handleReviewSubmit = async (values: any, status: number) => {
-    // Validação de ATA obrigatória para aprovação ou reprovação
     if ((status === 1 || status === 2) && !values.numeroAta) {
       Toast.error("O preenchimento do 'Número da ATA' é obrigatório para Aprovar ou Reprovar.");
       return;
     }
 
-    // Se o avaliador opcional foi selecionado, envia a requisição de vínculo antes
     if (values.avaliadorCeapgId) {
       try {
         await api.patch('/admin/ceapg/define/extra', {
@@ -288,43 +286,7 @@ export default function ReviewExtraSolicitationPage() {
                         />
                       )}
                     </Field>
-                  </Grid>
-
-                  {/* NOVO CAMPO: Seleção Opcional do Revisor CEAPG */}
-                  <Grid item xs={12} md={6}>
-                    <FormControl fullWidth size="small">
-                      <Typography variant="caption" sx={{ color: 'text.secondary', mb: 0.5, fontWeight: 'bold' }}>
-                        Revisor Responsável CEAPG (Opcional)
-                      </Typography>
-                      <Field name="avaliadorCeapgId">
-                        {({ field, meta }: any) => (
-                          <Select
-                            {...field}
-                            fullWidth
-                            displayEmpty
-                            disabled={isLoadingAvaliadores}
-                            error={Boolean(meta.touched && meta.error)}
-                            sx={{ bgcolor: 'white' }}
-                          >
-                            <MenuItem value="">
-                              <Typography color="text.secondary">Nenhum revisor indicado</Typography>
-                            </MenuItem>
-                            {isLoadingAvaliadores ? (
-                              <MenuItem disabled value="loading">
-                                <CircularProgress size={20} sx={{ mr: 2 }} /> Carregando revisores...
-                              </MenuItem>
-                            ) : (
-                              avaliadoresCeapg.map((avaliador) => (
-                                <MenuItem key={avaliador.id} value={avaliador.id}>
-                                  {avaliador.name}
-                                </MenuItem>
-                              ))
-                            )}
-                          </Select>
-                        )}
-                      </Field>
-                    </FormControl>
-                  </Grid>
+                  </Grid>                  
 
                   <Grid item xs={12}>
                     <Box sx={{ mt: 2, pt: 3, borderTop: '1px solid', borderColor: 'divider', display: 'flex', flexDirection: "column", justifyContent: "end" }}>

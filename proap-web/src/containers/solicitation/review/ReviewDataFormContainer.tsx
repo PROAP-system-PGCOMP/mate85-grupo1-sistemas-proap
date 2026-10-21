@@ -305,37 +305,6 @@ export default function ReviewDataFormContainer({ onBack }: ReviewDataFormContai
         </Field>
       </Box>
 
-      <Box sx={{ mb: 3 }}>
-        <FormControl size="small">
-          <StyledFormLabel>Revisor Responsável CEAPG (Opcional)</StyledFormLabel>
-          <Field name="avaliadorCeapgId">
-            {({ field }: any) => (
-              <Select
-                {...field}
-                value={field.value || ''} 
-                displayEmpty
-                disabled={isLoadingAvaliadores}
-                sx={{ bgcolor: 'white' }}
-              >
-                <MenuItem value="">
-                  <Typography color="text.secondary">Nenhum revisor indicado</Typography>
-                </MenuItem>
-                {isLoadingAvaliadores ? (
-                  <MenuItem disabled value="loading">
-                    <CircularProgress size={20} sx={{ mr: 2 }} /> Carregando revisores...
-                  </MenuItem>
-                ) : (
-                  avaliadoresCeapg.map((avaliador) => (
-                    <MenuItem key={avaliador.id} value={avaliador.id}>
-                      {avaliador.name}
-                    </MenuItem>
-                  ))
-                )}
-              </Select>
-            )}
-          </Field>
-        </FormControl>
-      </Box>
 
       <Box sx={{ mt: 4, pt: 3, borderTop: '1px solid', borderColor: 'divider', display: 'flex', flexDirection: "column", justifyContent: "end" }}>
         <Box sx={{ display: 'flex', justifyContent: isMobile ? 'center' : 'flex-end', mb: 2 }}>

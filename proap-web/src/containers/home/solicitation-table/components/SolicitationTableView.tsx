@@ -63,7 +63,7 @@ const TableCellHeader: React.FC<TableCellHeaderProps> = ({
   );
 };
 
-interface SolicitationTableViewProps {
+export interface SolicitationTableViewProps {
   filteredRequests: any[];
   searchQuery: string;
   selectedPropToSortTable: Record<string, boolean>;
@@ -78,6 +78,7 @@ interface SolicitationTableViewProps {
   onDelete: (id: number, tipo: string) => void;
   onClone: (id: number, tipo: string) => void;
   onShowDetails: (props: SolicitationDetailsDialogProps) => void;
+  onAssignEvaluator: (id: number, tipo: string) => void; // <-- ADICIONADO AQUI
 }
 
 const SolicitationTableView: React.FC<SolicitationTableViewProps> = ({
@@ -95,9 +96,9 @@ const SolicitationTableView: React.FC<SolicitationTableViewProps> = ({
   onDelete,
   onClone,
   onShowDetails,
+  onAssignEvaluator, // <-- ADICIONADO AQUI
 }) => {
   
-
   const [isAtaDialogOpen, setIsAtaDialogOpen] = useState(false);
   const [ataDialogData, setAtaDialogData] = useState<any>(null);
 
@@ -177,6 +178,7 @@ const SolicitationTableView: React.FC<SolicitationTableViewProps> = ({
                   onClone={onClone}
                   onShowDetails={onShowDetails}
                   onOpenAtaDialog={handleOpenAtaDialog} 
+                  onAssignEvaluator={onAssignEvaluator}
                 />
               ))
             )}

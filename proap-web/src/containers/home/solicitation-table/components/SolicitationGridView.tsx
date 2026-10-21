@@ -16,6 +16,7 @@ interface SolicitationGridViewProps {
   onDelete: (id: number, tipo: string) => void;
   onClone: (id: number, tipo: string) => void;
   onShowDetails: (props: SolicitationDetailsDialogProps) => void;
+  onAssignEvaluator: (id: number, tipo: string) => void;
 }
 
 const SolicitationGridView: React.FC<SolicitationGridViewProps> = ({
@@ -31,6 +32,7 @@ const SolicitationGridView: React.FC<SolicitationGridViewProps> = ({
   onDelete,
   onClone,
   onShowDetails,
+  onAssignEvaluator
 }) => {
   return (
     <Box sx={{ mb: 2 }}>
@@ -58,6 +60,7 @@ const SolicitationGridView: React.FC<SolicitationGridViewProps> = ({
                 onDelete={onDelete}
                 onClone={onClone}
                 onShowDetails={onShowDetails}
+                onAssignEvaluator={onAssignEvaluator}
               />
             </Grid>
           ))}

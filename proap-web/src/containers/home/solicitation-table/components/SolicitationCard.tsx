@@ -14,12 +14,12 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import { formatNumberToBRL } from '../../../../helpers/formatter';
 import { SolicitationDetailsDialogProps } from '../../request-dialog/SolicitationDetailsDialog';
 import { StatusChip } from './index';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
 import { Button, SvgIcon, SvgIconProps} from "@mui/material";
-
 
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -46,6 +46,7 @@ interface SolicitationCardProps {
   onDelete: (id: number, tipo: string) => void;
   onClone: (id: number, tipo: string) => void;
   onShowDetails: (props: SolicitationDetailsDialogProps) => void;
+  onAssignEvaluator: (id: number, tipo: string) => void;
 }
 
 const EditSquareIcon = (props: SvgIconProps) => (
@@ -66,6 +67,7 @@ const SolicitationCard: React.FC<SolicitationCardProps> = ({
   onDelete,
   onClone,
   onShowDetails,
+  onAssignEvaluator,
 }) => {
   const {
     id,
@@ -124,6 +126,11 @@ const SolicitationCard: React.FC<SolicitationCardProps> = ({
     }
   };
 
+  const handleAssignEvaluator = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (id !== undefined) onAssignEvaluator(id, tipoSolicitacao);
+  };
+
   const handleShowDetails = (e: React.MouseEvent) => {
     e.stopPropagation();
     onShowDetails({
@@ -162,7 +169,6 @@ const SolicitationCard: React.FC<SolicitationCardProps> = ({
     >
       <CardContent sx={{ flexGrow: 1, p: 2 }}>
         
-        {/* --- Topo do Card com as Tags --- */}
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5} gap={1.5}>
           {tipoSolicitacao === 'Extra' ? (
             <Chip label="Demanda Extra" size="small" variant="outlined" sx={{ color: '#d81b60', borderColor: '#d81b60', height: 24}} />
@@ -237,6 +243,15 @@ const SolicitationCard: React.FC<SolicitationCardProps> = ({
             <Tooltip title="Ver resumo da Solicitação">
               <IconButton size="small" color="default" onClick={handleShowDetails}>
                 <VisibilityIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+
+          {/* NOVO BOTÃO: Definir Avaliador CEAPG */}
+          {(userCanReviewRequests || isCeapg) && (
+            <Tooltip title="Definir Avaliador CEAPG">
+              <IconButton size="small" color="primary" onClick={handleAssignEvaluator}>
+                <AssignmentIndIcon fontSize="small" />
               </IconButton>
             </Tooltip>
           )}

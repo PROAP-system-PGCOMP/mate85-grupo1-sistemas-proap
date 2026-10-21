@@ -1,3 +1,4 @@
+import api from '../../../services';
 import {
   Typography,
   Box,
@@ -7,6 +8,7 @@ import {
   MenuItem,
   Select,
   FormControl,
+  InputLabel,
   SelectChangeEvent,
   alpha,
   Tooltip,
@@ -14,6 +16,11 @@ import {
   ToggleButtonGroup,
   useMediaQuery,
   useTheme,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
 } from '@mui/material';
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
@@ -160,6 +167,72 @@ export default function SolicitationTableRequests() {
     observacoes: '',
   });
 
+  const [evaluatorModalOpen, setEvaluatorModalOpen] = useState(false);
+  const [selectedRequestForEvaluator, setSelectedRequestForEvaluator] = useState<{ id: number, tipo: string } | null>(null);
+  const [selectedEvaluatorId, setSelectedEvaluatorId] = useState<string>('');
+
+  const [ceapgUsers, setCeapgUsers] = useState<any[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  
+  const handleOpenEvaluatorModal = (id: number, tipo: string) => {
+    setSelectedRequestForEvaluator({ id, tipo });
+    setEvaluatorModalOpen(true);
+  };
+
+  const handleCloseEvaluatorModal = () => {
+    setEvaluatorModalOpen(false);
+    setSelectedRequestForEvaluator(null);
+    setSelectedEvaluatorId('');
+  };
+
+  useEffect(() => {
+    if (isCeapg || userCanReviewRequests) {
+      setLoadingUsers(true);
+      
+      api.get('/user/list')
+        .then(({ data }) => {
+          const apenasCeapg = data.filter((user: any) => 
+            user.profileName === 'CEAPG' || 
+            user.profileName === 'Membro CEAPG' ||
+            user.perfil?.name === 'CEAPG'
+          );
+          setCeapgUsers(apenasCeapg);
+        })
+        .catch((error) => {
+          console.error("Erro ao buscar avaliadores CEAPG:", error);
+          toast.error("Erro ao carregar lista de avaliadores do CEAPG");
+        })
+        .finally(() => {
+          setLoadingUsers(false);
+        });
+    }
+  }, [isCeapg, userCanReviewRequests]);
+
+  const handleConfirmEvaluator = async () => {
+    if (!selectedRequestForEvaluator) return;
+    
+    try {
+      
+      const endpoint = selectedRequestForEvaluator.tipo === 'Extra' 
+        ? '/admin/ceapg/define/extra' 
+        : '/admin/ceapg/define/assistance'; 
+
+      await api.patch(endpoint, {
+        
+        avaliadorId: selectedEvaluatorId ? Number(selectedEvaluatorId) : null,
+        solicitacaoId: Number(selectedRequestForEvaluator.id)
+      });
+
+      toast.success('Revisor CEAPG atualizado com sucesso!');
+      updateAssistanceRequestListWithCurrentParameters(); // Atualiza a tabela na tela
+      handleCloseEvaluatorModal();
+      
+    } catch (error) {
+      console.error("Erro ao atribuir o avaliador:", error);
+      toast.error('Erro ao atualizar o revisor CEAPG.');
+    }
+  };
+
   const { requests: apoioRequests, extraRequests } = useSelector(
     (state: IRootState) => state.assistanceRequestSlice
   );
@@ -234,9 +307,9 @@ export default function SolicitationTableRequests() {
   const filteredRequests = combinedRequests.filter((request) => {
     return (
       (!searchQuery ||
-        request.user?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        request.tituloPublicacao?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        request.nomeEvento?.toLowerCase().includes(searchQuery.toLowerCase())) &&
+        (request.user?.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (request.tituloPublicacao || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (request.nomeEvento || '').toLowerCase().includes(searchQuery.toLowerCase())) &&
       (statusFilter === null || request.situacao === statusFilter) &&
       (typeFilter === '' || request.tipoSolicitacao === typeFilter)
     );
@@ -395,7 +468,7 @@ export default function SolicitationTableRequests() {
                 }
               }}
             >
-              <MenuItem value="" sx={{ color: 'gray' }}>
+              <MenuItem value="none" sx={{ color: 'gray' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, color: 'text.secondary' }}>
                   <LayersIcon fontSize="small" />
                   Todos os tipos
@@ -515,6 +588,7 @@ export default function SolicitationTableRequests() {
           onDelete={(id, tipo) => { setSolicitationToDelete({ id, tipo }); setOpenDeleteConfirmation(true); }}
           onClone={(id, tipo) => navigate(tipo === 'Extra' ? `/extra-solicitation/create?cloneFrom=${id}` : `/solicitation/create?cloneFrom=${id}`)}
           onShowDetails={(props) => { setDetailsDialogData(props); setOpenDetailsDialog(true); }}
+          onAssignEvaluator={handleOpenEvaluatorModal}
         />
       ) : (
         <SolicitationGridView
@@ -530,6 +604,7 @@ export default function SolicitationTableRequests() {
           onDelete={(id, tipo) => { setSolicitationToDelete({ id, tipo }); setOpenDeleteConfirmation(true); }}
           onClone={(id, tipo) => navigate(tipo === 'Extra' ? `/extra-solicitation/create?cloneFrom=${id}` : `/solicitation/create?cloneFrom=${id}`)}
           onShowDetails={(props) => { setDetailsDialogData(props); setOpenDetailsDialog(true); }}
+          onAssignEvaluator={handleOpenEvaluatorModal}
         />
       )}
 
@@ -591,6 +666,51 @@ export default function SolicitationTableRequests() {
         onClose={() => setOpenDetailsDialog(false)}
         solicitationData={detailsDialogData}
       />
+
+      {/* Modal de Seleção de Avaliador CEAPG */}
+      <Dialog open={evaluatorModalOpen} onClose={handleCloseEvaluatorModal} maxWidth="sm" fullWidth>
+        <DialogTitle>Definir Avaliador CEAPG</DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          <TextField
+            select
+            fullWidth
+            sx={{ mt: 1 }}
+            label="Selecione um Avaliador"
+            value={selectedEvaluatorId}
+            onChange={(e) => setSelectedEvaluatorId(e.target.value)}
+            disabled={loadingUsers}
+            InputLabelProps={{ shrink: true }}
+            SelectProps={{ displayEmpty: true }}
+          >
+            <MenuItem value="">
+              <Typography color="text.secondary">
+                {loadingUsers ? 'Carregando avaliadores...' : 'Nenhum revisor indicado'}
+              </Typography>
+            </MenuItem>
+
+            {ceapgUsers.map((user) => (
+              <MenuItem key={user.id} value={String(user.id)}>
+                {user.name}
+              </MenuItem>
+            ))}
+
+            {!loadingUsers && ceapgUsers.length === 0 && (
+              <MenuItem value="empty_fallback" disabled>Nenhum avaliador encontrado</MenuItem>
+            )}
+          </TextField>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseEvaluatorModal} color="inherit">Cancelar</Button>
+          <Button 
+            onClick={handleConfirmEvaluator} 
+            color="primary" 
+            variant="contained" 
+            disabled={loadingUsers}
+          >
+            Confirmar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 }

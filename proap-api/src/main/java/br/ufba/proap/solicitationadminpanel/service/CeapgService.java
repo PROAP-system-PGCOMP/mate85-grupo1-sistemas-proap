@@ -107,21 +107,26 @@ public class CeapgService {
             throw new UnauthorizedException("Usuario não tem permissão para definir avaliador para essa solicitação");
         }
 
-        User avaliador = userRepository.findById(ceapgAvaliador)
-                .orElseThrow(() -> new NotFoundException("Avaliador não encontrado"));
-
-        if (!avaliador.getPerfil().hasPermission("CEAPG_ROLE") && !currentUser.getPerfil().hasPermission("ADMIN_ROLE")) {
-            throw new UnauthorizedException("Usuario não tem autorização CEAPG para realizar a avaliação");
-        }
-
+        
         Optional<AssistanceRequest> assistance = assistanceRequestRepository.findById(assistenceId);
         if (assistance.isEmpty()) {
             throw new NotFoundException("Solicitação de assistência não encontrada");
         }
-
         AssistanceRequest newAssistance = assistance.get();
 
-        newAssistance.setAvaliadorCeapg(avaliador);
+        
+        if (ceapgAvaliador == null) {
+            newAssistance.setAvaliadorCeapg(null);
+        } else {
+            
+            User avaliador = userRepository.findById(ceapgAvaliador)
+                    .orElseThrow(() -> new NotFoundException("Avaliador não encontrado"));
+
+            if (!avaliador.getPerfil().hasPermission("CEAPG_ROLE") && !currentUser.getPerfil().hasPermission("ADMIN_ROLE")) {
+                throw new UnauthorizedException("Usuario não tem autorização CEAPG para realizar a avaliação");
+            }
+            newAssistance.setAvaliadorCeapg(avaliador);
+        }
 
         return assistanceRequestRepository.save(newAssistance);
     }
@@ -132,21 +137,26 @@ public class CeapgService {
             throw new UnauthorizedException("Usuario não tem permissão para definir avaliador para essa solicitação");
         }
 
-        User avaliador = userRepository.findById(ceapgAvaliador)
-                .orElseThrow(() -> new NotFoundException("Avaliador não encontrado"));
-
-        if (!avaliador.getPerfil().hasPermission("CEAPG_ROLE") && !avaliador.getPerfil().hasPermission("ADMIN_ROLE")) {
-            throw new UnauthorizedException("Usuario não tem autorização CEAPG para realizar a avaliação");
-        }
-
+        
         Optional<ExtraRequest> assistance = extraRequestRepostirory.findById(assistanceId);
         if (assistance.isEmpty()) {
             throw new NotFoundException("Solicitação não encontrada");
         }
-
         ExtraRequest newAssistance = assistance.get();
 
-        newAssistance.setAvaliadorCeapg(avaliador);
+        
+        if (ceapgAvaliador == null) {
+            newAssistance.setAvaliadorCeapg(null);
+        } else {
+            
+            User avaliador = userRepository.findById(ceapgAvaliador)
+                    .orElseThrow(() -> new NotFoundException("Avaliador não encontrado"));
+
+            if (!avaliador.getPerfil().hasPermission("CEAPG_ROLE") && !avaliador.getPerfil().hasPermission("ADMIN_ROLE")) {
+                throw new UnauthorizedException("Usuario não tem autorização CEAPG para realizar a avaliação");
+            }
+            newAssistance.setAvaliadorCeapg(avaliador);
+        }
 
         ExtraRequest saveExtra = this.extraRequestRepostirory.save(newAssistance);
 

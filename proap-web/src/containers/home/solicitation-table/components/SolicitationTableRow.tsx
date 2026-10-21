@@ -13,6 +13,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd'; // <-- Ícone importado
 import { SvgIcon, SvgIconProps } from "@mui/material";
 
 import { formatNumberToBRL } from '../../../../helpers/formatter';
@@ -62,6 +63,7 @@ interface SolicitationTableRowProps extends SolicitationRowData {
   onDelete: (id: number, tipo: string) => void;
   onClone: (id: number, tipo: string) => void;
   onShowDetails: (props: SolicitationDetailsDialogProps) => void;
+  onAssignEvaluator: (id: number, tipo: string) => void; // <-- Prop adicionada
 }
 
 const EditSquareIcon = (props: SvgIconProps) => (
@@ -135,6 +137,7 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
   onDelete,
   onClone,
   onShowDetails,
+  onAssignEvaluator, // <-- Função desestruturada
 }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -170,6 +173,12 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
   const handleClone = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (id !== undefined) onClone(id, tipoSolicitacao);
+  };
+
+  // <-- Nova função de acionamento do Modal
+  const handleAssignEvaluator = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (id !== undefined) onAssignEvaluator(id, tipoSolicitacao);
   };
 
   const handleShowDetailsClick = (e: React.MouseEvent) => {
@@ -259,6 +268,14 @@ const SolicitationTableRow: React.FC<SolicitationTableRowProps> = ({
             <Tooltip title="Gerar texto para Ata">
               <IconButton size="small" color="default" onClick={handleOpenAta}>
                 <MenuBookIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+
+          {(userCanReviewRequests || isCeapg) && (
+            <Tooltip title="Definir Avaliador CEAPG">
+              <IconButton size="small" onClick={handleAssignEvaluator}>
+                <AssignmentIndIcon fontSize="small" />
               </IconButton>
             </Tooltip>
           )}

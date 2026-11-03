@@ -131,9 +131,12 @@ public class AssistanceRequestService {
 	}
 
 	public AssistanceRequest save(AssistanceRequest assistanceReques) {
-        this.totalAssistanceRequestByUser(assistanceReques.getUser(), assistanceReques.getValorTotal());
-		return assistanteRequestRepository.save(assistanceReques);
-	}
+
+    if (assistanceReques.getSituacao() != null && assistanceReques.getSituacao() == 1) {
+        this.totalAssistanceRequestByUser(assistanceReques);
+    }
+    return assistanteRequestRepository.save(assistanceReques);
+}
 
 	@Transactional
 	public void delete(Long id) {
@@ -162,7 +165,6 @@ public class AssistanceRequestService {
 			return null;
 		}
 
-		// Validate situation value
 		Integer situacao = assistanceRequest.getSituacao();
 		if (situacao == null || (situacao != 1 && situacao != 2 && situacao != 0 && situacao != 3 && situacao != 4)) {
 			throw new IllegalArgumentException("Situação deve ser Aprovado, Reprovado, Em espera ou Cancelado");
@@ -249,29 +251,41 @@ public class AssistanceRequestService {
         return new TotalElementosResponseDTO(this.assistanteRequestRepository.count(data.startDate(), data.endDate()));
     }
     @Transactional(readOnly = true)
-    public void totalAssistanceRequestByUser (User user, BigDecimal totalValue) {
-        int anoAtual = Year.now().getValue();
+	public void totalAssistanceRequestByUser(AssistanceRequest request) {
+		User user = request.getUser();
+		BigDecimal totalValue = request.getValorTotal() != null ? request.getValorTotal() : BigDecimal.ZERO;
+		int anoAtual = Year.now().getValue();
 
-        LocalDateTime inicioAno = LocalDateTime.of(anoAtual, 1, 1, 0, 0, 0);
-        LocalDateTime fimAno = LocalDateTime.of(anoAtual, 12, 31, 23, 59, 59);
+		LocalDateTime inicioAno = LocalDateTime.of(anoAtual, 1, 1, 0, 0, 0);
+		LocalDateTime fimAno = LocalDateTime.of(anoAtual, 12, 31, 23, 59, 59);
 
-        BigDecimal totalAssistanceRequest = this.assistanteRequestRepository.totalAssistanceRequestAprovedByUser(user, inicioAno, fimAno);
-        BigDecimal totalExtraRequest = this.extraRequestRepostirory.totalExtraRequestAprovedByUser(user, inicioAno, fimAno);
-        BigDecimal total = totalAssistanceRequest.add(totalExtraRequest).add(totalValue);
-        SolicitationAdmin budget = this.budgetService.getBudgetsByYear(anoAtual);
+		BigDecimal totalAssistance = this.assistanteRequestRepository.totalAssistanceRequestAprovedByUser(user, inicioAno, fimAno);
+		if (totalAssistance == null) totalAssistance = BigDecimal.ZERO;
 
-        BigDecimal dezBudget = budget.getOrcamentoAnual().multiply(new BigDecimal("10"))
-                .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
+		BigDecimal totalExtra = this.extraRequestRepostirory.totalExtraRequestAprovedByUser(user, inicioAno, fimAno);
+		if (totalExtra == null) totalExtra = BigDecimal.ZERO;
 
-        if (totalValue.compareTo(dezBudget) > 0) {
-            throw new RuntimeException("O valor da solicitação não pode ultrapassar 10% do total do Orçamento anual");
-        }
+	
+		BigDecimal total = totalAssistance.add(totalExtra);
+		
+		if (request.getId() == null) {
+			total = total.add(totalValue);
+		}
 
-        BigDecimal vinteBudget = budget.getOrcamentoAnual().multiply(new BigDecimal("20"))
-                .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
+		SolicitationAdmin budget = this.budgetService.getBudgetsByYear(anoAtual);
 
-        if (total.compareTo(vinteBudget) > 0) {
-            throw new RuntimeException("O valor das solicitações do usuario ultrapassam 20% do Orçamento total");
-        }
-    }
+		BigDecimal dezBudget = budget.getOrcamentoAnual().multiply(new BigDecimal("10"))
+				.divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
+
+		if (totalValue.compareTo(dezBudget) > 0) {
+			throw new RuntimeException("O valor da solicitação não pode ultrapassar 10% do total do Orçamento anual");
+		}
+
+		BigDecimal vinteBudget = budget.getOrcamentoAnual().multiply(new BigDecimal("20"))
+				.divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
+
+		if (total.compareTo(vinteBudget) > 0) {
+			throw new RuntimeException("O valor das solicitações do usuario ultrapassam 20% do Orçamento total");
+		}
+	}
 }

@@ -161,13 +161,19 @@ public class ExtraRequestService {
         ExtraRequest request = extraRequestRepostirory.findById(id)
                 .orElseThrow(() -> new RuntimeException("Demanda extra não encontrada"));
 
-        if (request.getSituacao() != 1 || request.getSituacao() != 0) {
+        if (request.getSituacao() != 1 && request.getSituacao() != 0) {
             throw new BadRequestException("Demanda ainda não aprovada pela comissão");
         }
 
         request.setCustoFinalCeapg(dto.getCustoFinalCeapg());
 
-        BigDecimal diferenca = dto.getCustoFinalCeapg().subtract(request.getValorAprovado());
+        BigDecimal valorReferencia = request.getValorAprovado() != null
+                ? request.getValorAprovado()
+                : request.getValorSolicitado();
+        if (dto.getCustoFinalCeapg() == null || valorReferencia == null) {
+            throw new BadRequestException("Custo final CEAPG e valor de referência da demanda são obrigatórios");
+        }
+        BigDecimal diferenca = dto.getCustoFinalCeapg().subtract(valorReferencia);
 
         request.setDiferencaCeapg(diferenca);
 

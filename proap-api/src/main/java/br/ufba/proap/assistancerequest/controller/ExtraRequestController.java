@@ -1,5 +1,6 @@
 package br.ufba.proap.assistancerequest.controller;
 
+import br.ufba.proap.exception.BudgetLimitExceededException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -165,6 +166,9 @@ public class ExtraRequestController {
             ExtraRequest savedExtra = service.save(extraRequest);
 
             return ResponseEntity.ok(new ExtraRequestResponseDTO(savedExtra));
+        } catch (BudgetLimitExceededException e) {
+            // Tratada no GlobalExceptionHandler (400 com mensagem)
+            throw e;
         } catch (Exception e) {
             logger.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();

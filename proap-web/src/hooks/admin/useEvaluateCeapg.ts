@@ -22,7 +22,12 @@ export default function useEvaluateCeapg() {
         numeroAta: payload.numeroAta || null, 
       };
       
-      const response = await api.patch(`/admin/ceapg/review/${id}`, payloadParaOJava);
+      const isExtra = (payload.tipoDemanda || '').toUpperCase() === 'EXTRA';
+      const endpoint = isExtra
+        ? `/admin/ceapg/review/extra/${id}`
+        : `/admin/ceapg/review/${id}`;
+
+      const response = await api.patch(endpoint, payloadParaOJava);
       
       Toast.success('Avaliação do CEAPG salva com sucesso!');
       return response.data;

@@ -188,7 +188,11 @@ export default function FinancialDetailFormContainer() {
                 {({ field }: any) => (
                   <StyledTextField
                     {...field}
-                    label="Valor da inscrição/solicitação"
+                    label={
+                      values.isDolar
+                        ? 'Valor da inscrição/solicitação (USD)'
+                        : 'Valor da inscrição/solicitação (BRL)'
+                    }
                     InputProps={{
                       inputComponent: NumericFormatCustom as any,
                       startAdornment: (
@@ -727,7 +731,7 @@ export default function FinancialDetailFormContainer() {
                   {({ field }: any) => (
                     <StyledTextField
                       {...field}
-                      label="Valor aproximado da passagem aérea"
+                      label="Valor aproximado da passagem aérea (BRL)"
                       InputProps={{
                         inputComponent: NumericFormatCustom as any,
                         startAdornment: (

@@ -5,11 +5,20 @@ import {
 } from '@mui/material';
 import { CeapgResponse } from '../../../types';
 
+// Deve coincidir com o CeapgReviewDTO do backend (valorFinal, observacoes, numeroAta).
+// tipoDemanda é usado apenas para escolher o endpoint (normal ou extra).
+export interface CeapgEvaluationPayload {
+  valorFinal: number;
+  observacoes: string;
+  numeroAta?: string | null;
+  tipoDemanda?: string;
+}
+
 interface Props {
   open: boolean;
   request: CeapgResponse | null;
   onClose: () => void;
-  onSave: (id: number, data: { costoFinal: number; observacao: string }) => void;
+  onSave: (id: number, data: CeapgEvaluationPayload) => void;
 }
 
 const CeapgEvaluationModal: React.FC<Props> = ({ open, request, onClose, onSave }) => {
@@ -25,7 +34,12 @@ const CeapgEvaluationModal: React.FC<Props> = ({ open, request, onClose, onSave 
 
   const handleConfirm = () => {
     if (request) {
-      onSave(request.id, { costoFinal: valorFinal, observacao });
+      onSave(request.id, {
+        valorFinal,
+        observacoes: observacao,
+        numeroAta: request.numeroAta != null ? String(request.numeroAta) : null,
+        tipoDemanda: request.tipoDemanda,
+      });
     }
   };
 

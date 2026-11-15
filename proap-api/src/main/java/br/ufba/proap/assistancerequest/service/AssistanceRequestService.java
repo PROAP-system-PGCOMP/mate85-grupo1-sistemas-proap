@@ -22,6 +22,7 @@ import br.ufba.proap.assistancerequest.repository.AssistanceRequestQueryReposito
 import br.ufba.proap.assistancerequest.repository.AssistanceRequestRepository;
 import br.ufba.proap.authentication.domain.User;
 import br.ufba.proap.authentication.service.UserService;
+import br.ufba.proap.exception.BudgetLimitExceededException;
 import br.ufba.proap.exception.UnauthorizedException;
 import jakarta.ws.rs.NotFoundException;
 
@@ -204,13 +205,19 @@ public class AssistanceRequestService {
 		AssistanceRequest request = assistanteRequestRepository.findById(id)
 				.orElseThrow(() -> new NotFoundException("Solicitação não encontrada"));
 
-		if (!request.getSituacao().equals(1) || !request.getSituacao().equals(0)) {
+		if (request.getSituacao() == null || (!request.getSituacao().equals(1) && !request.getSituacao().equals(0))) {
 			throw new UnauthorizedException("Solicitação não foi aprovada pela comissão do PROAP");
 		}
 
 		request.setCustoFinalCeapg(ceapgDTO.getCustoFinalCeapg());
 
-        BigDecimal diferenca = ceapgDTO.getCustoFinalCeapg().subtract(request.getValorAprovado());
+        BigDecimal valorReferencia = request.getValorAprovado() != null
+                ? request.getValorAprovado()
+                : request.getValorTotal();
+        if (ceapgDTO.getCustoFinalCeapg() == null || valorReferencia == null) {
+            throw new IllegalArgumentException("Custo final CEAPG e valor de referência da solicitação são obrigatórios");
+        }
+        BigDecimal diferenca = ceapgDTO.getCustoFinalCeapg().subtract(valorReferencia);
         request.setDiferencaCeapg(diferenca);
         if (diferenca.compareTo(BigDecimal.ZERO) > 0) {
             request.setStatusCeapg(StatusCeapg.ACIMA_DO_LIMITE);
@@ -278,14 +285,14 @@ public class AssistanceRequestService {
 				.divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
 
 		if (totalValue.compareTo(dezBudget) > 0) {
-			throw new RuntimeException("O valor da solicitação não pode ultrapassar 10% do total do Orçamento anual");
+			throw new BudgetLimitExceededException("O valor da solicitação não pode ultrapassar 10% do total do Orçamento anual");
 		}
 
 		BigDecimal vinteBudget = budget.getOrcamentoAnual().multiply(new BigDecimal("20"))
 				.divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
 
 		if (total.compareTo(vinteBudget) > 0) {
-			throw new RuntimeException("O valor das solicitações do usuario ultrapassam 20% do Orçamento total");
+			throw new BudgetLimitExceededException("O valor das solicitações do usuário ultrapassa 20% do Orçamento anual");
 		}
 	}
 	
@@ -309,14 +316,14 @@ public class AssistanceRequestService {
                 .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
 
         if (totalValue.compareTo(dezBudget) > 0) {
-            throw new RuntimeException("O valor da solicitação não pode ultrapassar 10% do total do Orçamento anual");
+            throw new BudgetLimitExceededException("O valor da solicitação não pode ultrapassar 10% do total do Orçamento anual");
         }
 
         BigDecimal vinteBudget = budget.getOrcamentoAnual().multiply(new BigDecimal("20"))
                 .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
 
         if (total.compareTo(vinteBudget) > 0) {
-            throw new RuntimeException("O valor das solicitações do usuario ultrapassam 20% do Orçamento total");
+            throw new BudgetLimitExceededException("O valor das solicitações do usuário ultrapassa 20% do Orçamento anual");
         }
     }
 }

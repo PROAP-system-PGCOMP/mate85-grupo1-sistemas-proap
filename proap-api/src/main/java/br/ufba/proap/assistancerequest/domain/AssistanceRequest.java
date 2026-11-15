@@ -1,6 +1,7 @@
 package br.ufba.proap.assistancerequest.domain;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -183,65 +184,65 @@ public class AssistanceRequest {
 	}
 
 	public void setAutomaticDecText() {
-		String name = this.user.getName();
-		String quantDiarias = String.valueOf(this.quantidadeDiariasSolicitadas);
-		String valorTotal = this.valorTotal.toString();
-		String cargo = this.solicitanteDocente ? "docente" : "discente";
-		String nomeTrabalho = this.tituloPublicacao;
-		String evento = this.nomeEvento;
-		String qualis = this.qualis;
-		String cidade = this.cidade;
-		String pais = this.pais;
-		String inicio = this.dataInicio.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-		String fim = this.dataFim.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-		String cotacao = this.cotacaoMoeda.toString();
+		if (this.situacao == null) {
+			this.automaticDecText = null;
+			return;
+		}
+
+		final String naoInformado = "não informado";
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+		String name = (this.user != null && this.user.getName() != null) ? this.user.getName() : naoInformado;
+		String quantDiarias = this.quantidadeDiariasSolicitadas != null
+				? String.valueOf(this.quantidadeDiariasSolicitadas)
+				: "0";
+		String valorTotal = this.valorTotal != null
+				? this.valorTotal.setScale(2, RoundingMode.HALF_UP).toPlainString()
+				: naoInformado;
+		String cargo = Boolean.TRUE.equals(this.solicitanteDocente) ? "docente" : "discente";
+		String nomeTrabalho = this.tituloPublicacao != null ? this.tituloPublicacao : naoInformado;
+		String evento = this.nomeEvento != null ? this.nomeEvento : naoInformado;
+		String qualis = (this.qualis != null && !this.qualis.isBlank()) ? this.qualis : naoInformado;
+		String local = (this.cidade != null ? this.cidade : naoInformado) + "-"
+				+ (this.pais != null ? this.pais : naoInformado);
+		String inicio = this.dataInicio != null ? this.dataInicio.format(formatter) : null;
+		String fim = this.dataFim != null ? this.dataFim.format(formatter) : null;
+
+		String periodo;
+		if (inicio != null && fim != null && !inicio.equals(fim)) {
+			periodo = ", no período de " + inicio + " a " + fim;
+		} else if (inicio != null) {
+			periodo = ", em " + inicio;
+		} else {
+			periodo = "";
+		}
+
+		// valorTotal já é calculado em BRL no front (diárias em dólar convertidas pela cotação)
+		String valorDescricao = "(R$ " + valorTotal + " e " + quantDiarias + " diárias";
+		if (Boolean.TRUE.equals(this.isDolar) && this.cotacaoMoeda != null) {
+			valorDescricao += ", já convertido para reais com cotação do dólar informada de R$ "
+					+ this.cotacaoMoeda.setScale(4, RoundingMode.HALF_UP).toPlainString();
+		}
+		valorDescricao += ")";
+
+		String detalhesEvento = " para apresentação do trabalho (" + nomeTrabalho + ") no evento " + evento
+				+ ", Qualis " + qualis + ", a ser realizado em " + local + periodo;
 
 		switch (this.situacao) {
 			case 1: // Aprovado
-				if (!this.isDolar) {
-					this.automaticDecText = "O " + cargo + " " + name + " solicita apoio no valor total de (R$"
-							+ valorTotal
-							+ " e " + quantDiarias + " diárias ) para apresentação do trabalho (" + nomeTrabalho
-							+ ") no evento " + evento + ", Qualis " + qualis + ", a ser realizado em " + cidade + "-"
-							+ pais
-							+ ", no período de " + inicio + " a " + fim
-							+ ". Após verificação da documentação enviada, a comissão PROAP entende que a solicitação está de acordo com a resolução vigente e recomenda sua aprovação.";
-				} else {
-					this.automaticDecText = "O " + cargo + " " + name + " solicita apoio no valor total em dólar de ($"
-							+ valorTotal + " e " + quantDiarias
-							+ " diárias ) com variação cambial atual informada de (R$ "
-							+ cotacao + ") para apresentação do trabalho (" + nomeTrabalho + ") no evento "
-							+ evento + ", Qualis " + qualis + ", a ser realizado em " + cidade + "-" + pais
-							+ ", no período de " + inicio + " a " + fim
-							+ ". Após verificação da documentação enviada, a comissão PROAP entende que a solicitação está de acordo com a resolução vigente e recomenda sua aprovação.";
-				}
+				this.automaticDecText = "O " + cargo + " " + name + " solicita apoio no valor total de "
+						+ valorDescricao + detalhesEvento
+						+ ". Após verificação da documentação enviada, a comissão PROAP entende que a solicitação está de acordo com a resolução vigente e recomenda sua aprovação.";
 				break;
 
 			case 2: // Rejeitado
-				if (!this.isDolar) {
-					this.automaticDecText = "O " + cargo + " " + name + " solicita apoio no valor total de (R$"
-							+ valorTotal + " e " + quantDiarias + " diárias ) para apresentação do trabalho ("
-							+ nomeTrabalho
-							+ ") no evento " + evento + ", Qualis " + qualis + ", a ser realizado em " + cidade + "-"
-							+ pais
-							+ ", no período de " + inicio + " a " + fim
-							+ ". Após verificação da documentação enviada, a comissão PROAP entende que a solicitação não está de acordo com a resolução vigente e recomenda sua reprovação.";
-				} else {
-					this.automaticDecText = "O " + cargo + " " + name + " solicita apoio no valor total em dólar de ($"
-							+ valorTotal + " e " + quantDiarias
-							+ " diárias ) com variação cambial atual informada de (R$ "
-							+ cotacao + ") para apresentação do trabalho (" + nomeTrabalho + ") no evento "
-							+ evento + ", Qualis " + qualis + ", a ser realizado em " + cidade + "-" + pais
-							+ ", no período de " + inicio + " a " + fim
-							+ ". Após verificação da documentação enviada, a comissão PROAP entende que a solicitação não está de acordo com a resolução vigente e recomenda sua reprovação.";
-				}
+				this.automaticDecText = "O " + cargo + " " + name + " solicita apoio no valor total de "
+						+ valorDescricao + detalhesEvento
+						+ ". Após verificação da documentação enviada, a comissão PROAP entende que a solicitação não está de acordo com a resolução vigente e recomenda sua reprovação.";
 				break;
 
 			case 3: // Aguardando informações
-				this.automaticDecText = "O " + cargo + " " + name + " solicitou apoio para apresentação do trabalho ("
-						+ nomeTrabalho + ") no evento " + evento + ", Qualis " + qualis + ", a ser realizado em "
-						+ cidade
-						+ "-" + pais + ", no período de " + inicio + " a " + fim
+				this.automaticDecText = "O " + cargo + " " + name + " solicitou apoio" + detalhesEvento
 						+ ". A solicitação está aguardando informações adicionais do solicitante para ser avaliada.";
 				break;
 			default:

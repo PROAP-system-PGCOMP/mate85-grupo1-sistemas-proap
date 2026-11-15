@@ -2,25 +2,37 @@ import { useFormikContext } from 'formik';
 import { SolicitationFormValues } from '../../containers/solicitation/SolicitationFormSchema';
 import { useEffect } from 'react';
 
+const toNumber = (value: unknown): number => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+/**
+ * Calcula o valor total da solicitação, sempre em BRL.
+ *
+ * Quando `isDolar` é verdadeiro, a inscrição e as diárias são informadas em USD
+ * e convertidas pela `cotacaoMoeda`. A passagem aérea é sempre informada em BRL.
+ */
 const useCalculeTotal = () => {
   const { values, setFieldValue } = useFormikContext<SolicitationFormValues>();
 
   useEffect(() => {
-    let fatorQuantidadeDiarias = values.quantidadeDiariasSolicitadas;
-    if (
-      values.quantidadeDiariasSolicitadas > 1 &&
-      !values.ultimaDiariaIntegral
-    ) {
+    const quantidadeDiarias = toNumber(values.quantidadeDiariasSolicitadas);
+    let fatorQuantidadeDiarias = quantidadeDiarias;
+    if (quantidadeDiarias > 1 && !values.ultimaDiariaIntegral) {
       fatorQuantidadeDiarias -= 0.5;
     }
-    const valorTotal = values.isDolar
-      ? values.valorInscricao +
-        values.valorDiaria * values.cotacaoMoeda * fatorQuantidadeDiarias +
-        values.valorPassagem
-      : values.valorInscricao +
-        values.valorDiaria * fatorQuantidadeDiarias +
-        values.valorPassagem;
-    setFieldValue('valorTotal', Number(valorTotal));
+
+    const cotacao = values.isDolar ? toNumber(values.cotacaoMoeda) : 1;
+
+    const valorInscricaoBRL = toNumber(values.valorInscricao) * cotacao;
+    const valorDiariasBRL =
+      toNumber(values.valorDiaria) * cotacao * fatorQuantidadeDiarias;
+    const valorPassagemBRL = toNumber(values.valorPassagem);
+
+    const valorTotal = valorInscricaoBRL + valorDiariasBRL + valorPassagemBRL;
+
+    setFieldValue('valorTotal', Number(valorTotal.toFixed(2)));
   }, [
     values.valorInscricao,
     values.valorDiaria,

@@ -57,6 +57,9 @@ public class CeapgService {
         return convertPairsToDTOs(data);
     }
 
+    // Ordem das colunas deve bater com as queries findAll*CeapgRequests do AssistanceRequestRepository:
+    // id, valorAprovado, dataAvaliacaoProap, avaliadorProap, custoFinalCeapg, observacoesCeapg,
+    // avaliadorCeapg, dataAvaliacaoCeapg, numeroAta, nomeSolicitante
     protected List<CeapgResponseDTO> convertPairsToDTOs(List<Object[]> data) {
         return data.stream()
                 .map(objArray -> {
@@ -87,14 +90,20 @@ public class CeapgService {
             throw new NotFoundException("Solicitação de assistência não encontrada");
         }
 
-        AssistanceRequest novo = AssistenceRequestOptional.get();
-        novo.setCustoFinalCeapg(data.valorFinal());
-        BigDecimal diferenca;
-        if (novo.getValorAprovado() != null) {
-            diferenca = data.valorFinal().subtract(novo.getValorAprovado());
-        } else {
-            diferenca = data.valorFinal().subtract(novo.getValorTotal());
+        if (data == null || data.valorFinal() == null) {
+            throw new IllegalArgumentException("O valor final da avaliação CEAPG é obrigatório");
         }
+
+        AssistanceRequest novo = AssistenceRequestOptional.get();
+        BigDecimal valorReferencia = novo.getValorAprovado() != null
+                ? novo.getValorAprovado()
+                : novo.getValorTotal();
+        if (valorReferencia == null) {
+            throw new IllegalArgumentException("Solicitação não possui valor aprovado nem valor total para comparação");
+        }
+
+        novo.setCustoFinalCeapg(data.valorFinal());
+        BigDecimal diferenca = data.valorFinal().subtract(valorReferencia);
 
         novo.setDiferencaCeapg(diferenca);
          if (diferenca.compareTo(BigDecimal.ZERO) > 0) {
@@ -107,6 +116,9 @@ public class CeapgService {
         novo.setObservacoesCeapg(data.observacoes());
         novo.setDataAvaliacaoCeapg(LocalDate.now());
         novo.setNumeroAta(data.numeroAta());
+        if (novo.getAvaliadorCeapg() == null) {
+            novo.setAvaliadorCeapg(currentUser);
+        }
 
         return assistanceRequestRepository.save(novo);
     }
@@ -186,14 +198,20 @@ public class CeapgService {
         }
 
 
-        ExtraRequest saveExtra = extra.get();
-        BigDecimal diferenca;
-        saveExtra.setCustoFinalCeapg(data.valorFinal());
-        if (saveExtra.getValorAprovado() != null) {
-            diferenca = data.valorFinal().subtract(saveExtra.getValorAprovado());
-        } else {
-            diferenca = data.valorFinal().subtract(saveExtra.getValorSolicitado());
+        if (data == null || data.valorFinal() == null) {
+            throw new IllegalArgumentException("O valor final da avaliação CEAPG é obrigatório");
         }
+
+        ExtraRequest saveExtra = extra.get();
+        BigDecimal valorReferencia = saveExtra.getValorAprovado() != null
+                ? saveExtra.getValorAprovado()
+                : saveExtra.getValorSolicitado();
+        if (valorReferencia == null) {
+            throw new IllegalArgumentException("Demanda extra não possui valor aprovado nem valor solicitado para comparação");
+        }
+
+        saveExtra.setCustoFinalCeapg(data.valorFinal());
+        BigDecimal diferenca = data.valorFinal().subtract(valorReferencia);
         saveExtra.setDiferencaCeapg(diferenca);
         if (diferenca.compareTo(BigDecimal.ZERO) > 0) {
             saveExtra.setStatusCeapg(StatusCeapg.ACIMA_DO_LIMITE);
@@ -205,6 +223,9 @@ public class CeapgService {
         saveExtra.setNumeroAta(data.numeroAta());
         saveExtra.setDataAvaliacaoCeapg(LocalDate.now());
         saveExtra.setObservacoesCeapg(data.observacoes());
+        if (saveExtra.getAvaliadorCeapg() == null) {
+            saveExtra.setAvaliadorCeapg(currentUser);
+        }
 
         ExtraRequest newExtra = this.extraRequestRepostirory.save(saveExtra);
 

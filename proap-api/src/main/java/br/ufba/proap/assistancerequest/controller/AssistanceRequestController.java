@@ -140,6 +140,7 @@ public class AssistanceRequestController {
             assistanceRequest.setSituacao(0);
             assistanceRequest.setUser(currentUser);
 
+            service.validateDailyRate(assistanceRequest);
             AssistanceRequest saved = service.save(assistanceRequest);
 
             return ResponseEntity.ok().body(ResponseAssistanceRequestDTO.fromEntity(saved));
@@ -168,6 +169,7 @@ public class AssistanceRequestController {
             assistanceRequest.setUser(currentUser);
             assistanceRequest.setSituacao(0);
 
+            service.validateDailyRate(assistanceRequest);
             AssistanceRequest saved = service.save(assistanceRequest);
 
             return ResponseEntity.ok().body(ResponseAssistanceRequestDTO.fromEntity(saved));
@@ -210,6 +212,10 @@ public class AssistanceRequestController {
             updatedAssistanceRequest.setId(existingInstance.id());
             updatedAssistanceRequest.setUser(serviceUser.findByEmail(existingInstance.user().email()).orElse(null));
             updatedAssistanceRequest.setCreatedAt(existingInstance.createdAt());
+            if (existingInstance.situacao() == 0) {
+                // Só solicitações pendentes são revalidadas; as já avaliadas mantêm o valor histórico
+                service.validateDailyRate(updatedAssistanceRequest);
+            }
             if (file != null) {
                 String savedFileName = fileUploadService.uploadPdf(file);
                 updatedAssistanceRequest.setCartaAceite(savedFileName);

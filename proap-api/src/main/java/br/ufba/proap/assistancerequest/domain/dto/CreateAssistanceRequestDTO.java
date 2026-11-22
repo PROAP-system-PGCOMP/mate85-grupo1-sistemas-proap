@@ -38,7 +38,25 @@ public record CreateAssistanceRequestDTO(
         BigDecimal valorPassagem,
         BigDecimal valorTotal,
         @NotBlank String justificativa,
-        String cartaAceite) {
+        String cartaAceite,
+        String countryGroup) {
+
+    /** Construtor sem o grupo de país (mantém compatibilidade com chamadas antigas). */
+    public CreateAssistanceRequestDTO(
+            String tituloPublicacao, List<String> coautores, Boolean algumCoautorPGCOMP,
+            Boolean solicitanteDocente, String nomeDocente, String nomeDiscente, String nomeEvento,
+            Boolean eventoInternacional, LocalDate dataInicio, LocalDate dataFim, Integer qtdDiasEvento,
+            String linkHomePageEvento, String cidade, String pais, String qualis,
+            String modalidadeParticipacao, BigDecimal valorInscricao, String linkPaginaInscricao,
+            Integer quantidadeDiariasSolicitadas, BigDecimal valorDiaria, Boolean ultimaDiariaIntegral,
+            Boolean isDolar, BigDecimal cotacaoMoeda, BigDecimal valorPassagem, BigDecimal valorTotal,
+            String justificativa, String cartaAceite) {
+        this(tituloPublicacao, coautores, algumCoautorPGCOMP, solicitanteDocente, nomeDocente, nomeDiscente,
+                nomeEvento, eventoInternacional, dataInicio, dataFim, qtdDiasEvento, linkHomePageEvento, cidade,
+                pais, qualis, modalidadeParticipacao, valorInscricao, linkPaginaInscricao,
+                quantidadeDiariasSolicitadas, valorDiaria, ultimaDiariaIntegral, isDolar, cotacaoMoeda,
+                valorPassagem, valorTotal, justificativa, cartaAceite, null);
+    }
 
     public static CreateAssistanceRequestDTO fromEntity(AssistanceRequest entity) {
         return new CreateAssistanceRequestDTO(
@@ -68,7 +86,8 @@ public record CreateAssistanceRequestDTO(
                 entity.getValorPassagem(),
                 entity.getValorTotal(),
                 entity.getJustificativa(),
-                entity.getCartaAceite());
+                entity.getCartaAceite(),
+                entity.getCountryGroup());
     }
 
     public AssistanceRequest toEntity() {
@@ -99,6 +118,7 @@ public record CreateAssistanceRequestDTO(
         entity.setValorPassagem(this.valorPassagem());
         entity.setValorTotal(this.valorTotal());
         entity.setJustificativa(this.justificativa());
+        entity.setCountryGroup(this.countryGroup());
         if (this.cartaAceite() != null) {
             entity.setCartaAceite(this.cartaAceite());
         }

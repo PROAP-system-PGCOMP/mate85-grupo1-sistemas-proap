@@ -25,6 +25,9 @@ public class SystemConfigurationDTO {
     private String resolucaoProapURL;
     private Integer numMaxDiarias;
     private BigDecimal valorDiariaBRL;
+    private BigDecimal valorDiariaAlunoBRL;
+    private BigDecimal valorDiariaDocenteBRL;
+    private BigDecimal valorDiariaDocenteSpRjBRL;
     private String textoAvisoQualis;
     private String textoAvisoValorInscricao;
     private String textoInformacaoQtdDiarias;
@@ -70,6 +73,9 @@ public class SystemConfigurationDTO {
                 config.getResolucaoProapURL(),
                 config.getNumMaxDiarias(),
                 config.getValorDiariaBRL(),
+                config.getValorDiariaAlunoBRL(),
+                config.getValorDiariaDocenteBRL(),
+                config.getValorDiariaDocenteSpRjBRL(),
                 config.getTextoAvisoQualis(),
                 config.getTextoAvisoValorInscricao(),
                 config.getTextoInformacaoQtdDiarias(),
@@ -92,6 +98,9 @@ public class SystemConfigurationDTO {
         config.setResolucaoProapURL(this.resolucaoProapURL);
         config.setNumMaxDiarias(this.numMaxDiarias);
         config.setValorDiariaBRL(this.valorDiariaBRL);
+        config.setValorDiariaAlunoBRL(this.valorDiariaAlunoBRL);
+        config.setValorDiariaDocenteBRL(this.valorDiariaDocenteBRL);
+        config.setValorDiariaDocenteSpRjBRL(this.valorDiariaDocenteSpRjBRL);
         config.setTextoAvisoQualis(this.textoAvisoQualis);
         config.setTextoAvisoValorInscricao(this.textoAvisoValorInscricao);
         config.setTextoInformacaoQtdDiarias(this.textoInformacaoQtdDiarias);

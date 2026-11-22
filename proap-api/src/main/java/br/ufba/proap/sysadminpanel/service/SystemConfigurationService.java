@@ -2,7 +2,14 @@ package br.ufba.proap.sysadminpanel.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +22,7 @@ import br.ufba.proap.sysadminpanel.domain.dto.CountryGroupDTO;
 import br.ufba.proap.sysadminpanel.domain.dto.SystemConfigurationDTO;
 import br.ufba.proap.sysadminpanel.domain.dto.UrlMapperDTO;
 import br.ufba.proap.sysadminpanel.repository.SystemConfigurationRepository;
+import br.ufba.proap.util.TextNormalizer;
 
 @Service
 public class SystemConfigurationService {
@@ -81,6 +89,18 @@ public class SystemConfigurationService {
             config.setValorDiariaBRL(dto.getValorDiariaBRL());
         }
 
+        if (dto.getValorDiariaAlunoBRL() != null) {
+            config.setValorDiariaAlunoBRL(dto.getValorDiariaAlunoBRL());
+        }
+
+        if (dto.getValorDiariaDocenteBRL() != null) {
+            config.setValorDiariaDocenteBRL(dto.getValorDiariaDocenteBRL());
+        }
+
+        if (dto.getValorDiariaDocenteSpRjBRL() != null) {
+            config.setValorDiariaDocenteSpRjBRL(dto.getValorDiariaDocenteSpRjBRL());
+        }
+
         if (dto.getTextoAvisoQualis() != null) {
             config.setTextoAvisoQualis(dto.getTextoAvisoQualis());
         }
@@ -127,6 +147,7 @@ public class SystemConfigurationService {
         }
 
         if (dto.getCountryGroups() != null) {
+            validateNoDuplicateCountries(dto.getCountryGroups());
             config.getCountryGroups().clear();
 
             for (CountryGroupDTO groupDTO : dto.getCountryGroups()) {
@@ -166,6 +187,49 @@ public class SystemConfigurationService {
     }
 
     /**
+     * Garante que nenhum país apareça em mais de um grupo. A comparação ignora
+     * caixa, acentos e espaços nas pontas.
+     *
+     * @throws IllegalArgumentException listando os países em conflito
+     */
+    static void validateNoDuplicateCountries(List<CountryGroupDTO> groups) {
+        Map<String, String> firstGroupByCountry = new HashMap<>();
+        Map<String, String> firstNameByCountry = new HashMap<>();
+        Map<String, Set<String>> conflicts = new LinkedHashMap<>();
+
+        for (CountryGroupDTO group : groups) {
+            if (group.getCountries() == null) {
+                continue;
+            }
+            Set<String> seenInThisGroup = new HashSet<>();
+            for (String country : group.getCountries()) {
+                if (country == null || country.isBlank()) {
+                    continue;
+                }
+                String key = TextNormalizer.normalize(country);
+                if (!seenInThisGroup.add(key)) {
+                    continue; // repetido dentro do mesmo grupo é inofensivo
+                }
+                firstNameByCountry.putIfAbsent(key, country.trim());
+                String previousGroup = firstGroupByCountry.putIfAbsent(key, group.getGroupName());
+                if (previousGroup != null) {
+                    conflicts.computeIfAbsent(firstNameByCountry.get(key),
+                            c -> new LinkedHashSet<>(List.of(previousGroup)))
+                            .add(group.getGroupName());
+                }
+            }
+        }
+
+        if (!conflicts.isEmpty()) {
+            String detail = conflicts.entrySet().stream()
+                    .map(e -> e.getKey() + " (grupos " + String.join(", ", e.getValue()) + ")")
+                    .collect(Collectors.joining("; "));
+            throw new IllegalArgumentException(
+                    "Cada país deve pertencer a um único grupo. Países em mais de um grupo: " + detail);
+        }
+    }
+
+    /**
      * Cria uma configuração padrão
      */
     private SystemConfiguration createDefaultConfiguration() {
@@ -174,6 +238,9 @@ public class SystemConfigurationService {
         config.setQualisList(List.of("A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4"));
         config.setNumMaxDiarias(5);
         config.setValorDiariaBRL(BigDecimal.valueOf(320.0));
+        config.setValorDiariaAlunoBRL(BigDecimal.valueOf(320.0));
+        config.setValorDiariaDocenteBRL(BigDecimal.valueOf(380.0));
+        config.setValorDiariaDocenteSpRjBRL(BigDecimal.valueOf(425.0));
         config.setTextoAvisoQualis(
                 "Nos casos de artigos aceitos em conferências, o Qualis deve ser atribubído quando o artigo é aceito no evento principal, e não em eventos satélites como workshops, minicursos ou CTDs.");
         config.setTextoAvisoValorInscricao(
@@ -184,7 +251,7 @@ public class SystemConfigurationService {
         config.setTextoInformacaoCalcularQualis(
                 "Para calcular o Qualis do seu evento, siga as instruções disponíveis no site da PGCOMP.");
         config.setTextoInformacaoValorDiaria(
-                "O valor atual da diária no Brasil é R$320. No exterior, indique o valor em USD, conforme a tabela de auxílio diário no exterior mais recente.");
+                "No Brasil, a diária é de R$320 para discentes e R$380 para docentes (R$425 para docentes nas capitais de São Paulo e Rio de Janeiro). No exterior, o valor em USD segue o grupo do país, conforme a tabela de auxílio diário no exterior mais recente.");
         config.setTextoInformacaoValorPassagem(
                 "As passagens serão adquiridas pelo SCDP.");
         config.setResourceLinks(new ArrayList<>());
@@ -199,8 +266,8 @@ public class SystemConfigurationService {
                 "El Salvador", "Equador", "Eslovênia", "Filipinas", "Gâmbia", "Guiana", "Guiné Bissau", "Guiné",
                 "Honduras", "Indonésia", "Irã", "Iraque", "Laos", "Líbano", "Malásia", "Maldivas", "Marrocos",
                 "Mongólia", "Myanmar", "Namíbia", "Nauru", "Nepal", "Nicarágua", "Panamá", "Paraguai",
-                "Rep. Centro Africana", "República Togolesa", "Romênia", "Samoa", "Serra Leoa", "Síria", "Somália",
-                "Sri Lanka", "Suriname", "Tadjiquistão", "Tailândia", "Timor-Leste", "Turcomenistão", "Uzbequistão",
+                "Rep. Centro Africana", "República Togolesa", "Samoa", "Serra Leoa", "Síria", "Somália",
+                "Sri Lanka", "Suriname", "Tadjiquistão", "Tailândia", "Timor-Leste", "Uzbequistão",
                 "Vietnã", "Zimbábue"));
         groupA.setSystemConfiguration(config);
 
@@ -210,18 +277,18 @@ public class SystemConfigurationService {
         groupB.setCountriesList(List.of("África do Sul", "Albânia", "Andorra", "Argélia", "Argentina", "Austrália",
                 "Belize", "Bósnia-Herzegovina", "Burundi", "Cabo Verde", "Camarões", "Camboja", "Catar", "Chade",
                 "China", "Chipre", "Colômbia", "Dominica", "Egito", "Eritréia", "Estônia", "Etiópia", "Gana", "Geórgia",
-                "Guatemala", "Haiti", "Hong Kong", "Kiribati", "Letônia", "Líbia", "Macedônia", "Madagascar", "Malauí",
+                "Haiti", "Kiribati", "Líbia", "Macedônia", "Madagascar", "Malauí",
                 "Micronésia", "Moçambique", "Moldávia", "Níger", "Nigéria", "Nova Zelândia", "Palau",
                 "Papua Nova Guiné", "Paquistão", "Peru", "Polônia", "Quênia", "República Dominicana",
                 "República Eslovaca", "Romênia", "Ruanda", "São Tomé e Príncipe", "Senegal", "Sudão", "Tanzânia",
-                "Turcomenistão", "Turquia", "Ucrânia"));
+                "Turcomenistão", "Turquia"));
         groupB.setSystemConfiguration(config);
 
         CountryGroup groupC = new CountryGroup();
         groupC.setGroupName("C");
         groupC.setValueUSD(BigDecimal.valueOf(310.0));
         groupC.setCountriesList(List.of("Antígua e Barbuda", "Arábia Saudita", "Azerbaijão", "Bahamas", "Bahrein",
-                "Barbados", "Brunei Darussalam", "Bulgária", "Canadá", "Cingapura", "Congo", "Costa do Marfim", "Cuba",
+                "Brunei Darussalam", "Bulgária", "Cingapura", "Congo", "Costa do Marfim", "Cuba",
                 "Djibuti", "Emirados Árabes", "Fiji", "Gabão", "Guatemala", "Jamaica", "Jordânia", "Letônia", "Libéria",
                 "Lituânia", "Mali", "Malta", "Maurício", "Mauritânia", "México", "República Democrática do Congo",
                 "República Tcheca", "Rússia", "San Marino", "Santa Lúcia", "São Cristóvão e Nêvis",

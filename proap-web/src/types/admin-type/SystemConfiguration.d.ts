@@ -18,7 +18,11 @@ export interface SystemConfiguration {
   sitePgcompURL: string | null;
   resolucaoProapURL: string | null;
   numMaxDiarias: number;
+  /** @deprecated substituído pelos valores por perfil/localidade abaixo */
   valorDiariaBRL: number;
+  valorDiariaAlunoBRL: number;
+  valorDiariaDocenteBRL: number;
+  valorDiariaDocenteSpRjBRL: number;
   textoAvisoQualis: string;
   textoAvisoValorInscricao: string;
   textoInformacaoQtdDiarias: string;

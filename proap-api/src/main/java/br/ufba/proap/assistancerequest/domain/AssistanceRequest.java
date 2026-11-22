@@ -108,6 +108,10 @@ public class AssistanceRequest {
 
 	private Boolean isDolar;
 
+	// Grupo CNPq do país de destino (A, B, C, D); preenchido em diárias em USD
+	@Column(name = "country_group", nullable = true, length = 50)
+	private String countryGroup;
+
 	@Column(nullable = true, precision = 19, scale = 4)
 	private BigDecimal cotacaoMoeda;
 

@@ -53,6 +53,15 @@ public class SystemConfiguration {
     @Column(nullable = true, precision = 19, scale = 4)
     private BigDecimal valorDiariaBRL;
 
+    @Column(name = "valor_diaria_aluno_brl", nullable = true, precision = 19, scale = 4)
+    private BigDecimal valorDiariaAlunoBRL;
+
+    @Column(name = "valor_diaria_docente_brl", nullable = true, precision = 19, scale = 4)
+    private BigDecimal valorDiariaDocenteBRL;
+
+    @Column(name = "valor_diaria_docente_sp_rj_brl", nullable = true, precision = 19, scale = 4)
+    private BigDecimal valorDiariaDocenteSpRjBRL;
+
     @Column(columnDefinition = "text", nullable = true)
     private String textoAvisoEnvioArquivoCarta;
 

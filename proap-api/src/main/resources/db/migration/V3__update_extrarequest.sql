@@ -12,4 +12,4 @@ ADD COLUMN data_avaliacao_ceapg DATE;
 
 ALTER TABLE proap.proap_extra_request
 ADD CONSTRAINT fk_extra_request_avaliador_ceapg
-FOREIGN KEY (avaliador_ceapg_id) REFERENCES proap.user(id);
+FOREIGN KEY (avaliador_ceapg_id) REFERENCES proap.aut_user(id);

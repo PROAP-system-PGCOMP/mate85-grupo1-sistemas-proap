@@ -297,9 +297,9 @@ export default function SystemConfigFormContainer({
                 />
                 <Tab
                   label="Limites e Valores"
-                  icon={checkTabHasError(['numMaxDiarias', 'valorDiariaBRL']) ? <ErrorOutline color="error" /> : undefined}
+                  icon={checkTabHasError(['numMaxDiarias', 'valorDiariaAlunoBRL', 'valorDiariaDocenteBRL', 'valorDiariaDocenteSpRjBRL']) ? <ErrorOutline color="error" /> : undefined}
                   iconPosition="end"
-                  sx={{ color: checkTabHasError(['numMaxDiarias', 'valorDiariaBRL']) ? 'error.main' : 'inherit' }}
+                  sx={{ color: checkTabHasError(['numMaxDiarias', 'valorDiariaAlunoBRL', 'valorDiariaDocenteBRL', 'valorDiariaDocenteSpRjBRL']) ? 'error.main' : 'inherit' }}
                 />
                 <Tab
                   label="Textos Informativos"
@@ -563,16 +563,52 @@ export default function SystemConfigFormContainer({
                     error={touched.numMaxDiarias && !!errors.numMaxDiarias}
                     helperText={touched.numMaxDiarias && errors.numMaxDiarias}
                   />
+                </Stack>
+                <Stack
+                  direction={{ xs: 'column', sm: 'row' }}
+                  spacing={2}
+                  sx={{ mt: 2 }}
+                >
                   <Field
                     as={TextField}
                     fullWidth
                     size="small"
-                    name="valorDiariaBRL"
-                    label="Valor da Diária (R$)"
+                    name="valorDiariaAlunoBRL"
+                    label="Diária nacional · Discente (R$)"
                     type="number"
-                    inputProps={{ step: '0.01', min: 1 }}
-                    error={touched.valorDiariaBRL && !!errors.valorDiariaBRL}
-                    helperText={touched.valorDiariaBRL && errors.valorDiariaBRL}
+                    inputProps={{ step: '0.01', min: 0.01 }}
+                    error={touched.valorDiariaAlunoBRL && !!errors.valorDiariaAlunoBRL}
+                    helperText={touched.valorDiariaAlunoBRL && errors.valorDiariaAlunoBRL}
+                  />
+                  <Field
+                    as={TextField}
+                    fullWidth
+                    size="small"
+                    name="valorDiariaDocenteBRL"
+                    label="Diária nacional · Docente (R$)"
+                    type="number"
+                    inputProps={{ step: '0.01', min: 0.01 }}
+                    error={touched.valorDiariaDocenteBRL && !!errors.valorDiariaDocenteBRL}
+                    helperText={
+                      (touched.valorDiariaDocenteBRL && errors.valorDiariaDocenteBRL) ||
+                      'Outras capitais e interior'
+                    }
+                  />
+                  <Field
+                    as={TextField}
+                    fullWidth
+                    size="small"
+                    name="valorDiariaDocenteSpRjBRL"
+                    label="Diária nacional · Docente em SP/RJ (R$)"
+                    type="number"
+                    inputProps={{ step: '0.01', min: 0.01 }}
+                    error={
+                      touched.valorDiariaDocenteSpRjBRL && !!errors.valorDiariaDocenteSpRjBRL
+                    }
+                    helperText={
+                      (touched.valorDiariaDocenteSpRjBRL && errors.valorDiariaDocenteSpRjBRL) ||
+                      'Somente as capitais São Paulo e Rio de Janeiro'
+                    }
                   />
                 </Stack>
               </SectionCard>

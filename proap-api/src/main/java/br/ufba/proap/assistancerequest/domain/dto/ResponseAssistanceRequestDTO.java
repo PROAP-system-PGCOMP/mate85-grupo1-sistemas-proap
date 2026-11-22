@@ -58,7 +58,60 @@ public record ResponseAssistanceRequestDTO(
         BigDecimal diferencaCeapg,
         StatusCeapg statusCeapg,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm") LocalDateTime createdAt,
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm") LocalDateTime updatedAt) {
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm") LocalDateTime updatedAt,
+        String countryGroup) {
+
+    /** Construtor sem o grupo de país (mantém compatibilidade com chamadas antigas). */
+    public ResponseAssistanceRequestDTO(
+            Long id,
+            UserResponseDTO user,
+            UserResponseDTO avaliadorProap,
+            UserResponseDTO avaliadorCeapg,
+            String tituloPublicacao,
+            List<String> coautores,
+            Boolean algumCoautorPGCOMP,
+            Boolean solicitanteDocente,
+            String nomeDocente,
+            String nomeDiscente,
+            String nomeEvento,
+            Boolean eventoInternacional,
+            LocalDate dataInicio,
+            LocalDate dataFim,
+            Integer qtdDiasEvento,
+            String linkHomePageEvento,
+            String cidade,
+            String pais,
+            String qualis,
+            String modalidadeParticipacao,
+            BigDecimal valorInscricao,
+            String linkPaginaInscricao,
+            Integer quantidadeDiariasSolicitadas,
+            BigDecimal valorDiaria,
+            Boolean ultimaDiariaIntegral,
+            Boolean isDolar,
+            BigDecimal cotacaoMoeda,
+            BigDecimal valorPassagem,
+            BigDecimal valorTotal,
+            String cartaAceite,
+            String justificativa,
+            Boolean aceiteFinal,
+            Integer situacao,
+            String comprovantePagamento,
+            String numeroAta,
+            LocalDate dataAvaliacaoProap,
+            Integer numeroDiariasAprovadas,
+            BigDecimal valorAprovado,
+            String observacao,
+            String automaticDecText,
+            BigDecimal custoFinalCeapg,
+            String observacoesCeapg,
+            BigDecimal percentualOrcamentoAnual,
+            BigDecimal diferencaCeapg,
+            StatusCeapg statusCeapg,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt) {
+        this(id, user, avaliadorProap, avaliadorCeapg, tituloPublicacao, coautores, algumCoautorPGCOMP, solicitanteDocente, nomeDocente, nomeDiscente, nomeEvento, eventoInternacional, dataInicio, dataFim, qtdDiasEvento, linkHomePageEvento, cidade, pais, qualis, modalidadeParticipacao, valorInscricao, linkPaginaInscricao, quantidadeDiariasSolicitadas, valorDiaria, ultimaDiariaIntegral, isDolar, cotacaoMoeda, valorPassagem, valorTotal, cartaAceite, justificativa, aceiteFinal, situacao, comprovantePagamento, numeroAta, dataAvaliacaoProap, numeroDiariasAprovadas, valorAprovado, observacao, automaticDecText, custoFinalCeapg, observacoesCeapg, percentualOrcamentoAnual, diferencaCeapg, statusCeapg, createdAt, updatedAt, null);
+    }
 
     public AssistanceRequest toEntity() {
         AssistanceRequest entity = new AssistanceRequest();
@@ -102,6 +155,7 @@ public record ResponseAssistanceRequestDTO(
         entity.setPercentualOrcamentoAnual(this.percentualOrcamentoAnual());
         entity.setDiferencaCeapg(this.diferencaCeapg());
         entity.setStatusCeapg(this.statusCeapg());
+        entity.setCountryGroup(this.countryGroup());
         return entity;
     }
 
@@ -153,6 +207,7 @@ public record ResponseAssistanceRequestDTO(
                 entity.getDiferencaCeapg(),
                 entity.getStatusCeapg(),
                 entity.getCreatedAt(),
-                entity.getUpdatedAt());
+                entity.getUpdatedAt(),
+                entity.getCountryGroup());
     }
 }

@@ -10,6 +10,4 @@ ADD COLUMN observacoes_ceapg TEXT;
 ALTER TABLE proap.proap_extra_request
 ADD COLUMN data_avaliacao_ceapg DATE;
 
-ALTER TABLE proap.proap_extra_request
-ADD CONSTRAINT fk_extra_request_avaliador_ceapg
-FOREIGN KEY (avaliador_ceapg_id) REFERENCES proap.aut_user(id);
+-- A FK de avaliador_ceapg_id para proap.aut_user é criada na V4.

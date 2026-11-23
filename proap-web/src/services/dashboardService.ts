@@ -1,14 +1,14 @@
 import api from '.';
 
 export interface DashboardResponseDTO {
-  perfil: {
-    id: number;
-    name: string;
-  };
+  solicitanteDocente: boolean;
   eventoInternacional: boolean;
   totalSolicitado: number;
   totalAprovado: number;
-  count: number; 
+  count: number;
+  qtdInscricoes: number;
+  qtdPassagensAprovadas: number;
+  totalDiariasAprovadas: number;
 }
 
 export interface TotalElementosResponseDTO {

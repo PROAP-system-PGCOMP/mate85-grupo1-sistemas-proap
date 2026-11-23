@@ -40,24 +40,49 @@ public interface AssistanceRequestRepository extends JpaRepository<AssistanceReq
 	@Query(value = "SELECT COUNT(s) > 0 FROM proap_assistancerequest s WHERE s.user_id = :userId", nativeQuery = true)
 	Boolean userHasAnySolicitationRequests(Long userId);
 
-        @Query(
-                """
-                    SELECT new br.ufba.proap.assistancerequest.domain.dto.DashboardResponseDTO(
-                        t.user.perfil.name,
-                        t.eventoInternacional,
-                        CAST(SUM(t.valorTotal) as bigdecimal),
-                        CAST(SUM(CASE
-                            WHEN t.situacao = 1 THEN t.valorTotal ELSE 0.0 END)
-                         as bigdecimal),
-                         COUNT(t)
-                    )
-                    FROM AssistanceRequest t
-                    WHERE (:perfil IS NULL OR t.user.perfil.id IN :perfil)
-                    AND (:eventoInternacional IS NULL OR t.eventoInternacional = :eventoInternacional)
-                    AND (CAST(:startDate AS localdatetime) IS NULL OR t.createdAt >= :startDate)
-                    AND (CAST(:endDate AS localdatetime) IS NULL OR t.createdAt <= :endDate)
-                    GROUP BY t.user.perfil.name, t.eventoInternacional
-                """
+    /**
+     * Agregação do dashboard de Gestão, agrupada por tipo de solicitante e origem do evento.
+     * <ul>
+     * <li>Docente/Discente vem de {@code solicitanteDocente} (campo do formulário), e não do perfil
+     * do usuário: o perfil pode ser "Docente e Admin", "Admin" etc., e um docente pode solicitar
+     * em nome de um discente.</li>
+     * <li>{@code totalDiariasAprovadas} soma apenas o valor das diárias (BRL) das solicitações
+     * aprovadas, com a mesma fórmula do formulário: valorDiaria × cotação (se USD) × quantidade,
+     * descontando meia diária quando a última não é integral.</li>
+     * <li>{@code totalAprovado} soma {@code valorAprovado} (valor definido pelo PROAP) das aprovadas.</li>
+     * <li>{@code qtdInscricoes} conta solicitações com valorInscricao &gt; 0;
+     * {@code qtdPassagensAprovadas} conta solicitações aprovadas com valorPassagem &gt; 0.</li>
+     * </ul>
+     */
+    @Query(
+            """
+                SELECT new br.ufba.proap.assistancerequest.domain.dto.DashboardResponseDTO(
+                    t.solicitanteDocente,
+                    t.eventoInternacional,
+                    CAST(COALESCE(SUM(t.valorTotal), 0) as bigdecimal),
+                    CAST(COALESCE(SUM(CASE WHEN t.situacao = 1 THEN t.valorAprovado ELSE 0.0 END), 0) as bigdecimal),
+                    COUNT(t),
+                    SUM(CASE WHEN t.valorInscricao > 0 THEN 1 ELSE 0 END),
+                    SUM(CASE WHEN t.situacao = 1 AND t.valorPassagem > 0 THEN 1 ELSE 0 END),
+                    CAST(COALESCE(SUM(CASE WHEN t.situacao = 1 THEN
+                        COALESCE(t.valorDiaria, 0)
+                        * (CASE WHEN t.isDolar = true THEN COALESCE(t.cotacaoMoeda, 1) ELSE 1 END)
+                        * (CASE
+                              WHEN COALESCE(t.quantidadeDiariasSolicitadas, 0) > 1 AND t.ultimaDiariaIntegral = false
+                                  THEN t.quantidadeDiariasSolicitadas - 0.5
+                              ELSE COALESCE(t.quantidadeDiariasSolicitadas, 0)
+                           END)
+                        ELSE 0.0 END), 0) as bigdecimal)
+                )
+                FROM AssistanceRequest t
+                LEFT JOIN t.user u
+                LEFT JOIN u.perfil p
+                WHERE (:perfil IS NULL OR p.id IN :perfil)
+                AND (:eventoInternacional IS NULL OR t.eventoInternacional = :eventoInternacional)
+                AND (CAST(:startDate AS localdatetime) IS NULL OR t.createdAt >= :startDate)
+                AND (CAST(:endDate AS localdatetime) IS NULL OR t.createdAt <= :endDate)
+                GROUP BY t.solicitanteDocente, t.eventoInternacional
+            """
     )
     List<DashboardResponseDTO> mountDashboard(@Param("perfil")List<Long>perfilId,
                                                    @Param("eventoInternacional") Boolean eventoInternacional,

@@ -13,8 +13,15 @@ public record AssistanceIdValueDTO(
         LocalDate dataAvaliacaoProap,
         String avaliadorProap,
         String docente,
-        String perfil
+        String perfil,
+        BigDecimal custoFinalCeapg,
+        String avaliadorCeapg
 ) {
+
+    public AssistanceIdValueDTO(Long id, BigDecimal value, LocalDate createdAt, LocalDate dataAvaliacaoProap,
+            String avaliadorProap, String docente, String perfil) {
+        this(id, value, createdAt, dataAvaliacaoProap, avaliadorProap, docente, perfil, null, null);
+    }
 
     public static List<AssistanceIdValueDTO> convertPairsToDTOs(List<Object[]> data) {
         if (data == null) return List.of();
@@ -35,8 +42,11 @@ public record AssistanceIdValueDTO(
                     String avaliadorProap = (String) objArray[4];
                     String docente = (objArray.length > 5) ? (String) objArray[5] : null;
                     String perfil = (objArray.length > 6) ? (String) objArray[6] : null;
+                    BigDecimal custoFinalCeapg = (objArray.length > 7) ? (BigDecimal) objArray[7] : null;
+                    String avaliadorCeapg = (objArray.length > 8) ? (String) objArray[8] : null;
 
-                    return new AssistanceIdValueDTO(id, value, createdAt, dataAvaliacaoProap, avaliadorProap, docente, perfil);
+                    return new AssistanceIdValueDTO(id, value, createdAt, dataAvaliacaoProap, avaliadorProap,
+                            docente, perfil, custoFinalCeapg, avaliadorCeapg);
                 })
                 .collect(Collectors.toList());
     }

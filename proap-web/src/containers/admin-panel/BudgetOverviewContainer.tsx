@@ -214,7 +214,7 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
       const nome = sol.nomeDocente;
       const valor = !!sol.avaliadorCeapg 
         ? Number(sol.custoFinalCeapg ?? sol.valorAprovado ?? 0)
-        : Number(sol.valorAprovado || 0);
+        : Number(sol.valorAprovado ?? 0);
 
       if (!nome) return acumulador;
       if (!acumulador[nome]) acumulador[nome] = 0;

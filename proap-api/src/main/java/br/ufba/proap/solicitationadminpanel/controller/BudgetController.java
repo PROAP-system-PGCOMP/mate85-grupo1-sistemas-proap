@@ -22,6 +22,7 @@ import jakarta.ws.rs.NotFoundException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @RestController
@@ -133,12 +134,37 @@ public class BudgetController {
 
     @GetMapping("/total-approved-extra-requests")
     public ResponseEntity<List<ExtraRequestResponseDTO>> getExtraRequestAprovedByDateRange(
-            FindAprovedExtraRequestDTO data) {
+            @RequestParam(required = false) String start,
+            @RequestParam(required = false) String end) {
         User currentUser = userService.getLoggedUser();
         if (currentUser.getPerfil() == null || !currentUser.getPerfil().hasPermission("ADMIN_ROLE") && !currentUser.getPerfil().hasPermission("CEAPG_ROLE")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+
+        FindAprovedExtraRequestDTO data;
+        try {
+            data = new FindAprovedExtraRequestDTO(parseFilterDate(start), parseFilterDate(end));
+        } catch (DateTimeParseException e) {
+            return ResponseEntity.badRequest().build();
+        }
+
         List<ExtraRequestResponseDTO> totalValue = budgetService.getTotalApprovedExtraRequestsValue(data);
         return ResponseEntity.ok().body(totalValue);
+    }
+
+    /**
+     * Aceita o formato dd-MM-yyyy (o mesmo de /total-assistance-requests, enviado pelo frontend)
+     * e também o ISO yyyy-MM-dd.
+     */
+    private static LocalDate parseFilterDate(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        String trimmed = value.trim();
+        try {
+            return LocalDate.parse(trimmed, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        } catch (DateTimeParseException e) {
+            return LocalDate.parse(trimmed);
+        }
     }
 }

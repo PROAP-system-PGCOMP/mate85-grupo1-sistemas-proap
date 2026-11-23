@@ -287,7 +287,7 @@ const CeapgReviewRequests: React.FC<CeapgReviewRequestsProps> = ({
                       </TableCell>
                       <TableCell align="center" sx={{ fontWeight: 'normal' }}>
                         {isCompleted
-                          ? (sit === 2 || sit === 4) ? formatNumberToBRL(0) : formatNumberToBRL(request.custoFinalCeapg || request.valorAprovado)
+                          ? (sit === 2 || sit === 4) ? formatNumberToBRL(0) : formatNumberToBRL(request.custoFinalCeapg ?? request.valorAprovado)
                           : '-'}
                       </TableCell>
                       <TableCell align="center">

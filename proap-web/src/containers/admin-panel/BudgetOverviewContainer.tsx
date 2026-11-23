@@ -213,7 +213,7 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
     const agrupamento = solicitacoes.reduce((acumulador: Record<string, number>, sol) => {
       const nome = sol.nomeDocente;
       const valor = !!sol.avaliadorCeapg 
-        ? Number(sol.custoFinalCeapg || sol.valorAprovado || 0)
+        ? Number(sol.custoFinalCeapg ?? sol.valorAprovado ?? 0)
         : Number(sol.valorAprovado || 0);
 
       if (!nome) return acumulador;

@@ -204,7 +204,7 @@ const AdminDashboardContainer = () => {
   
   const usedCeapgCalculado = ceapgList
     .filter((req: any) => !!req.avaliadorCeapg)
-    .reduce((acc: number, req: any) => acc + Number(req.custoFinalCeapg || req.valorAprovado || 0), 0);
+    .reduce((acc: number, req: any) => acc + Number(req.custoFinalCeapg ?? req.valorAprovado ?? 0), 0);
 
   const remainingCeapgCalculado = totalCeapgCalculado - usedCeapgCalculado;
   const percentageCeapgCalculado = totalCeapgCalculado > 0 

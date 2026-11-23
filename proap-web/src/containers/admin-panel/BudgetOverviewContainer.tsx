@@ -194,16 +194,10 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
   };
 
   
-  const calculadoSolicitado = solicitacoes
-    .filter((req: SolicitacaoDTO) => req.status !== 'rejeitado' && req.status !== 'reprovado') 
-    .reduce((acc: number, req: SolicitacaoDTO) => acc + Number(req.valorAprovado || req.valorSolicitado || 0), 0);
-  
-  const calculadoGasto = solicitacoes
-    .filter((req: SolicitacaoDTO) => !!req.avaliadorCeapg)
-    .reduce((acc: number, req: SolicitacaoDTO) => acc + Number(req.custoFinalCeapg || req.valorAprovado || 0), 0);
-
-  const consumoPrevisto = calculadoSolicitado > 0 ? calculadoSolicitado : usedBudget;
-  const consumoReal = calculadoGasto > 0 ? calculadoGasto : usedCeapgBudget;
+  // `solicitacoes` contém apenas pedidos de usuários com perfil DOCENTE (alimenta a aba
+  // "Valores Acumulados por Docente") e não deve ser usado para o consumo do orçamento.
+  const consumoPrevisto = Number(usedBudget);
+  const consumoReal = Number(usedCeapgBudget);
 
   const saldoPrevisto = totalBudget - consumoPrevisto;
   const saldoReal = totalBudget - consumoReal;

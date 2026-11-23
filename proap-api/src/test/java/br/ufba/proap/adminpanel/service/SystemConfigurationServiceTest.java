@@ -1,8 +1,13 @@
 package br.ufba.proap.adminpanel.service;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -20,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import br.ufba.proap.sysadminpanel.domain.SystemConfiguration;
 import br.ufba.proap.sysadminpanel.domain.UrlMapper;
+import br.ufba.proap.sysadminpanel.domain.dto.CountryGroupDTO;
 import br.ufba.proap.sysadminpanel.domain.dto.SystemConfigurationDTO;
 import br.ufba.proap.sysadminpanel.domain.dto.UrlMapperDTO;
 import br.ufba.proap.sysadminpanel.repository.SystemConfigurationRepository;
@@ -186,6 +192,68 @@ public class SystemConfigurationServiceTest {
         assertNotNull(result);
         assertNotNull(result.getResourceLinks());
         assertEquals(2, result.getResourceLinks().size());
+    }
+
+    @Test
+    public void testUpdateConfiguration_RejectsCountryInTwoGroups() {
+        // Given
+        when(repository.findAll()).thenReturn(List.of(sampleConfig));
+        sampleConfig.setCountryGroups(new ArrayList<>());
+
+        SystemConfigurationDTO updateDTO = new SystemConfigurationDTO();
+        updateDTO.setCountryGroups(List.of(
+                new CountryGroupDTO(null, "C", BigDecimal.valueOf(310), List.of("Canadá", "México")),
+                new CountryGroupDTO(null, "D", BigDecimal.valueOf(370), List.of("  canada ", "Japão"))));
+
+        // When / Then
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> service.updateConfiguration(updateDTO));
+        assertTrue(ex.getMessage().contains("Canadá"));
+        assertTrue(ex.getMessage().contains("C, D"));
+        verify(repository, never()).save(any(SystemConfiguration.class));
+    }
+
+    @Test
+    public void testUpdateConfiguration_AcceptsDisjointGroupsAndSavesTariffs() {
+        // Given
+        when(repository.findAll()).thenReturn(List.of(sampleConfig));
+        sampleConfig.setCountryGroups(new ArrayList<>());
+        when(repository.save(any(SystemConfiguration.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        SystemConfigurationDTO updateDTO = new SystemConfigurationDTO();
+        updateDTO.setValorDiariaAlunoBRL(BigDecimal.valueOf(320));
+        updateDTO.setValorDiariaDocenteBRL(BigDecimal.valueOf(380));
+        updateDTO.setValorDiariaDocenteSpRjBRL(BigDecimal.valueOf(425));
+        updateDTO.setCountryGroups(List.of(
+                new CountryGroupDTO(null, "C", BigDecimal.valueOf(310), List.of("México")),
+                new CountryGroupDTO(null, "D", BigDecimal.valueOf(370), List.of("Canadá", "Japão"))));
+
+        // When
+        SystemConfigurationDTO result = service.updateConfiguration(updateDTO);
+
+        // Then
+        assertEquals(BigDecimal.valueOf(320), result.getValorDiariaAlunoBRL());
+        assertEquals(BigDecimal.valueOf(380), result.getValorDiariaDocenteBRL());
+        assertEquals(BigDecimal.valueOf(425), result.getValorDiariaDocenteSpRjBRL());
+        assertEquals(2, result.getCountryGroups().size());
+    }
+
+    @Test
+    public void testDefaultConfiguration_HasTariffsAndNoDuplicateCountries() {
+        // Given
+        when(repository.findAll()).thenReturn(Collections.emptyList());
+        when(repository.save(any(SystemConfiguration.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // When
+        SystemConfigurationDTO result = service.getCurrentConfiguration();
+
+        // Then
+        assertEquals(0, BigDecimal.valueOf(320).compareTo(result.getValorDiariaAlunoBRL()));
+        assertEquals(0, BigDecimal.valueOf(380).compareTo(result.getValorDiariaDocenteBRL()));
+        assertEquals(0, BigDecimal.valueOf(425).compareTo(result.getValorDiariaDocenteSpRjBRL()));
+        assertEquals(4, result.getCountryGroups().size());
+        // nenhum país repetido entre grupos
+        assertDoesNotThrow(() -> service.updateConfiguration(result));
     }
 
     @Test

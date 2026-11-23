@@ -56,6 +56,7 @@ import {
   Public,
 } from '@mui/icons-material';
 import useCalculeTotal from '../../../hooks/solicitation/useCalculeTotal';
+import { resolveNationalDailyRate } from '../../../helpers/dailyRate';
 import { useSysConfig } from '../../../hooks/admin/useSysConfig';
 import TextPreviewAlert from '../../../components/FormFields/TextPreviewAlert';
 import useDollarRate from '../../../hooks/useDollarRate';
@@ -100,15 +101,37 @@ export default function FinancialDetailFormContainer() {
 
   useCalculeTotal();
 
+  // Diária nacional conforme perfil (discente/docente) e localidade (capitais SP/RJ)
+  const nationalRate = resolveNationalDailyRate(
+    values.solicitanteDocente,
+    values.cidade,
+    values.pais,
+    config,
+  );
+
+  // Evento internacional sempre usa diária em USD (grupo do país de destino)
+  useEffect(() => {
+    if (values.eventoInternacional && !values.isDolar) {
+      setFieldValue('isDolar', true);
+    }
+  }, [values.eventoInternacional, values.isDolar]);
+
   useEffect(() => {
     if (!values.isDolar) {
-      setFieldValue('valorDiaria', config.valorDiariaBRL);
+      setFieldValue('valorDiaria', nationalRate.valor);
+      if (values.countryGroup) {
+        setFieldValue('countryGroup', '');
+      }
     }
 
     if (values.quantidadeDiariasSolicitadas === 0) {
       setFieldValue('valorDiaria', 0);
     }
-  }, [values.isDolar, values.quantidadeDiariasSolicitadas]);
+  }, [
+    values.isDolar,
+    values.quantidadeDiariasSolicitadas,
+    nationalRate.valor,
+  ]);
 
   useEffect(() => {
     if (loadingDollarRate) return;
@@ -382,6 +405,7 @@ export default function FinancialDetailFormContainer() {
                           <Select
                             {...field}
                             displayEmpty
+                            disabled={Boolean(values.eventoInternacional)}
                             sx={{ width: '80px', bgcolor: 'white' }}
                             size="small"
                             defaultValue={false}
@@ -441,6 +465,18 @@ export default function FinancialDetailFormContainer() {
                     {touched.isDolar && errors.isDolar && (
                       <FormHelperText error>{errors.isDolar}</FormHelperText>
                     )}
+
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ mt: 0.5 }}
+                    >
+                      {values.isDolar
+                        ? values.countryGroup
+                          ? `Enquadramento: Grupo ${values.countryGroup} (tabela CNPq)`
+                          : 'Selecione o grupo do país de destino abaixo'
+                        : `Enquadramento: ${nationalRate.descricao}`}
+                    </Typography>
                   </FormControl>
 
                   {config.textoInformacaoValorDiaria && (

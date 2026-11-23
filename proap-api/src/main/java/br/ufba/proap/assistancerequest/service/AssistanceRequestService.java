@@ -13,6 +13,8 @@ import br.ufba.proap.assistancerequest.domain.enums.StatusCeapg;
 import br.ufba.proap.assistancerequest.repository.ExtraRequestRepostirory;
 import br.ufba.proap.solicitationadminpanel.domain.SolicitationAdmin;
 import br.ufba.proap.solicitationadminpanel.service.BudgetService;
+import br.ufba.proap.sysadminpanel.domain.SystemConfiguration;
+import br.ufba.proap.sysadminpanel.repository.SystemConfigurationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +45,26 @@ public class AssistanceRequestService {
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private SystemConfigurationRepository systemConfigurationRepository;
+
+	@Autowired
+	private DailyRateCalculator dailyRateCalculator;
+
+	/**
+	 * Confere se o valor da diária e o total da solicitação seguem as regras
+	 * vigentes (perfil, localidade e grupo de país). Deve ser chamado na criação e
+	 * na edição de solicitações pendentes, nunca em revisões de solicitações já
+	 * avaliadas.
+	 *
+	 * @throws br.ufba.proap.exception.InvalidDailyRateException se houver divergência
+	 */
+	@Transactional(readOnly = true)
+	public void validateDailyRate(AssistanceRequest request) {
+		SystemConfiguration config = systemConfigurationRepository.findAll().stream().findFirst().orElse(null);
+		dailyRateCalculator.validate(request, config);
+	}
 
 	public List<ResponseAssistanceRequestDTO> findAll() {
 		List<AssistanceRequest> assistanceRequest = assistanteRequestRepository.findAll();

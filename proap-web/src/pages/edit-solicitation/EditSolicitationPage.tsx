@@ -64,6 +64,7 @@ export default function EditSolicitationPage() {
               onSubmit={handleEditSolicitationSubmit}
               initialValues={{
                 ...solicitation,
+                countryGroup: solicitation.countryGroup ?? '',
                 aceiteFinal: false,
                 file: null,
               }}

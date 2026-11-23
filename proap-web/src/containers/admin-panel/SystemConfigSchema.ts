@@ -12,9 +12,17 @@ export const systemConfigSchema = Yup.object().shape({
     .required('Número máximo de diárias é obrigatório')
     .min(0, 'Número máximo de diárias deve ser pelo menos 0')
     .integer('Número máximo de diárias deve ser um número inteiro'),
-  valorDiariaBRL: Yup.number()
-    .required('Valor da diária é obrigatório')
-    .min(0, 'Valor da diária deve ser maior que 0'),
+  // Campo antigo (valor único), mantido só por compatibilidade com o backend
+  valorDiariaBRL: Yup.number().nullable().notRequired(),
+  valorDiariaAlunoBRL: Yup.number()
+    .required('Valor da diária do discente é obrigatório')
+    .moreThan(0, 'Valor da diária deve ser maior que 0'),
+  valorDiariaDocenteBRL: Yup.number()
+    .required('Valor da diária do docente é obrigatório')
+    .moreThan(0, 'Valor da diária deve ser maior que 0'),
+  valorDiariaDocenteSpRjBRL: Yup.number()
+    .required('Valor da diária do docente em SP/RJ é obrigatório')
+    .moreThan(0, 'Valor da diária deve ser maior que 0'),
 
   enableSolicitation: Yup.boolean().notRequired(),
   

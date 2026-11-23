@@ -26,6 +26,8 @@ export interface AssistanceRequest {
   valorDiaria: number;
   ultimaDiariaIntegral: boolean;
   isDolar: boolean;
+  /** Grupo CNPq (A a D) do país de destino, usado nas diárias em USD */
+  countryGroup?: string | null;
   cotacaoMoeda: number;
   valorPassagem: number;
   valorTotal: number;

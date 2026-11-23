@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import { Delete, Edit, Add } from '@mui/icons-material';
 import { CountryGroup } from '../../types';
+import { normalizeText } from '../../helpers/dailyRate';
 
 interface CountryGroupFieldProps {
   groups: CountryGroup[];
@@ -37,6 +38,17 @@ export default function CountryGroupField({
     countries: [],
   });
   const [newCountry, setNewCountry] = useState('');
+  const [countryError, setCountryError] = useState('');
+
+  // Grupo (diferente do que está sendo editado) que já contém o país, se houver
+  const findOtherGroupWithCountry = (country: string): string | undefined => {
+    const key = normalizeText(country);
+    return groups.find(
+      (group, index) =>
+        index !== editIndex &&
+        group.countries.some((c) => normalizeText(c) === key),
+    )?.groupName;
+  };
 
   const handleOpen = (index?: number) => {
     if (index !== undefined) {
@@ -56,6 +68,7 @@ export default function CountryGroupField({
   const handleClose = () => {
     setOpen(false);
     setNewCountry('');
+    setCountryError('');
   };
 
   const handleAddGroup = () => {
@@ -76,9 +89,20 @@ export default function CountryGroupField({
   };
 
   const handleAddCountry = () => {
+    const country = newCountry.trim();
+    const otherGroup = country ? findOtherGroupWithCountry(country) : undefined;
+    if (otherGroup !== undefined) {
+      setCountryError(
+        `"${country}" já pertence ao Grupo ${otherGroup}. Cada país deve estar em um único grupo.`,
+      );
+      return;
+    }
+    setCountryError('');
     if (
       newCountry.trim() !== '' &&
-      !currentGroup.countries.includes(newCountry.trim())
+      !currentGroup.countries.some(
+        (c) => normalizeText(c) === normalizeText(country),
+      )
     ) {
       setCurrentGroup({
         ...currentGroup,
@@ -187,7 +211,12 @@ export default function CountryGroupField({
               <TextField
                 label="Adicionar país"
                 value={newCountry}
-                onChange={(e) => setNewCountry(e.target.value)}
+                onChange={(e) => {
+                  setNewCountry(e.target.value);
+                  if (countryError) setCountryError('');
+                }}
+                error={Boolean(countryError)}
+                helperText={countryError || undefined}
                 fullWidth
               />
               <Button

@@ -80,7 +80,7 @@ const CeapgReviewPageContainer = () => {
   const totalSolicitado = requestsArray.reduce((acc: number, req: CeapgResponse) => acc + Number(req.valorAprovado || 0), 0);
   const totalGasto = requestsArray
     .filter((req: CeapgResponse) => !!req.avaliadorCeapg)
-    .reduce((acc: number, req: CeapgResponse) => acc + Number(req.custoFinalCeapg || req.valorAprovado || 0), 0);
+    .reduce((acc: number, req: CeapgResponse) => acc + Number(req.custoFinalCeapg ?? req.valorAprovado ?? 0), 0);
 
   const saldoPrevisto = totalBudget - totalSolicitado;
   const saldoReal = totalBudget - totalGasto;

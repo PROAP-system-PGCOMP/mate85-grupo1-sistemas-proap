@@ -1,14 +1,15 @@
 package br.ufba.proap.assistancerequest.domain.dto;
 
-import br.ufba.proap.authentication.domain.Perfil;
-
 import java.math.BigDecimal;
 
-public record DashboardResponseDTO (
-        String perfilName,
+public record DashboardResponseDTO(
+        Boolean solicitanteDocente,
         Boolean eventoInternacional,
         BigDecimal totalSolicitado,
         BigDecimal totalAprovado,
-        long count
-){
+        long count,
+        long qtdInscricoes,
+        long qtdPassagensAprovadas,
+        BigDecimal totalDiariasAprovadas
+) {
 }

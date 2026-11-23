@@ -57,38 +57,36 @@ const useDashboardMetrics = () => {
       consolidated.totalGeralSolicitacoes = responseTotal.count;
 
       responseMetrics.forEach((item) => {
-        const isDocente = item.perfil?.name.toUpperCase() === 'DOCENTE';
+        // Docente/Discente vem de solicitanteDocente (campo da solicitação), não do perfil do usuário.
+        const isDocente = item.solicitanteDocente === true;
         const isIntl = item.eventoInternacional === true;
-        
-        const valorAprovado = item.totalAprovado || 0;
-        const valorSolicitado = item.totalSolicitado || 0; 
-        const quantidade = item.count || 0; 
 
-        // Cálculo do Ticket Médio
-        const valorMedio = quantidade > 0 ? valorAprovado / quantidade : 0;
+        const valorAprovado = Number(item.totalAprovado) || 0;
+        const valorSolicitado = Number(item.totalSolicitado) || 0;
+        const quantidade = Number(item.count) || 0;
+        const qtdInscricoes = Number(item.qtdInscricoes) || 0;
+        const qtdPassagens = Number(item.qtdPassagensAprovadas) || 0;
+        const valorDiarias = Number(item.totalDiariasAprovadas) || 0;
 
-        if (isDocente && !isIntl) consolidated.ticketMedio[0].valor += valorMedio;
-        else if (isDocente && isIntl) consolidated.ticketMedio[1].valor += valorMedio;
-        else if (!isDocente && !isIntl) consolidated.ticketMedio[2].valor += valorMedio;
-        else if (!isDocente && isIntl) consolidated.ticketMedio[3].valor += valorMedio;
+        const key = `${isDocente ? 'docente' : 'discente'}${isIntl ? 'Internacional' : 'Nacional'}` as
+          'docenteNacional' | 'docenteInternacional' | 'discenteNacional' | 'discenteInternacional';
+        const ticketIndex = (isDocente ? 0 : 2) + (isIntl ? 1 : 0);
 
-        // Distribuição Financeira (Tabela de Diárias)
-        if (isDocente && !isIntl) consolidated.diarias.docenteNacional += valorAprovado;
-        if (isDocente && isIntl) consolidated.diarias.docenteInternacional += valorAprovado;
-        if (!isDocente && !isIntl) consolidated.diarias.discenteNacional += valorAprovado;
-        if (!isDocente && isIntl) consolidated.diarias.discenteInternacional += valorAprovado;
+        // Ticket médio (valor aprovado / nº de solicitações)
+        consolidated.ticketMedio[ticketIndex].valor += quantidade > 0 ? valorAprovado / quantidade : 0;
 
-        // Distribuição de Inscrições (Pizzas)
-        if (isDocente && !isIntl) consolidated.inscricoes.docenteNacional += quantidade;
-        if (isDocente && isIntl) consolidated.inscricoes.docenteInternacional += quantidade;
-        if (!isDocente && !isIntl) consolidated.inscricoes.discenteNacional += quantidade;
-        if (!isDocente && isIntl) consolidated.inscricoes.discenteInternacional += quantidade;
+        // Tabela "Consolidação de Diárias": somente o valor das diárias aprovadas
+        consolidated.diarias[key] += valorDiarias;
+
+        // Pizzas "Inscrições em Eventos": somente solicitações com valor de inscrição
+        consolidated.inscricoes[key] += qtdInscricoes;
+
+        // Card "Passagens Aéreas": solicitações aprovadas com valor de passagem
+        consolidated.totalPassagensDocentes += qtdPassagens;
 
         consolidated.comparativoFinanceiro[0].solicitado += valorSolicitado;
         consolidated.comparativoFinanceiro[0].aprovado += valorAprovado;
       });
-
-      consolidated.totalPassagensDocentes = consolidated.inscricoes.docenteNacional + consolidated.inscricoes.docenteInternacional;
 
       setData(consolidated);
     } catch (error) {

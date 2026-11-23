@@ -12,6 +12,10 @@ export interface AssistanceIdValueDTO {
   createdAt: string;
   dataAvaliacaoProap: string;
   avaliadorProap: string;
+  docente?: string;
+  perfil?: string;
+  custoFinalCeapg?: number | null;
+  avaliadorCeapg?: string | null;
   isExtra?: boolean;
 }
 

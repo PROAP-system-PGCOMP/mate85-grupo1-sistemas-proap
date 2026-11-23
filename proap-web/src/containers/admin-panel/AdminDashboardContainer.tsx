@@ -94,7 +94,7 @@ const AdminDashboardContainer = () => {
 
   useEffect(() => {
     budgetByYear.getBudget(selectedYear);
-    solicitationRequests.getApprovedRequests(); 
+    solicitationRequests.getApprovedRequests(`01/01/${selectedYear}`, `31/12/${selectedYear}`);
     ceapg.getCeapg();
   }, [selectedYear]);
 
@@ -304,10 +304,13 @@ const AdminDashboardContainer = () => {
               onYearChange={handleYearChange}
               
               solicitacoes={solicitationRequests.approvedRequests
-              .filter((req: any) => req.perfil && req.perfil.toUpperCase() === 'DOCENTE') 
-              .map((req: any) => ({
+              .filter((req) => !req.isExtra && (req.perfil ?? '').toUpperCase().includes('DOCENTE'))
+              .map((req) => ({
+                id: req.id,
                 nomeDocente: req.docente || 'Docente não identificado',
-                valorSolicitado: req.value || 0,
+                valorAprovado: Number(req.value ?? 0),
+                custoFinalCeapg: req.custoFinalCeapg ?? undefined,
+                avaliadorCeapg: req.avaliadorCeapg ?? undefined,
               }))}
             />
           </TabPanel>

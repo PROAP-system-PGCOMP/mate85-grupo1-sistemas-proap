@@ -250,8 +250,10 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
   const chartData = historicalData.map((item) => ({
     year: item.year.toString(),
     'Orçamento Total': item.totalBudget,
-    Utilizado: item.usedBudget,
-    Restante: item.remainingBudget,
+    'Aprovado em reunião': item.usedBudget,
+    // A barra nunca fica abaixo de zero; o valor real (possivelmente negativo) é mantido para o tooltip
+    Restante: Math.max(0, Number(item.remainingBudget)),
+    restanteReal: Number(item.remainingBudget),
   }));
 
   // 1. Gráfico PROAP Original
@@ -319,7 +321,7 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
                 </Typography>
                 <Stack spacing={2}>
                   <StatCard title="Orçamento Total" value={formatNumberToBRL(Number(totalBudget))} icon={<Square />} color="primary.main" />
-                  <StatCard title="Utilizado" value={formatNumberToBRL(Number(consumoPrevisto))} secondaryText={`${percentualPrevisto}% do orçamento total`} icon={<Square />} color="warning.main" />
+                  <StatCard title="Aprovado em reunião" value={formatNumberToBRL(Number(consumoPrevisto))} secondaryText={`${percentualPrevisto}% do orçamento total`} icon={<Square />} color="warning.main" />
                   <StatCard title="Restante" value={formatNumberToBRL(Number(saldoPrevisto))} secondaryText={`${100 - percentualPrevisto}% do orçamento total restante`} icon={<Square />} color="success.main" />
                 </Stack>
               </Box>
@@ -439,11 +441,15 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
                     <RechartBarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="year" />
-                      <YAxis tickFormatter={(value) => new Intl.NumberFormat('pt-BR', { notation: 'compact', compactDisplay: 'short' }).format(value)} />
-                      <RechartTooltip formatter={(value: number) => formatNumberToBRL(value)} />
+                      <YAxis domain={[0, 'auto']} tickFormatter={(value) => new Intl.NumberFormat('pt-BR', { notation: 'compact', compactDisplay: 'short' }).format(value)} />
+                      <RechartTooltip
+                        formatter={(value: number, name: string, item: any) =>
+                          formatNumberToBRL(name === 'Restante' ? item?.payload?.restanteReal ?? value : value)
+                        }
+                      />
                       <Legend />
                       <Bar dataKey="Orçamento Total" fill={theme.palette.primary.main} />
-                      <Bar dataKey="Utilizado" fill={theme.palette.warning.main} />
+                      <Bar dataKey="Aprovado em reunião" fill={theme.palette.warning.main} />
                       <Bar dataKey="Restante" fill={theme.palette.success.main} />
                     </RechartBarChart>
                   </ResponsiveContainer>
